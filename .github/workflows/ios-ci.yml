@@ -7,9 +7,12 @@ on:
     branches: [ main, develop ]
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   build-and-test:
-    name: Build, Test & Package Simulator App
+    name: Build, Test & Package Simulator App & IPA
     runs-on: macos-latest
 
     steps:
@@ -63,6 +66,46 @@ jobs:
           name: PaperMoneyApp-Simulator-Build
           path: derived_data/Build/Products/Debug-iphonesimulator/PaperMoneyApp-Simulator.app.zip
           retention-days: 14
+
+      - name: Build Native iOS Device App & Package IPA
+        run: |
+          echo "Building unsigned IPA for physical device / distribution..."
+          xcodebuild build \
+            -project PaperMoneyApp.xcodeproj \
+            -scheme PaperMoneyApp \
+            -destination "generic/platform=iOS" \
+            -configuration Release \
+            -derivedDataPath derived_data_device \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=NO
+          
+          mkdir -p Payload
+          cp -r derived_data_device/Build/Products/Release-iphoneos/PaperMoneyApp.app Payload/
+          zip -r PaperMoneyApp.ipa Payload
+          rm -rf Payload
+
+      - name: Upload IPA Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: PaperMoneyApp-Device-IPA
+          path: PaperMoneyApp.ipa
+          retention-days: 14
+
+      - name: Publish to GitHub Releases (Main Branch Only)
+        if: github.ref == 'refs/heads/main'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v1.0.0
+          name: "PaperMoneyApp v1.0.0 (Release & Simulator Builds)"
+          body: |
+            ### PaperMoneyApp v1.0.0
+            
+            - **`PaperMoneyApp.ipa`**: Native iOS package for physical iPhone / iPad installation via AltStore, Sideloadly, or Apple Configurator.
+            - **`PaperMoneyApp-Simulator.app.zip`**: iOS Simulator build for Appetize.io cloud streaming or macOS Xcode Simulator.
+          files: |
+            PaperMoneyApp.ipa
+            derived_data/Build/Products/Debug-iphonesimulator/PaperMoneyApp-Simulator.app.zip
 
       - name: Upload Build Log on Failure
         if: always()
