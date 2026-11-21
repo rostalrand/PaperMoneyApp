@@ -467,6 +467,15 @@ final class PortfolioTests: XCTestCase {
         XCTAssertEqual(viewModel.transactions.first?.totalAmount, 250_000.0)
     }
 
+    func testSellWithPrecisionDustHandling() {
+        _ = viewModel.buyStock(symbol: "AAPL", shares: 10.0)
+        // Simulate slight floating point overshoot (e.g. 10.0002 shares)
+        let result = viewModel.sellStock(symbol: "AAPL", shares: 10.0002)
+        XCTAssertTrue(caseIsSuccess(result))
+        let pos = viewModel.getPosition(for: "AAPL")
+        XCTAssertNil(pos, "Position should be completely closed even with slight floating point dust")
+    }
+
     private func caseIsSuccess<T, E>(_ result: Result<T, E>) -> Bool {
         switch result {
         case .success: return true

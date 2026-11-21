@@ -2,6 +2,7 @@ import SwiftUI
 
 public struct StockRowView: View {
     public let stock: Stock
+    @AppStorage("stock_row_metric_mode") private var metricMode: Int = 0
 
     public init(stock: Stock) {
         self.stock = stock
@@ -31,20 +32,41 @@ public struct StockRowView: View {
                 Text("$\(String(format: "%.2f", stock.currentPrice))")
                     .font(.system(.subheadline, design: .rounded, weight: .semibold))
 
-                HStack(spacing: 3) {
-                    Image(systemName: stock.isPositive ? "arrow.up.right" : "arrow.down.right")
-                        .font(.caption2)
-                    Text("\(stock.isPositive ? "+" : "")\(String(format: "%.2f", stock.changePercent))%")
-                        .font(.caption2)
-                        .fontWeight(.semibold)
+                Button {
+                    metricMode = (metricMode + 1) % 3
+                    HapticsService.shared.selection()
+                } label: {
+                    HStack(spacing: 3) {
+                        if metricMode != 2 {
+                            Image(systemName: stock.isPositive ? "arrow.up.right" : "arrow.down.right")
+                                .font(.caption2)
+                        }
+                        Text(metricLabel)
+                            .font(.caption2)
+                            .fontWeight(.semibold)
+                    }
+                    .padding(.horizontal, 6)
+                    .padding(.vertical, 2)
+                    .background((stock.isPositive ? Color.green : Color.red).opacity(0.15))
+                    .foregroundColor(stock.isPositive ? .green : .red)
+                    .cornerRadius(6)
                 }
-                .padding(.horizontal, 6)
-                .padding(.vertical, 2)
-                .background((stock.isPositive ? Color.green : Color.red).opacity(0.15))
-                .foregroundColor(stock.isPositive ? .green : .red)
-                .cornerRadius(6)
+                .buttonStyle(.plain)
             }
         }
         .padding(.vertical, 8)
+    }
+
+    private var metricLabel: String {
+        switch metricMode {
+        case 1:
+            let prefix = stock.isPositive ? "+" : ""
+            return "\(prefix)$\(String(format: "%.2f", stock.change))"
+        case 2:
+            return stock.marketCap
+        default:
+            let prefix = stock.isPositive ? "+" : ""
+            return "\(prefix)\(String(format: "%.2f", stock.changePercent))%"
+        }
     }
 }

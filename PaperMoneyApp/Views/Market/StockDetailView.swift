@@ -14,6 +14,7 @@ public struct StockDetailView: View {
     @State private var showPriceAlertSheet: Bool = false
     @State private var alertTargetPriceText: String = ""
     @State private var alertCondition: AlertCondition = .above
+    @State private var selectedArticle: NewsArticle? = nil
 
     public init(stock: Stock, viewModel: PortfolioViewModel) {
         self.stock = stock
@@ -57,7 +58,7 @@ public struct StockDetailView: View {
                     newsSection
 
                     // Bottom padding for sticky button
-                    Spacer().frame(height: 80)
+                    Spacer().frame(height: 100)
                 }
                 .padding(.horizontal, 16)
                 .padding(.top, 12)
@@ -103,6 +104,65 @@ public struct StockDetailView: View {
             priceAlertSheetView
                 .presentationDetents([.medium])
                 .presentationDragIndicator(.visible)
+        }
+        .sheet(item: $selectedArticle) { article in
+            articleDetailSheet(article)
+                .presentationDetents([.medium, .large])
+                .presentationDragIndicator(.visible)
+        }
+    }
+
+    // MARK: - Article Detail Sheet
+    private func articleDetailSheet(_ article: NewsArticle) -> some View {
+        NavigationStack {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 16) {
+                    HStack {
+                        Text(article.publisher)
+                            .font(.caption)
+                            .fontWeight(.bold)
+                            .foregroundColor(.blue)
+                        Text("·")
+                            .foregroundColor(.secondary)
+                        Text(article.timeAgo)
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                        Spacer()
+                        Text(article.sentiment.rawValue.uppercased())
+                            .font(.system(size: 10, weight: .black))
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 3)
+                            .background(sentimentColor(article.sentiment).opacity(0.15))
+                            .foregroundColor(sentimentColor(article.sentiment))
+                            .cornerRadius(6)
+                    }
+
+                    Text(article.title)
+                        .font(.system(.title3, design: .rounded, weight: .bold))
+
+                    Divider()
+
+                    Text(article.snippet)
+                        .font(.body)
+                        .foregroundColor(.primary)
+                        .lineSpacing(4)
+
+                    Text("Paper Money Market Intelligence uses simulated and aggregated real-world financial signals to mirror mobile market sentiment.")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                        .padding(.top, 10)
+                }
+                .padding(20)
+            }
+            .navigationTitle(article.symbol)
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Done") {
+                        selectedArticle = nil
+                    }
+                }
+            }
         }
     }
 
@@ -347,44 +407,51 @@ public struct StockDetailView: View {
 
             VStack(spacing: 10) {
                 ForEach(news) { item in
-                    VStack(alignment: .leading, spacing: 6) {
-                        HStack(spacing: 6) {
-                            Text(item.publisher)
-                                .font(.system(.caption, design: .rounded, weight: .bold))
+                    Button {
+                        selectedArticle = item
+                    } label: {
+                        VStack(alignment: .leading, spacing: 6) {
+                            HStack(spacing: 6) {
+                                Text(item.publisher)
+                                    .font(.system(.caption, design: .rounded, weight: .bold))
+                                    .foregroundColor(.primary)
+
+                                Text("•")
+                                    .font(.caption2)
+                                    .foregroundColor(.secondary)
+
+                                Text(item.timeAgo)
+                                    .font(.caption2)
+                                    .foregroundColor(.secondary)
+
+                                Spacer()
+
+                                Text(item.sentiment.rawValue.uppercased())
+                                    .font(.system(size: 9, weight: .black))
+                                    .padding(.horizontal, 6)
+                                    .padding(.vertical, 2)
+                                    .background(sentimentColor(item.sentiment).opacity(0.15))
+                                    .foregroundColor(sentimentColor(item.sentiment))
+                                    .cornerRadius(6)
+                            }
+
+                            Text(item.title)
+                                .font(.system(.subheadline, design: .rounded, weight: .semibold))
                                 .foregroundColor(.primary)
+                                .multilineTextAlignment(.leading)
+                                .lineLimit(2)
 
-                            Text("•")
-                                .font(.caption2)
+                            Text(item.snippet)
+                                .font(.caption)
                                 .foregroundColor(.secondary)
-
-                            Text(item.timeAgo)
-                                .font(.caption2)
-                                .foregroundColor(.secondary)
-
-                            Spacer()
-
-                            Text(item.sentiment.rawValue.uppercased())
-                                .font(.system(size: 9, weight: .black))
-                                .padding(.horizontal, 6)
-                                .padding(.vertical, 2)
-                                .background(sentimentColor(item.sentiment).opacity(0.15))
-                                .foregroundColor(sentimentColor(item.sentiment))
-                                .cornerRadius(6)
+                                .multilineTextAlignment(.leading)
+                                .lineLimit(2)
                         }
-
-                        Text(item.title)
-                            .font(.system(.subheadline, design: .rounded, weight: .semibold))
-                            .foregroundColor(.primary)
-                            .lineLimit(2)
-
-                        Text(item.snippet)
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                            .lineLimit(2)
+                        .padding(12)
+                        .background(Color(UIColor.tertiarySystemGroupedBackground))
+                        .cornerRadius(12)
                     }
-                    .padding(12)
-                    .background(Color(UIColor.tertiarySystemGroupedBackground))
-                    .cornerRadius(12)
+                    .buttonStyle(.plain)
                 }
             }
         }

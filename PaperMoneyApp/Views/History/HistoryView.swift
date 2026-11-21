@@ -86,6 +86,7 @@ public struct HistoryView: View {
                             }
                         }
                         .listStyle(.insetGrouped)
+                        .scrollDismissesKeyboard(.interactively)
                     }
                 } else if selectedDomain == .alerts {
                     if viewModel.priceAlerts.isEmpty {
@@ -117,6 +118,7 @@ public struct HistoryView: View {
                             }
                         }
                         .listStyle(.insetGrouped)
+                        .scrollDismissesKeyboard(.interactively)
                     }
                 } else if filteredTransactions.isEmpty {
                     VStack(spacing: 12) {
@@ -140,6 +142,7 @@ public struct HistoryView: View {
                         }
                     }
                     .listStyle(.insetGrouped)
+                    .scrollDismissesKeyboard(.interactively)
                 }
             }
             .navigationTitle("Activity History")

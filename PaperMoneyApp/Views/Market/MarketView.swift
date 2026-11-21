@@ -68,6 +68,7 @@ public struct MarketView: View {
                         }
                     }
                     .listStyle(.insetGrouped)
+                    .scrollDismissesKeyboard(.interactively)
                 }
             }
             .navigationTitle("Stock Market")

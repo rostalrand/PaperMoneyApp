@@ -62,7 +62,8 @@ public struct TradeSheetView: View {
     private var calculatedShares: Double {
         if isDollarMode {
             guard effectivePrice > 0 else { return 0 }
-            return inputNumeric / effectivePrice
+            let rawShares = inputNumeric / effectivePrice
+            return (rawShares * 10000).rounded() / 10000
         } else {
             return inputNumeric
         }
@@ -87,9 +88,9 @@ public struct TradeSheetView: View {
     private var isValidOrder: Bool {
         guard calculatedShares > 0 && calculatedTotalCost > 0 else { return false }
         if tradeType == .buy {
-            return viewModel.cashBalance >= calculatedTotalCost
+            return viewModel.cashBalance >= (calculatedTotalCost - 0.009)
         } else {
-            return sharesOwned >= calculatedShares
+            return sharesOwned >= (calculatedShares - 0.0005)
         }
     }
 
@@ -404,8 +405,12 @@ public struct TradeSheetView: View {
     }
 
     private func executeTrade() {
-        let shares = calculatedShares
+        var shares = calculatedShares
         guard shares > 0 else { return }
+
+        if tradeType == .sell && abs(sharesOwned - shares) < 0.0005 {
+            shares = sharesOwned
+        }
 
         switch selectedOrderType {
         case .market:

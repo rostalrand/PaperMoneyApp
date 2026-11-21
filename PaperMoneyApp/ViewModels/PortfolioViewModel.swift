@@ -231,21 +231,24 @@ public final class PortfolioViewModel: ObservableObject {
         }
 
         var existing = positions[index]
-        guard existing.shares >= shares else {
+        // Guard against slight floating-point dust (e.g. 10.000000000000002 requested vs 10.0 owned)
+        let effectiveShares = (abs(existing.shares - shares) < 0.0005 || (shares > existing.shares && shares - existing.shares < 0.0005)) ? existing.shares : shares
+
+        guard existing.shares >= effectiveShares else {
             return .failure(.insufficientShares(owned: existing.shares, requested: shares))
         }
 
-        let proceeds = shares * stock.currentPrice
+        let proceeds = effectiveShares * stock.currentPrice
         cashBalance += proceeds
 
         let costPerShare = existing.averagePrice
-        let costSold = shares * costPerShare
+        let costSold = effectiveShares * costPerShare
 
-        if abs(existing.shares - shares) < 0.0001 {
+        if abs(existing.shares - effectiveShares) < 0.0001 || existing.shares <= effectiveShares {
             // Sold entire holding
             positions.remove(at: index)
         } else {
-            existing.shares -= shares
+            existing.shares -= effectiveShares
             existing.totalCost -= costSold
             positions[index] = existing
         }
@@ -255,7 +258,7 @@ public final class PortfolioViewModel: ObservableObject {
             type: .sell,
             symbol: symbol,
             companyName: stock.name,
-            shares: shares,
+            shares: effectiveShares,
             pricePerShare: stock.currentPrice,
             totalAmount: proceeds,
             note: "Market Sell Execution"
@@ -263,7 +266,7 @@ public final class PortfolioViewModel: ObservableObject {
         transactions.insert(tx, at: 0)
 
         saveAll()
-        showNotification(message: "Sold \(String(format: "%.2f", shares)) \(symbol) for +$\(formatCurrency(proceeds))")
+        showNotification(message: "Sold \(String(format: "%.2f", effectiveShares)) \(symbol) for +$\(formatCurrency(proceeds))")
         recordSnapshot()
         HapticsService.shared.notification(type: .success)
         return .success(())
