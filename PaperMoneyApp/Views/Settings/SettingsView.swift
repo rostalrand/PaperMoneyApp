@@ -21,7 +21,7 @@ public struct SettingsView: View {
         NavigationStack {
             Form {
                 // iCloud Synchronization Status
-                Section("Apple iCloud Persistence") {
+                Section {
                     HStack {
                         Label("Storage Engine", systemImage: "icloud.fill")
                             .foregroundColor(.blue)
@@ -54,6 +54,8 @@ public struct SettingsView: View {
                             }
                         }
                     }
+                } header: {
+                    Text("Apple iCloud Persistence")
                 } footer: {
                     Text("Your paper balance, positions, transactions, limit orders, and alerts automatically sync across all your Apple devices signed into iCloud.")
                         .font(.caption2)
@@ -114,7 +116,7 @@ public struct SettingsView: View {
                 }
 
                 // Legal & App Store Compliance
-                Section("Legal & Compliance") {
+                Section {
                     Button {
                         selectedLegalSheet = .disclaimer
                     } label: {
@@ -153,6 +155,8 @@ public struct SettingsView: View {
                                 .foregroundColor(.secondary)
                         }
                     }
+                } header: {
+                    Text("Legal & Compliance")
                 } footer: {
                     Text("Paper Money is strictly an educational simulator. Real money is never used or required.")
                         .font(.caption2)
@@ -160,7 +164,7 @@ public struct SettingsView: View {
                 }
 
                 // Monetization & App Notice
-                Section("About PaperMoneyApp") {
+                Section {
                     HStack {
                         Text("Version")
                         Spacer()
@@ -183,6 +187,8 @@ public struct SettingsView: View {
                             .font(.caption)
                             .foregroundColor(.secondary)
                     }
+                } header: {
+                    Text("About PaperMoneyApp")
                 } footer: {
                     Text("Designed with zero-friction principles: no account creation, no subscriptions, and zero trade interruptions.")
                         .font(.caption2)
