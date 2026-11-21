@@ -35,6 +35,7 @@ jobs:
       - name: Build Native iOS Simulator App Bundle
         run: |
           echo "Building using destination: ${{ steps.sim_dest.outputs.dest }}"
+          set -o pipefail
           xcodebuild build \
             -project PaperMoneyApp.xcodeproj \
             -scheme PaperMoneyApp \
@@ -43,7 +44,7 @@ jobs:
             -derivedDataPath derived_data \
             CODE_SIGN_IDENTITY="" \
             CODE_SIGNING_REQUIRED=NO \
-            CODE_SIGNING_ALLOWED=NO
+            CODE_SIGNING_ALLOWED=NO 2>&1 | tee build.log || (echo "=== BUILD LOG FAILURE TAIL ===" && tail -n 100 build.log && exit 1)
 
       - name: Compress Simulator App for Cloud Streaming
         run: |
