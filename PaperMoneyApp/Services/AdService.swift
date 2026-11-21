@@ -11,13 +11,13 @@ public final class AdService: ObservableObject {
     public static let shared = AdService()
 
     /// Toggle to switch between Google AdMob Test Ad Unit and your Live Production Ad Unit
-    public var isProductionMode: Bool = false
+    public var isProductionMode: Bool = true
 
     /// Google AdMob App Open Test Ad Unit ID for iOS
     public let testAppOpenAdUnitID = "ca-app-pub-3940256099942544/5575463023"
 
-    /// Insert your live production AdMob App Open Ad Unit ID here prior to App Store submission
-    public var productionAppOpenAdUnitID: String = "ca-app-pub-XXXXXXXXXXXXXXXX/YYYYYYYYYY"
+    /// Live production AdMob App Open Ad Unit ID configured for App Store release
+    public var productionAppOpenAdUnitID: String = "ca-app-pub-3083596925398734/9038523742"
 
     /// The active Ad Unit ID based on environment configuration
     public var appOpenAdUnitID: String {

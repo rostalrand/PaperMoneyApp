@@ -44,7 +44,7 @@
 
 	<!-- Google AdMob Configuration for Launch App Open Ad -->
 	<key>GADApplicationIdentifier</key>
-	<string>ca-app-pub-3940256099942544~1458002511</string>
+	<string>ca-app-pub-3083596925398734~8503125098</string>
 	<key>SKAdNetworkItems</key>
 	<array>
 		<dict>

@@ -409,6 +409,9 @@ final class PortfolioTests: XCTestCase {
 
     func testAdServiceProductionSwitchAndActiveAdUnitID() {
         let adService = AdService.shared
+        let originalMode = adService.isProductionMode
+        let originalID = adService.productionAppOpenAdUnitID
+
         adService.isProductionMode = false
         XCTAssertEqual(adService.appOpenAdUnitID, adService.testAppOpenAdUnitID)
 
@@ -416,8 +419,9 @@ final class PortfolioTests: XCTestCase {
         adService.productionAppOpenAdUnitID = "ca-app-pub-9999999999999999/8888888888"
         XCTAssertEqual(adService.appOpenAdUnitID, "ca-app-pub-9999999999999999/8888888888")
 
-        // Reset to test mode
-        adService.isProductionMode = false
+        // Restore original production settings
+        adService.isProductionMode = originalMode
+        adService.productionAppOpenAdUnitID = originalID
     }
 
     func testLegalSheetTypes() {
