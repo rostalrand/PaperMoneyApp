@@ -76,11 +76,11 @@ public struct HistoryView: View {
                             } label: {
                                 Text("Explore Market & Set Orders")
                                     .font(.footnote)
-                                    .fontWeight(.semibold)
+                                    .fontWeight(.bold)
                                     .padding(.horizontal, 16)
                                     .padding(.vertical, 8)
-                                    .background(Color.green.opacity(0.15))
-                                    .foregroundColor(.green)
+                                    .background(AppTheme.Colors.gainBadge)
+                                    .foregroundColor(AppTheme.Colors.gain)
                                     .cornerRadius(10)
                             }
                             .padding(.top, 4)
@@ -185,11 +185,11 @@ public struct HistoryView: View {
                         } label: {
                             Text("Browse Stock Market")
                                 .font(.footnote)
-                                .fontWeight(.semibold)
+                                .fontWeight(.bold)
                                 .padding(.horizontal, 16)
                                 .padding(.vertical, 8)
-                                .background(Color.green.opacity(0.15))
-                                .foregroundColor(.green)
+                                .background(AppTheme.Colors.gainBadge)
+                                .foregroundColor(AppTheme.Colors.gain)
                                 .cornerRadius(10)
                         }
                         .padding(.top, 4)
@@ -244,10 +244,14 @@ public struct HistoryView: View {
                             .padding(.vertical, 6)
                             .background(
                                 activityFilter == filter
-                                    ? Color.green
-                                    : Color(UIColor.secondarySystemGroupedBackground)
+                                    ? AppTheme.Colors.gain
+                                    : AppTheme.Colors.cardSurface
                             )
-                            .foregroundColor(activityFilter == filter ? .white : .primary)
+                            .foregroundColor(activityFilter == filter ? Color(hex: "#080A0F") : AppTheme.Colors.subheadline)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 16)
+                                    .stroke(activityFilter == filter ? Color.clear : AppTheme.Colors.cardBorder, lineWidth: 1)
+                            )
                             .cornerRadius(16)
                     }
                     .buttonStyle(.plain)
@@ -267,40 +271,51 @@ public struct HistoryView: View {
             VStack(alignment: .leading, spacing: 2) {
                 Text("REALIZED P&L")
                     .font(.system(size: 9, weight: .bold))
-                    .foregroundColor(.secondary)
+                    .foregroundColor(AppTheme.Colors.muted)
                 Text("\(isProfit ? "+" : "")$\(formatCurrency(abs(stats.realizedPnL)))")
                     .font(.system(.subheadline, design: .rounded, weight: .bold))
-                    .foregroundColor(isProfit ? .green : .red)
+                    .foregroundColor(isProfit ? AppTheme.Colors.gain : AppTheme.Colors.loss)
+                    .monospacedDigit()
             }
             .frame(maxWidth: .infinity, alignment: .leading)
 
-            Divider().frame(height: 28)
+            Divider()
+                .frame(height: 28)
+                .overlay(AppTheme.Colors.cardBorder)
 
             VStack(alignment: .center, spacing: 2) {
                 Text("WIN RATE")
                     .font(.system(size: 9, weight: .bold))
-                    .foregroundColor(.secondary)
+                    .foregroundColor(AppTheme.Colors.muted)
                 Text(stats.closedTradesCount > 0 ? "\(String(format: "%.1f", stats.winRate))%" : "—")
                     .font(.system(.subheadline, design: .rounded, weight: .bold))
-                    .foregroundColor(.primary)
+                    .foregroundColor(AppTheme.Colors.headline)
+                    .monospacedDigit()
             }
             .frame(maxWidth: .infinity)
 
-            Divider().frame(height: 28)
+            Divider()
+                .frame(height: 28)
+                .overlay(AppTheme.Colors.cardBorder)
 
             VStack(alignment: .trailing, spacing: 2) {
                 Text("EXECUTIONS")
                     .font(.system(size: 9, weight: .bold))
-                    .foregroundColor(.secondary)
+                    .foregroundColor(AppTheme.Colors.muted)
                 Text("\(stats.totalTradesCount)")
                     .font(.system(.subheadline, design: .rounded, weight: .bold))
-                    .foregroundColor(.primary)
+                    .foregroundColor(AppTheme.Colors.headline)
+                    .monospacedDigit()
             }
             .frame(maxWidth: .infinity, alignment: .trailing)
         }
         .padding(.horizontal, 14)
         .padding(.vertical, 10)
-        .background(Color(UIColor.secondarySystemGroupedBackground))
+        .background(AppTheme.Colors.cardSurface)
+        .overlay(
+            RoundedRectangle(cornerRadius: 12)
+                .stroke(AppTheme.Colors.cardBorder, lineWidth: 1)
+        )
         .cornerRadius(12)
         .padding(.horizontal, 16)
         .padding(.top, 4)
@@ -309,10 +324,10 @@ public struct HistoryView: View {
     private func alertRow(_ alert: PriceAlert) -> some View {
         HStack(spacing: 12) {
             Image(systemName: alert.isTriggered ? "bell.badge.fill" : "bell.fill")
-                .font(.system(size: 20))
-                .foregroundColor(alert.isTriggered ? .orange : .blue)
+                .font(.system(size: 18))
+                .foregroundColor(alert.isTriggered ? Color(hex: "#FF9F0A") : Color(hex: "#0A84FF"))
                 .frame(width: 36, height: 36)
-                .background((alert.isTriggered ? Color.orange : Color.blue).opacity(0.12))
+                .background((alert.isTriggered ? Color(hex: "#FF9F0A") : Color(hex: "#0A84FF")).opacity(0.12))
                 .clipShape(Circle())
 
             VStack(alignment: .leading, spacing: 3) {
@@ -324,18 +339,19 @@ public struct HistoryView: View {
                         .font(.system(size: 9, weight: .black))
                         .padding(.horizontal, 6)
                         .padding(.vertical, 2)
-                        .background((alert.isTriggered ? Color.orange : Color.green).opacity(0.15))
-                        .foregroundColor(alert.isTriggered ? .orange : .green)
+                        .background((alert.isTriggered ? Color(hex: "#FF9F0A").opacity(0.15) : AppTheme.Colors.gainBadge))
+                        .foregroundColor(alert.isTriggered ? Color(hex: "#FF9F0A") : AppTheme.Colors.gain)
                         .cornerRadius(6)
                 }
 
                 Text("\(alert.condition.rawValue) $\(String(format: "%.2f", alert.targetPrice))")
                     .font(.caption)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(AppTheme.Colors.subheadline)
+                    .monospacedDigit()
 
                 Text(formatDate(alert.createdAt))
                     .font(.caption2)
-                    .foregroundColor(.secondary.opacity(0.8))
+                    .foregroundColor(AppTheme.Colors.muted)
             }
 
             Spacer()
@@ -345,7 +361,7 @@ public struct HistoryView: View {
             } label: {
                 Image(systemName: "trash")
                     .font(.caption)
-                    .foregroundColor(.red.opacity(0.7))
+                    .foregroundColor(AppTheme.Colors.loss.opacity(0.7))
                     .padding(8)
             }
             .buttonStyle(.plain)
@@ -357,7 +373,7 @@ public struct HistoryView: View {
         HStack(spacing: 12) {
             // Icon
             Image(systemName: tx.type.iconName)
-                .font(.system(size: 24))
+                .font(.system(size: 20))
                 .foregroundColor(color(for: tx.type))
                 .frame(width: 36, height: 36)
                 .background(color(for: tx.type).opacity(0.12))
@@ -371,7 +387,8 @@ public struct HistoryView: View {
                     if let shares = tx.shares, let price = tx.pricePerShare {
                         Text("\(formatShares(shares)) shares @ $\(String(format: "%.2f", price))")
                             .font(.caption)
-                            .foregroundColor(.secondary)
+                            .foregroundColor(AppTheme.Colors.subheadline)
+                            .monospacedDigit()
                     }
                 } else {
                     Text(tx.type.rawValue)
@@ -379,23 +396,25 @@ public struct HistoryView: View {
                     if let note = tx.note {
                         Text(note)
                             .font(.caption)
-                            .foregroundColor(.secondary)
+                            .foregroundColor(AppTheme.Colors.subheadline)
                     }
                 }
 
                 Text(formatDate(tx.timestamp))
                     .font(.caption2)
-                    .foregroundColor(.secondary.opacity(0.8))
+                    .foregroundColor(AppTheme.Colors.muted)
             }
 
             Spacer()
 
             // Amount
             VStack(alignment: .trailing, spacing: 2) {
-                let prefix = (tx.type == .deposit || tx.type == .sell) ? "+" : "-"
+                let isCredit = (tx.type == .deposit || tx.type == .sell)
+                let prefix = isCredit ? "+" : "-"
                 Text("\(prefix)$\(formatCurrency(tx.totalAmount))")
                     .font(.system(.subheadline, design: .rounded, weight: .bold))
-                    .foregroundColor(tx.type == .buy ? .primary : .green)
+                    .foregroundColor(isCredit ? AppTheme.Colors.gain : AppTheme.Colors.headline)
+                    .monospacedDigit()
             }
         }
         .padding(.vertical, 4)
@@ -404,7 +423,7 @@ public struct HistoryView: View {
     private func orderRow(_ order: LimitOrder) -> some View {
         HStack(spacing: 12) {
             Image(systemName: orderIcon(for: order))
-                .font(.system(size: 22))
+                .font(.system(size: 20))
                 .foregroundColor(kindColor(for: order.kind))
                 .frame(width: 36, height: 36)
                 .background(kindColor(for: order.kind).opacity(0.12))
@@ -434,11 +453,12 @@ public struct HistoryView: View {
 
                 Text("Target $\(String(format: "%.2f", order.targetPrice)) · \(formatShares(order.shares)) shares")
                     .font(.caption)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(AppTheme.Colors.subheadline)
+                    .monospacedDigit()
 
                 Text(formatDate(order.createdAt))
                     .font(.caption2)
-                    .foregroundColor(.secondary.opacity(0.8))
+                    .foregroundColor(AppTheme.Colors.muted)
             }
 
             Spacer()
@@ -446,6 +466,7 @@ public struct HistoryView: View {
             VStack(alignment: .trailing, spacing: 4) {
                 Text("$\(formatCurrency(order.totalAmount))")
                     .font(.system(.subheadline, design: .rounded, weight: .bold))
+                    .monospacedDigit()
 
                 if order.status == .pending {
                     Button {
@@ -456,8 +477,16 @@ public struct HistoryView: View {
                             .fontWeight(.semibold)
                             .padding(.horizontal, 8)
                             .padding(.vertical, 3)
-                            .background(Color.red.opacity(0.12))
-                            .foregroundColor(.red)
+                            .background(AppTheme.Colors.lossBadge)
+                            .foregroundColor(AppTheme.Colors.loss)
+                            .cornerRadius(6)
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+        }
+        .padding(.vertical, 4)
+    }
                             .cornerRadius(6)
                     }
                     .buttonStyle(.plain)

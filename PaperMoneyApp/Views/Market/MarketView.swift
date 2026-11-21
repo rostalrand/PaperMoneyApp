@@ -1,13 +1,33 @@
 import SwiftUI
 
+public enum MarketCategory: String, CaseIterable, Identifiable {
+    case all = "All"
+    case watchlist = "Watchlist"
+    case gainers = "Gainers"
+    case losers = "Losers"
+    case tech = "Tech"
+    case etfs = "ETFs"
+
+    public var id: String { rawValue }
+
+    public var iconName: String? {
+        switch self {
+        case .all: return nil
+        case .watchlist: return "star.fill"
+        case .gainers: return "arrow.up.right"
+        case .losers: return "arrow.down.right"
+        case .tech: return "desktopcomputer"
+        case .etfs: return "chart.pie.fill"
+        }
+    }
+}
+
 public struct MarketView: View {
     @ObservedObject var viewModel: PortfolioViewModel
     @Binding var selectedTab: Int
     @State private var searchText: String = ""
-    @State private var selectedFilter: String = "All"
+    @State private var selectedCategory: MarketCategory = .all
     @State private var quickTradeStock: Stock? = nil
-
-    private let filterOptions = ["All", "Watchlist ⭐", "Gainers 🟢", "Losers 🔴", "Tech", "ETFs"]
 
     public init(viewModel: PortfolioViewModel, selectedTab: Binding<Int> = .constant(1)) {
         self.viewModel = viewModel
@@ -18,15 +38,18 @@ public struct MarketView: View {
         var list = viewModel.stocks
 
         // Category & Screener filters
-        if selectedFilter == "Watchlist ⭐" {
+        switch selectedCategory {
+        case .all:
+            break
+        case .watchlist:
             list = viewModel.watchlistStocks
-        } else if selectedFilter == "Gainers 🟢" {
+        case .gainers:
             list = list.sorted { $0.changePercent > $1.changePercent }
-        } else if selectedFilter == "Losers 🔴" {
+        case .losers:
             list = list.sorted { $0.changePercent < $1.changePercent }
-        } else if selectedFilter == "Tech" {
+        case .tech:
             list = list.filter { $0.sector.contains("Tech") || $0.sector.contains("Internet") }
-        } else if selectedFilter == "ETFs" {
+        case .etfs:
             list = list.filter { $0.sector.contains("ETF") }
         }
 
@@ -45,34 +68,33 @@ public struct MarketView: View {
     public var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
-                // Category Filter Pills
+                // Category Filter Pills (Robinhood Style)
                 filterPillsBar
 
                 // Stocks List
                 if filteredStocks.isEmpty {
-                    if selectedFilter == "Watchlist ⭐" {
+                    if selectedCategory == .watchlist {
                         VStack(spacing: 12) {
                             Image(systemName: "star.slash")
                                 .font(.system(size: 40))
-                                .foregroundColor(.secondary)
+                                .foregroundColor(AppTheme.Colors.secondaryText)
                                 .padding(.top, 40)
                             Text("Your Watchlist is Empty")
-                                .font(.headline)
+                                .font(.system(.headline, design: .rounded, weight: .bold))
                             Text("Star stocks in the market list or on stock detail pages to monitor your favorite tickers here.")
-                                .font(.subheadline)
-                                .foregroundColor(.secondary)
+                                .font(.system(.subheadline, design: .rounded))
+                                .foregroundColor(AppTheme.Colors.secondaryText)
                                 .multilineTextAlignment(.center)
                                 .padding(.horizontal, 32)
                             Button {
-                                selectedFilter = "All"
+                                selectedCategory = .all
                             } label: {
                                 Text("View All Stocks")
-                                    .font(.footnote)
-                                    .fontWeight(.semibold)
+                                    .font(.system(.footnote, design: .rounded, weight: .bold))
                                     .padding(.horizontal, 16)
                                     .padding(.vertical, 8)
-                                    .background(Color.green.opacity(0.15))
-                                    .foregroundColor(.green)
+                                    .background(AppTheme.Colors.gainBadge)
+                                    .foregroundColor(AppTheme.Colors.gain)
                                     .cornerRadius(10)
                             }
                             .padding(.top, 4)
@@ -82,13 +104,13 @@ public struct MarketView: View {
                         VStack(spacing: 12) {
                             Image(systemName: "magnifyingglass")
                                 .font(.system(size: 40))
-                                .foregroundColor(.secondary)
+                                .foregroundColor(AppTheme.Colors.secondaryText)
                                 .padding(.top, 40)
                             Text("No matching stocks")
-                                .font(.headline)
+                                .font(.system(.headline, design: .rounded, weight: .bold))
                             Text("Try searching for symbols like AAPL, NVDA, TSLA, SPY")
-                                .font(.subheadline)
-                                .foregroundColor(.secondary)
+                                .font(.system(.subheadline, design: .rounded))
+                                .foregroundColor(AppTheme.Colors.secondaryText)
                         }
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
                     }
@@ -116,7 +138,7 @@ public struct MarketView: View {
                                 } label: {
                                     Label("Trade", systemImage: "arrow.left.arrow.right")
                                 }
-                                .tint(.green)
+                                .tint(AppTheme.Colors.gain)
                             }
                         }
                     }
@@ -125,7 +147,7 @@ public struct MarketView: View {
                 }
             }
             .navigationTitle("Stock Market")
-            .searchable(text: $searchText, prompt: "Search any ticker or ETF (e.g. PLTR, GME)")
+            .searchable(text: $searchText, prompt: "Search ticker or ETF (e.g. PLTR, GME)")
             .onSubmit(of: .search) {
                 Task {
                     _ = await viewModel.searchUniversalStocks(query: searchText)
@@ -146,8 +168,6 @@ public struct MarketView: View {
             }
             .sheet(item: $quickTradeStock) { stock in
                 TradeSheetView(stock: stock, viewModel: viewModel, initialTradeType: .buy)
-                    .presentationDetents([.medium, .large])
-                    .presentationDragIndicator(.visible)
             }
         }
     }
@@ -155,27 +175,36 @@ public struct MarketView: View {
     private var filterPillsBar: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 8) {
-                ForEach(filterOptions, id: \.self) { filter in
+                ForEach(MarketCategory.allCases) { category in
                     Button {
-                        selectedFilter = filter
+                        withAnimation(.spring(response: 0.25, dampingFraction: 0.75)) {
+                            selectedCategory = category
+                        }
+                        HapticsService.shared.selection()
                     } label: {
-                        Text(filter)
-                            .font(.system(.footnote, design: .rounded, weight: .semibold))
-                            .padding(.horizontal, 14)
-                            .padding(.vertical, 7)
-                            .background(
-                                selectedFilter == filter
-                                    ? Color.green
-                                    : Color(UIColor.secondarySystemGroupedBackground)
-                            )
-                            .foregroundColor(selectedFilter == filter ? .white : .primary)
-                            .cornerRadius(20)
+                        HStack(spacing: 5) {
+                            if let icon = category.iconName {
+                                Image(systemName: icon)
+                                    .font(.system(size: 11, weight: .bold))
+                            }
+                            Text(category.rawValue)
+                                .font(.system(size: 12, weight: .bold, design: .rounded))
+                        }
+                        .padding(.horizontal, 14)
+                        .padding(.vertical, 7)
+                        .background(
+                            selectedCategory == category
+                                ? AppTheme.Colors.gain
+                                : Color(UIColor.secondarySystemGroupedBackground)
+                        )
+                        .foregroundColor(selectedCategory == category ? .black : .white)
+                        .cornerRadius(20)
                     }
+                    .buttonStyle(.plain)
                 }
             }
             .padding(.horizontal, 16)
             .padding(.vertical, 8)
         }
-        .background(Color(UIColor.systemGroupedBackground))
     }
 }

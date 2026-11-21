@@ -36,6 +36,7 @@
 		AA0100312CE0000100000001 /* PriceAlert.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0200312CE0000100000001 /* PriceAlert.swift */; };
 		AA0100322CE0000100000001 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0200322CE0000100000001 /* SettingsView.swift */; };
 		AA0100332CE0000100000001 /* LegalSheetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0200332CE0000100000001 /* LegalSheetView.swift */; };
+		AA0100342CE0000100000001 /* AppTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0200342CE0000100000001 /* AppTheme.swift */; };
 		AA0100242CE0000100000001 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AA0200222CE0000100000001 /* Assets.xcassets */; };
 		AA0100252CE0000100000001 /* PortfolioTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0200232CE0000100000001 /* PortfolioTests.swift */; };
 /* End PBXBuildFile section */
@@ -72,6 +73,7 @@
 		AA0200312CE0000100000001 /* PriceAlert.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PriceAlert.swift; sourceTree = "<group>"; };
 		AA0200322CE0000100000001 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		AA0200332CE0000100000001 /* LegalSheetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LegalSheetView.swift; sourceTree = "<group>"; };
+		AA0200342CE0000100000001 /* AppTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppTheme.swift; sourceTree = "<group>"; };
 		AA0200222CE0000100000001 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		AA0200232CE0000100000001 /* PortfolioTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PortfolioTests.swift; sourceTree = "<group>"; };
 		AA0200242CE0000100000001 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -112,6 +114,7 @@
 				AA0400052CE0000100000001 /* ViewModels */,
 				AA0400062CE0000100000001 /* Services */,
 				AA0400072CE0000100000001 /* Views */,
+				AA0400162CE0000100000001 /* Theme */,
 				AA0400082CE0000100000001 /* Resources */,
 				AA0400152CE0000100000001 /* Tests */,
 			);
@@ -220,6 +223,14 @@
 				AA0200332CE0000100000001 /* LegalSheetView.swift */,
 			);
 			path = Settings;
+			sourceTree = "<group>";
+		};
+		AA0400162CE0000100000001 /* Theme */ = {
+			isa = PBXGroup;
+			children = (
+				AA0200342CE0000100000001 /* AppTheme.swift */,
+			);
+			path = Theme;
 			sourceTree = "<group>";
 		};
 		AA0400082CE0000100000001 /* Resources */ = {
@@ -368,6 +379,7 @@
 				AA0100312CE0000100000001 /* PriceAlert.swift in Sources */,
 				AA0100322CE0000100000001 /* SettingsView.swift in Sources */,
 				AA0100332CE0000100000001 /* LegalSheetView.swift in Sources */,
+				AA0100342CE0000100000001 /* AppTheme.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

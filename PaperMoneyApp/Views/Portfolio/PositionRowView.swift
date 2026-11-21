@@ -43,20 +43,25 @@ public struct PositionRowView: View {
 
             VStack(alignment: .trailing, spacing: 3) {
                 Text("$\(formatNumber(currentValue))")
-                    .font(.system(.subheadline, design: .rounded, weight: .semibold))
+                    .font(.system(.subheadline, design: .rounded, weight: .bold))
+                    .monospacedDigit()
 
-                HStack(spacing: 4) {
+                HStack(spacing: 3) {
                     Image(systemName: isGain ? "arrow.up.right" : "arrow.down.right")
-                        .font(.caption2)
+                        .font(.system(size: 9, weight: .bold))
                     Text("\(isGain ? "+" : "")$\(formatNumber(abs(pnl))) (\(String(format: "%.2f", returnPercent))%)")
-                        .font(.caption2)
-                        .fontWeight(.medium)
+                        .font(.system(size: 11, weight: .bold, design: .rounded))
+                        .monospacedDigit()
                 }
-                .padding(.horizontal, 6)
-                .padding(.vertical, 2)
-                .background((isGain ? Color.green : Color.red).opacity(0.15))
-                .foregroundColor(isGain ? .green : .red)
-                .cornerRadius(6)
+                .padding(.horizontal, 7)
+                .padding(.vertical, 3)
+                .background(isGain ? AppTheme.Colors.gainBadge : AppTheme.Colors.lossBadge)
+                .foregroundColor(isGain ? AppTheme.Colors.gain : AppTheme.Colors.loss)
+                .cornerRadius(8)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 8)
+                        .stroke((isGain ? AppTheme.Colors.gain : AppTheme.Colors.loss).opacity(0.2), lineWidth: 0.5)
+                )
             }
         }
         .padding(.vertical, 6)

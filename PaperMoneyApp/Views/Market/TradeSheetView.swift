@@ -26,7 +26,7 @@ public struct TradeSheetView: View {
     @State private var tradeType: TransactionType = .buy
     @State private var selectedOrderType: TradeOrderType = .market
     @State private var targetPriceText: String = ""
-    @State private var isDollarMode: Bool = false
+    @State private var isDollarMode: Bool = true
     @State private var inputText: String = ""
     @State private var errorMessage: String? = nil
     @State private var showErrorAlert: Bool = false
@@ -96,209 +96,369 @@ public struct TradeSheetView: View {
 
     public var body: some View {
         NavigationStack {
-            Form {
-                // Buy / Sell Selector (Locked to Sell for Stop-Loss & Take-Profit)
-                Section {
-                    Picker("Trade Type", selection: $tradeType) {
-                        Text("Buy \(stock.symbol)").tag(TransactionType.buy)
-                        Text("Sell \(stock.symbol)").tag(TransactionType.sell)
+            VStack(spacing: 0) {
+                // Top Header: Navigation & Purchasing Power
+                topNavigationBar
+
+                ScrollView(showsIndicators: false) {
+                    VStack(spacing: 16) {
+                        // Order Type Selector
+                        orderTypePillSelector
+
+                        // Target Price Field if Limit / Stop / Take Profit
+                        if selectedOrderType != .market {
+                            targetPriceAdjuster
+                        }
+
+                        // Prominent Amount Input Display
+                        amountInputHeroDisplay
+
+                        // Quick Position Sizing Chips
+                        quickSizingChipsRow
+
+                        // Order Preview Context Card
+                        orderPreviewContextCard
                     }
-                    .pickerStyle(.segmented)
-                    .listRowBackground(Color.clear)
-                    .disabled(selectedOrderType == .stopLoss || selectedOrderType == .takeProfit)
+                    .padding(.horizontal, 20)
+                    .padding(.top, 10)
+                    .padding(.bottom, 16)
                 }
 
-                // Balance Context
-                Section {
-                    HStack {
-                        Text(tradeType == .buy ? "Available Paper Cash" : "Shares Currently Owned")
-                            .font(.subheadline)
-                            .foregroundColor(.secondary)
-                        Spacer()
-                        if tradeType == .buy {
-                            Text("$\(formatCurrency(viewModel.cashBalance))")
-                                .font(.system(.subheadline, design: .rounded, weight: .bold))
-                                .foregroundColor(.green)
-                        } else {
-                            Text("\(formatShares(sharesOwned)) shares")
-                                .font(.system(.subheadline, design: .rounded, weight: .bold))
-                        }
-                    }
-                }
+                // Custom Financial Numeric Keypad (Robinhood Style)
+                financialKeypad
 
-                // Order Type Selector
-                Section("Order Type") {
-                    Picker("Execution Style", selection: $selectedOrderType) {
-                        ForEach(TradeOrderType.allCases) { type in
-                            Text(type.rawValue).tag(type)
-                        }
-                    }
-                    .pickerStyle(.segmented)
-                    .onChange(of: selectedOrderType) { newType in
-                        if newType == .stopLoss || newType == .takeProfit {
-                            tradeType = .sell
-                            if newType == .stopLoss {
-                                targetPriceText = String(format: "%.2f", stock.currentPrice * 0.95)
-                            } else {
-                                targetPriceText = String(format: "%.2f", stock.currentPrice * 1.10)
-                            }
-                        } else {
-                            targetPriceText = String(format: "%.2f", stock.currentPrice)
-                        }
-                    }
-
-                    // Price Target field for Limit, Stop Loss, or Take Profit
-                    if selectedOrderType != .market {
-                        HStack {
-                            Text(targetPriceLabel)
-                                .font(.subheadline)
-                            Spacer()
-                            Text("$")
-                                .foregroundColor(.secondary)
-                            TextField("0.00", text: $targetPriceText)
-                                .keyboardType(.decimalPad)
-                                .font(.system(.body, design: .rounded, weight: .bold))
-                                .multilineTextAlignment(.trailing)
-                                .frame(width: 90)
-                        }
-
-                        Text(orderGuidanceText)
-                            .font(.caption2)
-                            .foregroundColor(.secondary)
-                    }
-                }
-
-                // Quantity / Amount Section
-                Section("Quantity") {
-                    Picker("Order By", selection: $isDollarMode) {
-                        Text("Number of Shares").tag(false)
-                        Text("Dollar Amount ($)").tag(true)
-                    }
-                    .pickerStyle(.segmented)
-
-                    HStack {
-                        Text(isDollarMode ? "$" : "Qty")
-                            .font(.headline)
-                            .foregroundColor(.secondary)
-                        TextField(isDollarMode ? "0.00" : "0", text: $inputText)
-                            .keyboardType(.decimalPad)
-                            .font(.system(.title2, design: .rounded, weight: .bold))
-
-                        Button {
-                            setMaxAmount()
-                        } label: {
-                            Text("MAX")
-                                .font(.caption)
-                                .fontWeight(.bold)
-                                .padding(.horizontal, 10)
-                                .padding(.vertical, 6)
-                                .background(Color.green.opacity(0.15))
-                                .foregroundColor(.green)
-                                .cornerRadius(8)
-                        }
-                    }
-
-                    // Quick Percentage Position Sizing Chips (25%, 50%, 75%, MAX)
-                    HStack(spacing: 8) {
-                        ForEach([0.25, 0.50, 0.75, 1.0], id: \.self) { pct in
-                            Button {
-                                setPercentageAmount(pct)
-                            } label: {
-                                Text(pct == 1.0 ? "MAX" : "\(Int(pct * 100))%")
-                                    .font(.system(.caption, design: .rounded, weight: .bold))
-                                    .frame(maxWidth: .infinity)
-                                    .padding(.vertical, 6)
-                                    .background(Color(UIColor.tertiarySystemGroupedBackground))
-                                    .foregroundColor(.primary)
-                                    .cornerRadius(8)
-                            }
-                            .buttonStyle(.plain)
-                        }
-                    }
-
-                    HStack {
-                        Text("Current Market Price")
-                            .font(.footnote)
-                            .foregroundColor(.secondary)
-                        Spacer()
-                        Text("$\(String(format: "%.2f", stock.currentPrice))")
-                            .font(.system(.footnote, design: .rounded, weight: .semibold))
-                    }
-                }
-
-                // Execution Summary
-                Section("Execution Preview") {
-                    HStack {
-                        Text("Estimated Shares")
-                            .foregroundColor(.secondary)
-                        Spacer()
-                        Text(formatShares(calculatedShares))
-                            .fontWeight(.medium)
-                    }
-
-                    HStack {
-                        Text(tradeType == .buy ? "Estimated Cost" : "Estimated Proceeds")
-                            .foregroundColor(.secondary)
-                        Spacer()
-                        Text("$\(formatCurrency(calculatedTotalCost))")
-                            .fontWeight(.bold)
-                            .foregroundColor(tradeType == .buy ? .primary : .green)
-                    }
-
-                    HStack {
-                        Text("Cash After Trade")
-                            .foregroundColor(.secondary)
-                        Spacer()
-                        Text("$\(formatCurrency(remainingCash))")
-                            .foregroundColor(.secondary)
-                    }
-                }
-
-                // Execute Button
-                Section {
-                    Button {
-                        executeTrade()
-                    } label: {
-                        HStack {
-                            Spacer()
-                            Text(actionButtonTitle)
-                                .font(.headline)
-                                .fontWeight(.bold)
-                            Spacer()
-                        }
-                        .padding(.vertical, 6)
-                    }
-                    .disabled(!isValidOrder)
-                    .tint(buttonTintColor)
-                } footer: {
-                    Text(orderFooterText)
-                        .font(.caption2)
-                        .foregroundColor(.secondary)
-                }
+                // Bottom Full-Width Action Button
+                bottomExecutionButton
             }
-            .navigationTitle("\(selectedOrderType.rawValue) \(stock.symbol)")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") {
-                        dismiss()
-                    }
-                }
-                ToolbarItemGroup(placement: .keyboard) {
-                    Spacer()
-                    Button("Done") {
-                        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
-                    }
-                    .font(.body.weight(.semibold))
-                    .foregroundColor(.green)
-                }
-            }
+            .background(AppTheme.Colors.canvas.ignoresSafeArea())
             .alert("Order Error", isPresented: $showErrorAlert) {
                 Button("OK", role: .cancel) {}
             } message: {
                 Text(errorMessage ?? "Unable to execute trade.")
             }
         }
+    }
+
+    // MARK: - Top Navigation Bar
+    private var topNavigationBar: some View {
+        HStack {
+            Button {
+                dismiss()
+            } label: {
+                Image(systemName: "xmark")
+                    .font(.system(size: 15, weight: .bold))
+                    .foregroundColor(.white)
+                    .padding(10)
+                    .background(AppTheme.Colors.elevatedSurface)
+                    .clipShape(Circle())
+            }
+
+            Spacer()
+
+            // Buy / Sell Mode Toggle
+            HStack(spacing: 4) {
+                Button {
+                    tradeType = .buy
+                    HapticsService.shared.selection()
+                } label: {
+                    Text("Buy")
+                        .font(.system(size: 13, weight: .bold, design: .rounded))
+                        .padding(.horizontal, 14)
+                        .padding(.vertical, 6)
+                        .background(tradeType == .buy ? AppTheme.Colors.gain : Color.clear)
+                        .foregroundColor(tradeType == .buy ? .black : .white)
+                        .cornerRadius(20)
+                }
+                .disabled(selectedOrderType == .stopLoss || selectedOrderType == .takeProfit)
+
+                Button {
+                    tradeType = .sell
+                    HapticsService.shared.selection()
+                } label: {
+                    Text("Sell")
+                        .font(.system(size: 13, weight: .bold, design: .rounded))
+                        .padding(.horizontal, 14)
+                        .padding(.vertical, 6)
+                        .background(tradeType == .sell ? AppTheme.Colors.loss : Color.clear)
+                        .foregroundColor(tradeType == .sell ? .white : .white)
+                        .cornerRadius(20)
+                }
+            }
+            .padding(3)
+            .background(AppTheme.Colors.elevatedSurface)
+            .cornerRadius(24)
+
+            Spacer()
+
+            // Dollar vs Shares Toggle
+            Button {
+                isDollarMode.toggle()
+                inputText = ""
+                HapticsService.shared.selection()
+            } label: {
+                Text(isDollarMode ? "in Dollars" : "in Shares")
+                    .font(.system(size: 12, weight: .bold, design: .rounded))
+                    .foregroundColor(AppTheme.Colors.gain)
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 6)
+                    .background(AppTheme.Colors.gainBadge)
+                    .cornerRadius(12)
+            }
+        }
+        .padding(.horizontal, 16)
+        .padding(.top, 12)
+        .padding(.bottom, 8)
+    }
+
+    // MARK: - Order Type Pill Selector
+    private var orderTypePillSelector: some View {
+        HStack(spacing: 6) {
+            ForEach(TradeOrderType.allCases) { type in
+                Button {
+                    selectedOrderType = type
+                    if type == .stopLoss || type == .takeProfit {
+                        tradeType = .sell
+                        if type == .stopLoss {
+                            targetPriceText = String(format: "%.2f", stock.currentPrice * 0.95)
+                        } else {
+                            targetPriceText = String(format: "%.2f", stock.currentPrice * 1.10)
+                        }
+                    } else {
+                        targetPriceText = String(format: "%.2f", stock.currentPrice)
+                    }
+                    HapticsService.shared.selection()
+                } label: {
+                    HStack(spacing: 4) {
+                        Image(systemName: type.iconName)
+                            .font(.system(size: 10, weight: .bold))
+                        Text(type.rawValue)
+                            .font(.system(size: 12, weight: .bold, design: .rounded))
+                    }
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 7)
+                    .background(selectedOrderType == type ? AppTheme.Colors.elevatedSurface : Color.clear)
+                    .foregroundColor(selectedOrderType == type ? .white : AppTheme.Colors.secondaryText)
+                    .cornerRadius(20)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 20)
+                            .stroke(selectedOrderType == type ? AppTheme.Colors.cardBorder : Color.clear, lineWidth: 1)
+                    )
+                }
+            }
+        }
+    }
+
+    // MARK: - Target Price Adjuster
+    private var targetPriceAdjuster: some View {
+        HStack {
+            Text(targetPriceLabel)
+                .font(.system(size: 12, weight: .semibold, design: .rounded))
+                .foregroundColor(AppTheme.Colors.secondaryText)
+            Spacer()
+            Text("$")
+                .foregroundColor(AppTheme.Colors.secondaryText)
+            TextField("0.00", text: $targetPriceText)
+                .keyboardType(.decimalPad)
+                .font(.system(size: 14, weight: .bold, design: .rounded))
+                .foregroundColor(.white)
+                .multilineTextAlignment(.trailing)
+                .frame(width: 80)
+        }
+        .padding(.horizontal, 14)
+        .padding(.vertical, 8)
+        .background(AppTheme.Colors.elevatedSurface)
+        .cornerRadius(12)
+    }
+
+    // MARK: - Amount Input Hero Display
+    private var amountInputHeroDisplay: some View {
+        VStack(spacing: 6) {
+            // Purchasing power pill
+            HStack(spacing: 4) {
+                Image(systemName: "creditcard.fill")
+                    .font(.system(size: 10))
+                if tradeType == .buy {
+                    Text("$\(formatCurrency(viewModel.cashBalance)) Buying Power")
+                } else {
+                    Text("\(formatShares(sharesOwned)) Shares Available")
+                }
+            }
+            .font(.system(size: 11, weight: .semibold, design: .rounded))
+            .foregroundColor(AppTheme.Colors.secondaryText)
+            .padding(.horizontal, 10)
+            .padding(.vertical, 4)
+            .background(AppTheme.Colors.elevatedSurface)
+            .cornerRadius(14)
+
+            // Massive Numeric Display
+            HStack(alignment: .firstTextBaseline, spacing: 2) {
+                if isDollarMode {
+                    Text("$")
+                        .font(.system(size: 32, weight: .bold, design: .rounded))
+                        .foregroundColor(inputText.isEmpty ? AppTheme.Colors.tertiaryText : .white)
+                }
+                Text(inputText.isEmpty ? "0" : inputText)
+                    .font(.system(size: 46, weight: .heavy, design: .rounded))
+                    .foregroundColor(inputText.isEmpty ? AppTheme.Colors.tertiaryText : .white)
+                    .monospacedDigit()
+                if !isDollarMode {
+                    Text("Shares")
+                        .font(.system(size: 20, weight: .bold, design: .rounded))
+                        .foregroundColor(inputText.isEmpty ? AppTheme.Colors.tertiaryText : .white)
+                        .padding(.leading, 4)
+                }
+            }
+            .padding(.vertical, 8)
+
+            // Approximation Sub-label
+            if isDollarMode {
+                Text("≈ \(formatShares(calculatedShares)) \(stock.symbol) Shares @ $\(String(format: "%.2f", effectivePrice))")
+                    .font(.system(size: 12, weight: .medium, design: .rounded))
+                    .foregroundColor(AppTheme.Colors.secondaryText)
+                    .monospacedDigit()
+            } else {
+                Text("≈ $\(formatCurrency(calculatedTotalCost)) Total Value @ $\(String(format: "%.2f", effectivePrice))")
+                    .font(.system(size: 12, weight: .medium, design: .rounded))
+                    .foregroundColor(AppTheme.Colors.secondaryText)
+                    .monospacedDigit()
+            }
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 12)
+    }
+
+    // MARK: - Position Sizing Chips
+    private var quickSizingChipsRow: some View {
+        HStack(spacing: 8) {
+            ForEach([0.25, 0.50, 0.75, 1.0], id: \.self) { pct in
+                Button {
+                    if pct == 1.0 {
+                        setMaxAmount()
+                    } else {
+                        setPercentageAmount(pct)
+                    }
+                } label: {
+                    Text(pct == 1.0 ? "MAX" : "\(Int(pct * 100))%")
+                        .font(.system(size: 12, weight: .bold, design: .rounded))
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 8)
+                        .background(AppTheme.Colors.elevatedSurface)
+                        .foregroundColor(pct == 1.0 ? AppTheme.Colors.gain : .white)
+                        .cornerRadius(10)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 10)
+                                .stroke(pct == 1.0 ? AppTheme.Colors.gain.opacity(0.3) : AppTheme.Colors.cardBorder, lineWidth: 1)
+                        )
+                }
+                .buttonStyle(.plain)
+            }
+        }
+    }
+
+    // MARK: - Order Preview Card
+    private var orderPreviewContextCard: some View {
+        VStack(spacing: 8) {
+            HStack {
+                Text("Execution Price")
+                    .font(.system(size: 12, weight: .medium, design: .rounded))
+                    .foregroundColor(AppTheme.Colors.secondaryText)
+                Spacer()
+                Text("$\(String(format: "%.2f", effectivePrice))")
+                    .font(.system(size: 12, weight: .bold, design: .rounded))
+                    .foregroundColor(.white)
+                    .monospacedDigit()
+            }
+
+            HStack {
+                Text("Estimated Total")
+                    .font(.system(size: 12, weight: .medium, design: .rounded))
+                    .foregroundColor(AppTheme.Colors.secondaryText)
+                Spacer()
+                Text("$\(formatCurrency(calculatedTotalCost))")
+                    .font(.system(size: 12, weight: .bold, design: .rounded))
+                    .foregroundColor(tradeType == .buy ? .white : AppTheme.Colors.gain)
+                    .monospacedDigit()
+            }
+
+            HStack {
+                Text("Trading Commission")
+                    .font(.system(size: 12, weight: .medium, design: .rounded))
+                    .foregroundColor(AppTheme.Colors.secondaryText)
+                Spacer()
+                Text("$0.00 Free")
+                    .font(.system(size: 12, weight: .bold, design: .rounded))
+                    .foregroundColor(AppTheme.Colors.gain)
+            }
+        }
+        .padding(14)
+        .background(AppTheme.Colors.cardSurface)
+        .cornerRadius(14)
+        .overlay(
+            RoundedRectangle(cornerRadius: 14)
+                .stroke(AppTheme.Colors.cardBorder, lineWidth: 1)
+        )
+    }
+
+    // MARK: - Custom Financial Keypad
+    private var financialKeypad: some View {
+        let keys = [
+            ["1", "2", "3"],
+            ["4", "5", "6"],
+            ["7", "8", "9"],
+            [".", "0", "⌫"]
+        ]
+
+        return VStack(spacing: 8) {
+            ForEach(keys, id: \.self) { row in
+                HStack(spacing: 8) {
+                    ForEach(row, id: \.self) { key in
+                        Button {
+                            handleKeypadPress(key)
+                        } label: {
+                            Text(key)
+                                .font(AppTheme.Fonts.keypadNumber)
+                                .foregroundColor(.white)
+                                .frame(maxWidth: .infinity)
+                                .frame(height: 48)
+                                .background(AppTheme.Colors.elevatedSurface.opacity(0.8))
+                                .cornerRadius(12)
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+            }
+        }
+        .padding(.horizontal, 20)
+        .padding(.vertical, 8)
+    }
+
+    // MARK: - Bottom Execution Button
+    private var bottomExecutionButton: some View {
+        VStack(spacing: 6) {
+            Button {
+                executeTrade()
+            } label: {
+                HStack(spacing: 8) {
+                    Text(actionButtonTitle)
+                        .font(.system(size: 16, weight: .bold, design: .rounded))
+                    Image(systemName: "arrow.up.right")
+                        .font(.system(size: 14, weight: .bold))
+                }
+                .foregroundColor(tradeType == .buy ? .black : .white)
+                .frame(maxWidth: .infinity)
+                .frame(height: 52)
+                .background(isValidOrder ? (tradeType == .buy ? AppTheme.Colors.gain : AppTheme.Colors.loss) : AppTheme.Colors.elevatedSurface)
+                .cornerRadius(26)
+            }
+            .disabled(!isValidOrder)
+
+            Text("Simulated Paper Order · Zero Risk")
+                .font(.system(size: 10, weight: .medium, design: .rounded))
+                .foregroundColor(AppTheme.Colors.tertiaryText)
+        }
+        .padding(.horizontal, 20)
+        .padding(.bottom, 16)
+        .padding(.top, 6)
     }
 
     private var targetPriceLabel: String {
@@ -310,27 +470,11 @@ public struct TradeSheetView: View {
         }
     }
 
-    private var orderGuidanceText: String {
-        switch selectedOrderType {
-        case .market:
-            return ""
-        case .limit:
-            if tradeType == .buy {
-                return "Order will fill only when the price drops to or below $\(String(format: "%.2f", effectivePrice))."
-            } else {
-                return "Order will fill only when the price rises to or above $\(String(format: "%.2f", effectivePrice))."
-            }
-        case .stopLoss:
-            return "Automatically sells your shares if market price drops to or below $\(String(format: "%.2f", effectivePrice)) to prevent severe drawdown."
-        case .takeProfit:
-            return "Automatically sells your shares when price surges to or above $\(String(format: "%.2f", effectivePrice)) to lock in profit."
-        }
-    }
-
     private var actionButtonTitle: String {
+        guard isValidOrder else { return "Enter Amount" }
         switch selectedOrderType {
         case .market:
-            return tradeType == .buy ? "Execute Paper Buy" : "Execute Paper Sell"
+            return tradeType == .buy ? "Submit Buy Order" : "Submit Sell Order"
         case .limit:
             return "Place Limit \(tradeType.rawValue)"
         case .stopLoss:
@@ -340,27 +484,30 @@ public struct TradeSheetView: View {
         }
     }
 
-    private var buttonTintColor: Color {
-        switch selectedOrderType {
-        case .market, .limit:
-            return tradeType == .buy ? Color.green : Color.red
-        case .stopLoss:
-            return Color.red
-        case .takeProfit:
-            return Color.green
-        }
-    }
-
-    private var orderFooterText: String {
-        switch selectedOrderType {
-        case .market:
-            return "This is an instant simulated paper trade with zero commission fees."
-        case .limit:
-            return "Order will monitor live price ticks and execute automatically when your target price is reached."
-        case .stopLoss:
-            return "Monitors live price ticks and automatically executes a market sell on any downside breach."
-        case .takeProfit:
-            return "Monitors live price ticks and automatically locks in gains when your upside target is reached."
+    private func handleKeypadPress(_ key: String) {
+        HapticsService.shared.impact(style: .light)
+        if key == "⌫" {
+            if !inputText.isEmpty {
+                inputText.removeLast()
+            }
+        } else if key == "." {
+            if !inputText.contains(".") {
+                inputText += (inputText.isEmpty ? "0." : ".")
+            }
+        } else {
+            if inputText == "0" {
+                inputText = key
+            } else {
+                if inputText.contains(".") {
+                    let parts = inputText.split(separator: ".")
+                    if parts.count > 1 && parts[1].count >= 4 {
+                        return
+                    }
+                } else if inputText.count >= 8 {
+                    return
+                }
+                inputText += key
+            }
         }
     }
 
@@ -402,6 +549,7 @@ public struct TradeSheetView: View {
                 inputText = formatShares(sharesOwned)
             }
         }
+        HapticsService.shared.impact(style: .light)
     }
 
     private func executeTrade() {

@@ -9,6 +9,7 @@ public struct StockDetailView: View {
     @State private var chartPoints: [ChartDataPoint] = []
     @State private var candles: [CandlestickPoint] = []
     @State private var chartMode: ChartDisplayMode = .line
+    @State private var scrubbedPoint: ChartDataPoint? = nil
     @State private var showTradeSheet: Bool = false
     @State private var tradeType: TransactionType = .buy
     @State private var showPriceAlertSheet: Bool = false
@@ -35,6 +36,9 @@ public struct StockDetailView: View {
 
     public var body: some View {
         ZStack(alignment: .bottom) {
+            AppTheme.Colors.obsidianCanvas
+                .ignoresSafeArea()
+
             ScrollView {
                 VStack(alignment: .leading, spacing: 20) {
                     // Header Price and Change
@@ -77,14 +81,14 @@ public struct StockDetailView: View {
                         showPriceAlertSheet = true
                     } label: {
                         Image(systemName: "bell.badge")
-                            .foregroundColor(.primary)
+                            .foregroundColor(AppTheme.Colors.subheadline)
                     }
 
                     Button {
                         viewModel.toggleWatchlist(symbol: liveStock.symbol)
                     } label: {
                         Image(systemName: isWatchlisted ? "star.fill" : "star")
-                            .foregroundColor(isWatchlisted ? .yellow : .secondary)
+                            .foregroundColor(isWatchlisted ? Color(hex: "#FFD700") : AppTheme.Colors.muted)
                     }
                 }
             }
@@ -245,85 +249,120 @@ public struct StockDetailView: View {
 
     // MARK: - Price Header
     private var priceHeaderSection: some View {
-        VStack(alignment: .leading, spacing: 6) {
+        let basePrice = chartPoints.first?.price ?? liveStock.currentPrice
+        let displayPrice = scrubbedPoint?.price ?? liveStock.currentPrice
+        let diff = displayPrice - (scrubbedPoint != nil ? basePrice : (liveStock.currentPrice - liveStock.change))
+        let pct = (displayPrice - diff) > 0 ? (diff / (displayPrice - diff)) * 100 : 0.0
+        let isPos = scrubbedPoint != nil ? (diff >= 0) : liveStock.isPositive
+
+        return VStack(alignment: .leading, spacing: 6) {
             Text(liveStock.name)
                 .font(.subheadline)
-                .foregroundColor(.secondary)
+                .foregroundColor(AppTheme.Colors.subheadline)
 
-            Text("$\(String(format: "%.2f", liveStock.currentPrice))")
-                .font(.system(size: 36, weight: .heavy, design: .rounded))
+            Text("$\(String(format: "%.2f", displayPrice))")
+                .font(.system(size: 38, weight: .bold, design: .rounded))
+                .foregroundColor(AppTheme.Colors.headline)
+                .monospacedDigit()
 
-            HStack(spacing: 6) {
-                Image(systemName: liveStock.isPositive ? "arrow.up.right" : "arrow.down.right")
-                    .font(.caption)
-                Text("\(liveStock.isPositive ? "+" : "")$\(String(format: "%.2f", abs(liveStock.change)))")
-                    .fontWeight(.semibold)
-                Text("(\(String(format: "%.2f", liveStock.changePercent))%) Today")
+            HStack(spacing: 8) {
+                HStack(spacing: 4) {
+                    Image(systemName: isPos ? "arrow.up.right" : "arrow.down.right")
+                        .font(.system(size: 11, weight: .bold))
+                    Text("\(isPos ? "+" : "")$\(String(format: "%.2f", abs(diff)))")
+                        .font(.system(.footnote, design: .rounded, weight: .bold))
+                        .monospacedDigit()
+                    Text("(\(String(format: "%.2f", pct))%)")
+                        .font(.system(.footnote, design: .rounded, weight: .medium))
+                        .monospacedDigit()
+                }
+                .foregroundColor(isPos ? AppTheme.Colors.gain : AppTheme.Colors.loss)
+                .padding(.horizontal, 8)
+                .padding(.vertical, 4)
+                .background((isPos ? AppTheme.Colors.gainBadge : AppTheme.Colors.lossBadge))
+                .cornerRadius(6)
+
+                if let scrub = scrubbedPoint {
+                    Text(formatScrubDate(scrub.timestamp))
+                        .font(.caption2)
+                        .foregroundColor(AppTheme.Colors.muted)
+                } else {
+                    Text(selectedTimeframe.rawValue)
+                        .font(.caption2)
+                        .foregroundColor(AppTheme.Colors.muted)
+                }
             }
-            .font(.footnote)
-            .foregroundColor(liveStock.isPositive ? .green : .red)
-            .padding(.horizontal, 8)
-            .padding(.vertical, 4)
-            .background((liveStock.isPositive ? Color.green : Color.red).opacity(0.12))
-            .cornerRadius(8)
         }
     }
 
     // MARK: - Chart Section
     private var chartSection: some View {
-        VStack(spacing: 12) {
+        VStack(spacing: 14) {
             // Chart Display Mode Toggle (Line vs Candles)
             HStack {
                 Spacer()
-                HStack(spacing: 2) {
+                HStack(spacing: 4) {
                     ForEach(ChartDisplayMode.allCases) { mode in
                         Button {
-                            chartMode = mode
+                            withAnimation(.easeInOut(duration: 0.15)) {
+                                chartMode = mode
+                            }
                         } label: {
                             HStack(spacing: 4) {
                                 Image(systemName: mode.iconName)
                                 Text(mode.rawValue)
                             }
-                            .font(.system(size: 11, weight: .bold))
+                            .font(.system(size: 11, weight: .semibold))
                             .padding(.horizontal, 10)
-                            .padding(.vertical, 4)
-                            .background(chartMode == mode ? Color.green.opacity(0.2) : Color.clear)
-                            .foregroundColor(chartMode == mode ? .green : .secondary)
+                            .padding(.vertical, 5)
+                            .background(chartMode == mode ? AppTheme.Colors.cardHighlight : Color.clear)
+                            .foregroundColor(chartMode == mode ? AppTheme.Colors.headline : AppTheme.Colors.muted)
                             .cornerRadius(6)
                         }
                     }
                 }
                 .padding(3)
-                .background(Color(UIColor.secondarySystemGroupedBackground))
+                .background(AppTheme.Colors.cardSurface)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 8)
+                        .stroke(AppTheme.Colors.cardBorder, lineWidth: 1)
+                )
                 .cornerRadius(8)
             }
 
             InteractiveChartView(
                 points: chartPoints,
                 candles: candles,
-                isPositive: liveStock.isPositive,
-                displayMode: $chartMode
+                isPositive: (scrubbedPoint != nil ? ((scrubbedPoint!.price - (chartPoints.first?.price ?? scrubbedPoint!.price)) >= 0) : liveStock.isPositive),
+                displayMode: $chartMode,
+                externalSelectedPoint: $scrubbedPoint
             )
-            .frame(height: 200)
+            .frame(height: 220)
 
             // Timeframe Segmented Control
-            HStack(spacing: 4) {
+            HStack(spacing: 6) {
                 ForEach(ChartTimeframe.allCases) { tf in
                     Button {
-                        selectedTimeframe = tf
+                        withAnimation(.easeInOut(duration: 0.15)) {
+                            selectedTimeframe = tf
+                        }
                     } label: {
                         Text(tf.rawValue)
-                            .font(.system(.caption, design: .rounded, weight: .bold))
+                            .font(.system(size: 12, weight: selectedTimeframe == tf ? .bold : .semibold, design: .rounded))
                             .frame(maxWidth: .infinity)
                             .padding(.vertical, 6)
-                            .background(selectedTimeframe == tf ? Color.green.opacity(0.2) : Color.clear)
-                            .foregroundColor(selectedTimeframe == tf ? .green : .secondary)
+                            .background(selectedTimeframe == tf ? AppTheme.Colors.cardHighlight : Color.clear)
+                            .foregroundColor(selectedTimeframe == tf ? (liveStock.isPositive ? AppTheme.Colors.gain : AppTheme.Colors.loss) : AppTheme.Colors.muted)
                             .cornerRadius(8)
                     }
                 }
             }
             .padding(4)
-            .background(Color(UIColor.secondarySystemGroupedBackground))
+            .background(AppTheme.Colors.cardSurface)
+            .overlay(
+                RoundedRectangle(cornerRadius: 10)
+                    .stroke(AppTheme.Colors.cardBorder, lineWidth: 1)
+            )
             .cornerRadius(10)
         }
     }
@@ -334,17 +373,20 @@ public struct StockDetailView: View {
         let pnl = position.unrealizedPnl(at: liveStock.currentPrice)
         let isGain = pnl >= 0
 
-        return VStack(alignment: .leading, spacing: 12) {
+        return VStack(alignment: .leading, spacing: 14) {
             HStack {
-                Text("Your Holding")
-                    .font(.headline)
+                Text("Your Position")
+                    .font(.system(.subheadline, design: .rounded, weight: .bold))
+                    .foregroundColor(AppTheme.Colors.headline)
                 Spacer()
-                Text("Market Value: $\(formatCurrency(currentVal))")
-                    .font(.subheadline)
-                    .fontWeight(.semibold)
+                Text("$\(formatCurrency(currentVal))")
+                    .font(.system(.subheadline, design: .rounded, weight: .bold))
+                    .foregroundColor(AppTheme.Colors.headline)
+                    .monospacedDigit()
             }
 
             Divider()
+                .overlay(AppTheme.Colors.cardBorder)
 
             HStack(spacing: 12) {
                 StatBoxView(title: "Shares Owned", value: formatShares(position.shares))
@@ -358,7 +400,11 @@ public struct StockDetailView: View {
             }
         }
         .padding(16)
-        .background(Color(UIColor.secondarySystemGroupedBackground))
+        .background(AppTheme.Colors.cardSurface)
+        .overlay(
+            RoundedRectangle(cornerRadius: 16)
+                .stroke(AppTheme.Colors.cardBorder, lineWidth: 1)
+        )
         .cornerRadius(16)
     }
 
@@ -366,7 +412,8 @@ public struct StockDetailView: View {
     private var keyStatisticsSection: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Key Statistics")
-                .font(.headline)
+                .font(.system(.subheadline, design: .rounded, weight: .bold))
+                .foregroundColor(AppTheme.Colors.headline)
 
             LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 10) {
                 StatBoxView(title: "Market Cap", value: liveStock.marketCap)
@@ -381,16 +428,21 @@ public struct StockDetailView: View {
 
     // MARK: - About Company
     private var aboutSection: some View {
-        VStack(alignment: .leading, spacing: 8) {
+        VStack(alignment: .leading, spacing: 10) {
             Text("About \(liveStock.name)")
-                .font(.headline)
+                .font(.system(.subheadline, design: .rounded, weight: .bold))
+                .foregroundColor(AppTheme.Colors.headline)
             Text(liveStock.about)
                 .font(.footnote)
-                .foregroundColor(.secondary)
+                .foregroundColor(AppTheme.Colors.subheadline)
                 .lineSpacing(4)
         }
         .padding(16)
-        .background(Color(UIColor.secondarySystemGroupedBackground))
+        .background(AppTheme.Colors.cardSurface)
+        .overlay(
+            RoundedRectangle(cornerRadius: 16)
+                .stroke(AppTheme.Colors.cardBorder, lineWidth: 1)
+        )
         .cornerRadius(16)
     }
 
@@ -398,19 +450,24 @@ public struct StockDetailView: View {
     private var newsSection: some View {
         let news = viewModel.getNews(for: liveStock.symbol)
 
-        return VStack(alignment: .leading, spacing: 12) {
+        return VStack(alignment: .leading, spacing: 14) {
             HStack {
                 Text("Market News & Analysis")
-                    .font(.headline)
+                    .font(.system(.subheadline, design: .rounded, weight: .bold))
+                    .foregroundColor(AppTheme.Colors.headline)
                 Spacer()
-                Text("Live Feed")
-                    .font(.caption2)
-                    .fontWeight(.semibold)
-                    .padding(.horizontal, 6)
-                    .padding(.vertical, 2)
-                    .background(Color.green.opacity(0.12))
-                    .foregroundColor(.green)
-                    .cornerRadius(4)
+                HStack(spacing: 4) {
+                    Circle()
+                        .fill(AppTheme.Colors.gain)
+                        .frame(width: 6, height: 6)
+                    Text("LIVE")
+                        .font(.system(size: 10, weight: .black))
+                        .foregroundColor(AppTheme.Colors.gain)
+                }
+                .padding(.horizontal, 6)
+                .padding(.vertical, 3)
+                .background(AppTheme.Colors.gainBadge)
+                .cornerRadius(4)
             }
 
             VStack(spacing: 10) {
@@ -422,15 +479,15 @@ public struct StockDetailView: View {
                             HStack(spacing: 6) {
                                 Text(item.publisher)
                                     .font(.system(.caption, design: .rounded, weight: .bold))
-                                    .foregroundColor(.primary)
+                                    .foregroundColor(AppTheme.Colors.headline)
 
                                 Text("•")
                                     .font(.caption2)
-                                    .foregroundColor(.secondary)
+                                    .foregroundColor(AppTheme.Colors.muted)
 
                                 Text(item.timeAgo)
                                     .font(.caption2)
-                                    .foregroundColor(.secondary)
+                                    .foregroundColor(AppTheme.Colors.muted)
 
                                 Spacer()
 
@@ -445,18 +502,22 @@ public struct StockDetailView: View {
 
                             Text(item.title)
                                 .font(.system(.subheadline, design: .rounded, weight: .semibold))
-                                .foregroundColor(.primary)
+                                .foregroundColor(AppTheme.Colors.headline)
                                 .multilineTextAlignment(.leading)
                                 .lineLimit(2)
 
                             Text(item.snippet)
                                 .font(.caption)
-                                .foregroundColor(.secondary)
+                                .foregroundColor(AppTheme.Colors.subheadline)
                                 .multilineTextAlignment(.leading)
                                 .lineLimit(2)
                         }
                         .padding(12)
-                        .background(Color(UIColor.tertiarySystemGroupedBackground))
+                        .background(AppTheme.Colors.cardHighlight)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 12)
+                                .stroke(AppTheme.Colors.cardBorder, lineWidth: 0.8)
+                        )
                         .cornerRadius(12)
                     }
                     .buttonStyle(.plain)
@@ -464,15 +525,19 @@ public struct StockDetailView: View {
             }
         }
         .padding(16)
-        .background(Color(UIColor.secondarySystemGroupedBackground))
+        .background(AppTheme.Colors.cardSurface)
+        .overlay(
+            RoundedRectangle(cornerRadius: 16)
+                .stroke(AppTheme.Colors.cardBorder, lineWidth: 1)
+        )
         .cornerRadius(16)
     }
 
     private func sentimentColor(_ sentiment: MarketSentiment) -> Color {
         switch sentiment {
-        case .bullish: return .green
-        case .neutral: return .secondary
-        case .bearish: return .red
+        case .bullish: return AppTheme.Colors.gain
+        case .neutral: return AppTheme.Colors.muted
+        case .bearish: return AppTheme.Colors.loss
         }
     }
 
@@ -489,8 +554,12 @@ public struct StockDetailView: View {
                         .fontWeight(.bold)
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 14)
-                        .background(Color.red.opacity(0.15))
-                        .foregroundColor(.red)
+                        .background(AppTheme.Colors.lossBadge)
+                        .foregroundColor(AppTheme.Colors.loss)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 14)
+                                .stroke(AppTheme.Colors.loss.opacity(0.3), lineWidth: 1)
+                        )
                         .cornerRadius(14)
                 }
             }
@@ -504,14 +573,26 @@ public struct StockDetailView: View {
                     .fontWeight(.bold)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 14)
-                    .background(Color.green)
-                    .foregroundColor(.white)
+                    .background(AppTheme.Colors.gain)
+                    .foregroundColor(Color(hex: "#080A0F"))
                     .cornerRadius(14)
             }
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 12)
-        .background(.ultraThinMaterial)
+        .background(AppTheme.Colors.cardSurface.opacity(0.95))
+        .overlay(
+            Rectangle()
+                .frame(height: 1)
+                .foregroundColor(AppTheme.Colors.cardBorder),
+            alignment: .top
+        )
+    }
+
+    private func formatScrubDate(_ date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "MMM d, h:mm a"
+        return formatter.string(from: date)
     }
 
     private func loadChart() {

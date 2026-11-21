@@ -13,18 +13,22 @@ public struct ToastBanner: View {
         if isVisible {
             HStack(spacing: 10) {
                 Image(systemName: "checkmark.circle.fill")
-                    .foregroundColor(.green)
+                    .foregroundColor(AppTheme.Colors.gain)
                     .font(.subheadline)
                 Text(message)
                     .font(.footnote)
                     .fontWeight(.medium)
-                    .foregroundColor(.white)
+                    .foregroundColor(AppTheme.Colors.headline)
             }
             .padding(.horizontal, 16)
             .padding(.vertical, 10)
-            .background(Color.black.opacity(0.85))
+            .background(AppTheme.Colors.cardSurface)
+            .overlay(
+                RoundedRectangle(cornerRadius: 24)
+                    .stroke(AppTheme.Colors.cardBorder, lineWidth: 1)
+            )
             .cornerRadius(24)
-            .shadow(color: Color.black.opacity(0.2), radius: 10, x: 0, y: 5)
+            .shadow(color: Color.black.opacity(0.4), radius: 10, x: 0, y: 5)
             .transition(.move(edge: .top).combined(with: .opacity))
             .animation(.spring(response: 0.35, dampingFraction: 0.7), value: isVisible)
             .padding(.top, 8)

@@ -25,11 +25,11 @@ public struct SettingsView: View {
                 Section {
                     HStack {
                         Label("Storage Engine", systemImage: "icloud.fill")
-                            .foregroundColor(.blue)
+                            .foregroundColor(Color(hex: "#0A84FF"))
                         Spacer()
                         Text(storageService.isICloudAvailable ? "iCloud Synced" : "Local Fallback")
                             .font(.system(.footnote, design: .rounded, weight: .bold))
-                            .foregroundColor(storageService.isICloudAvailable ? .green : .secondary)
+                            .foregroundColor(storageService.isICloudAvailable ? AppTheme.Colors.gain : AppTheme.Colors.muted)
                     }
 
                     HStack {
@@ -71,6 +71,7 @@ public struct SettingsView: View {
                         Spacer()
                         Text("$\(formatCurrency(viewModel.cashBalance))")
                             .font(.system(.body, design: .rounded, weight: .bold))
+                            .monospacedDigit()
                     }
 
                     VStack(alignment: .leading, spacing: 8) {
@@ -89,8 +90,8 @@ public struct SettingsView: View {
                                             .font(.system(.footnote, design: .rounded, weight: .bold))
                                             .padding(.horizontal, 12)
                                             .padding(.vertical, 6)
-                                            .background(selectedResetAmount == amount ? Color.green : Color(UIColor.tertiarySystemGroupedBackground))
-                                            .foregroundColor(selectedResetAmount == amount ? .white : .primary)
+                                            .background(selectedResetAmount == amount ? AppTheme.Colors.gain : Color(UIColor.tertiarySystemGroupedBackground))
+                                            .foregroundColor(selectedResetAmount == amount ? Color(hex: "#080A0F") : .primary)
                                             .cornerRadius(8)
                                     }
                                 }

@@ -14,14 +14,19 @@ public struct SparklineView: View {
             let points = normalize(data: data, width: geometry.size.width, height: geometry.size.height)
             
             Path { path in
-                guard let first = points.first else { return }
-                path.move(to: first)
-                for point in points.dropFirst() {
-                    path.addLine(to: point)
+                guard points.count > 1 else { return }
+                path.move(to: points[0])
+                for i in 1..<points.count {
+                    let p0 = points[i - 1]
+                    let p1 = points[i]
+                    let midPoint = CGPoint(x: (p0.x + p1.x) / 2, y: (p0.y + p1.y) / 2)
+                    let controlPoint1 = CGPoint(x: (midPoint.x + p0.x) / 2, y: p0.y)
+                    let controlPoint2 = CGPoint(x: (midPoint.x + p1.x) / 2, y: p1.y)
+                    path.addCurve(to: p1, control1: controlPoint1, control2: controlPoint2)
                 }
             }
             .stroke(
-                isPositive ? Color.green : Color.red,
+                isPositive ? AppTheme.Colors.gain : AppTheme.Colors.loss,
                 style: StrokeStyle(lineWidth: 1.8, lineCap: .round, lineJoin: .round)
             )
         }

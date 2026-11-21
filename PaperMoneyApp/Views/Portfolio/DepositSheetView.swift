@@ -26,10 +26,11 @@ public struct DepositSheetView: View {
                     VStack(alignment: .leading, spacing: 6) {
                         Text("Current Paper Cash Available")
                             .font(.caption)
-                            .foregroundColor(.secondary)
+                            .foregroundColor(AppTheme.Colors.subheadline)
                         Text("$\(formatCurrency(viewModel.cashBalance))")
                             .font(.system(.title2, design: .rounded, weight: .bold))
-                            .foregroundColor(.green)
+                            .foregroundColor(AppTheme.Colors.gain)
+                            .monospacedDigit()
                     }
                     .padding(.vertical, 4)
                 }
@@ -39,10 +40,11 @@ public struct DepositSheetView: View {
                     HStack {
                         Text("$")
                             .font(.title3)
-                            .foregroundColor(.secondary)
+                            .foregroundColor(AppTheme.Colors.subheadline)
                         TextField("Enter any amount (e.g. 25,000)", text: $inputAmountText)
                             .keyboardType(.decimalPad)
-                            .font(.system(.title3, design: .rounded, weight: .semibold))
+                            .font(.system(.title3, design: .rounded, weight: .bold))
+                            .monospacedDigit()
                     }
 
                     TextField("Optional Note (e.g. Paycheck, Bonus)", text: $depositNote)
@@ -55,16 +57,18 @@ public struct DepositSheetView: View {
                         ForEach(presetAmounts, id: \.self) { amount in
                             Button {
                                 inputAmountText = String(format: "%.0f", amount)
+                                HapticsService.shared.impact(style: .light)
                             } label: {
                                 Text("+$\(formatCompact(amount))")
-                                    .font(.system(.footnote, design: .rounded, weight: .semibold))
+                                    .font(.system(.footnote, design: .rounded, weight: .bold))
                                     .frame(maxWidth: .infinity)
                                     .padding(.vertical, 10)
-                                    .background(Color(UIColor.secondarySystemGroupedBackground))
+                                    .background(parsedAmount == amount ? AppTheme.Colors.gainBadge : Color(UIColor.secondarySystemGroupedBackground))
+                                    .foregroundColor(parsedAmount == amount ? AppTheme.Colors.gain : .primary)
                                     .cornerRadius(10)
                                     .overlay(
                                         RoundedRectangle(cornerRadius: 10)
-                                            .stroke(parsedAmount == amount ? Color.green : Color.clear, lineWidth: 1.5)
+                                            .stroke(parsedAmount == amount ? AppTheme.Colors.gain : AppTheme.Colors.cardBorder, lineWidth: 1)
                                     )
                             }
                             .buttonStyle(.plain)
@@ -86,11 +90,12 @@ public struct DepositSheetView: View {
                             Spacer()
                             Image(systemName: "plus.circle.fill")
                             Text("Deposit Paper Cash")
-                                .fontWeight(.semibold)
+                                .fontWeight(.bold)
                             Spacer()
                         }
                         .padding(.vertical, 4)
                     }
+                    .tint(AppTheme.Colors.gain)
                     .disabled(parsedAmount <= 0)
                 } footer: {
                     Text("100% simulated paper money. Deposits immediately reflect in your trading purchasing power and sync across your Apple devices via iCloud.")

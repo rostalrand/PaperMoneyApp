@@ -34,7 +34,7 @@ public struct MainTabView: View {
                     }
                     .tag(3)
             }
-            .tint(.green)
+            .tint(AppTheme.Colors.gain)
 
             // Dynamic floating toast notification
             ToastBanner(message: viewModel.bannerMessage ?? "", isVisible: viewModel.showBanner)

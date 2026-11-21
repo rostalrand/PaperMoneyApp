@@ -19,6 +19,7 @@ public struct InteractiveChartView: View {
     public let candles: [CandlestickPoint]
     public let isPositive: Bool
     @Binding public var displayMode: ChartDisplayMode
+    @Binding public var externalSelectedPoint: ChartDataPoint?
 
     @State private var dragLocation: CGPoint? = nil
     @State private var selectedPoint: ChartDataPoint? = nil
@@ -29,12 +30,14 @@ public struct InteractiveChartView: View {
         points: [ChartDataPoint],
         candles: [CandlestickPoint] = [],
         isPositive: Bool,
-        displayMode: Binding<ChartDisplayMode> = .constant(.line)
+        displayMode: Binding<ChartDisplayMode> = .constant(.line),
+        externalSelectedPoint: Binding<ChartDataPoint?> = .constant(nil)
     ) {
         self.points = points
         self.candles = candles
         self.isPositive = isPositive
         self._displayMode = displayMode
+        self._externalSelectedPoint = externalSelectedPoint
     }
 
     public var body: some View {
@@ -75,8 +78,8 @@ public struct InteractiveChartView: View {
                             .fill(
                                 LinearGradient(
                                     colors: [
-                                        (isPositive ? Color.green : Color.red).opacity(0.3),
-                                        (isPositive ? Color.green : Color.red).opacity(0.0)
+                                        (isPositive ? AppTheme.Colors.gain : AppTheme.Colors.loss).opacity(0.18),
+                                        (isPositive ? AppTheme.Colors.gain : AppTheme.Colors.loss).opacity(0.0)
                                     ],
                                     startPoint: .top,
                                     endPoint: .bottom
@@ -86,8 +89,8 @@ public struct InteractiveChartView: View {
                         // Line Stroke
                         chartLinePath(width: width, height: height)
                             .stroke(
-                                isPositive ? Color.green : Color.red,
-                                style: StrokeStyle(lineWidth: 2.5, lineCap: .round, lineJoin: .round)
+                                isPositive ? AppTheme.Colors.gain : AppTheme.Colors.loss,
+                                style: StrokeStyle(lineWidth: 2.2, lineCap: .round, lineJoin: .round)
                             )
                     } else {
                         // Candlestick Charts (OHLC)
@@ -100,14 +103,15 @@ public struct InteractiveChartView: View {
                             path.move(to: CGPoint(x: drag.x, y: 0))
                             path.addLine(to: CGPoint(x: drag.x, y: height))
                         }
-                        .stroke(Color.gray.opacity(0.6), style: StrokeStyle(lineWidth: 1, dash: [4, 4]))
+                        .stroke(Color.white.opacity(0.2), style: StrokeStyle(lineWidth: 1, dash: [4, 4]))
 
                         if displayMode == .line, let selected = selectedPoint {
                             let yPos = getYPosition(for: selected.price, height: height)
                             Circle()
-                                .fill(isPositive ? Color.green : Color.red)
+                                .fill(isPositive ? AppTheme.Colors.gain : AppTheme.Colors.loss)
                                 .frame(width: 10, height: 10)
                                 .overlay(Circle().stroke(Color.white, lineWidth: 2))
+                                .shadow(color: (isPositive ? AppTheme.Colors.gain : AppTheme.Colors.loss).opacity(0.6), radius: 4)
                                 .position(x: drag.x, y: yPos)
                         }
                     }
@@ -123,6 +127,7 @@ public struct InteractiveChartView: View {
                             selectedPoint = nil
                             selectedCandle = nil
                             lastScrubIndex = nil
+                            externalSelectedPoint = nil
                         }
                 )
             }
@@ -186,14 +191,21 @@ public struct InteractiveChartView: View {
         guard points.count > 1 else { return path }
         let stepX = width / CGFloat(points.count - 1)
 
+        var cgPoints: [CGPoint] = []
         for (index, point) in points.enumerated() {
             let x = CGFloat(index) * stepX
             let y = getYPosition(for: point.price, height: height)
-            if index == 0 {
-                path.move(to: CGPoint(x: x, y: y))
-            } else {
-                path.addLine(to: CGPoint(x: x, y: y))
-            }
+            cgPoints.append(CGPoint(x: x, y: y))
+        }
+
+        path.move(to: cgPoints[0])
+        for i in 1..<cgPoints.count {
+            let p0 = cgPoints[i - 1]
+            let p1 = cgPoints[i]
+            let midPoint = CGPoint(x: (p0.x + p1.x) / 2, y: (p0.y + p1.y) / 2)
+            let controlPoint1 = CGPoint(x: (midPoint.x + p0.x) / 2, y: p0.y)
+            let controlPoint2 = CGPoint(x: (midPoint.x + p1.x) / 2, y: p1.y)
+            path.addCurve(to: p1, control1: controlPoint1, control2: controlPoint2)
         }
         return path
     }
@@ -224,6 +236,7 @@ public struct InteractiveChartView: View {
             let index = Int(round(fraction * CGFloat(points.count - 1)))
             let safeIndex = max(0, min(points.count - 1, index))
             selectedPoint = points[safeIndex]
+            externalSelectedPoint = points[safeIndex]
             if lastScrubIndex != safeIndex {
                 lastScrubIndex = safeIndex
                 HapticsService.shared.selection()

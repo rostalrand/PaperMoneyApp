@@ -4,6 +4,7 @@ public struct PortfolioView: View {
     @ObservedObject var viewModel: PortfolioViewModel
     @Binding var selectedTab: Int
     @State private var showDepositSheet: Bool = false
+    @State private var scrubbedPoint: ChartDataPoint? = nil
     @AppStorage("has_dismissed_welcome_guide") private var hasDismissedWelcomeGuide: Bool = false
 
     public init(viewModel: PortfolioViewModel, selectedTab: Binding<Int> = .constant(0)) {
@@ -97,11 +98,11 @@ public struct PortfolioView: View {
                         Text("Add Custom Funds")
                             .font(.caption2)
                             .fontWeight(.bold)
-                            .foregroundColor(.green)
+                            .foregroundColor(AppTheme.Colors.gain)
                     }
 
                     Text("·")
-                        .foregroundColor(.secondary)
+                        .foregroundColor(AppTheme.Colors.secondaryText)
 
                     Button {
                         selectedTab = 1
@@ -109,88 +110,111 @@ public struct PortfolioView: View {
                         Text("Start Trading")
                             .font(.caption2)
                             .fontWeight(.bold)
-                            .foregroundColor(.blue)
+                            .foregroundColor(Color.blue)
                     }
                 }
                 .padding(.top, 2)
             }
         }
         .padding(16)
-        .background(Color(UIColor.secondarySystemGroupedBackground))
+        .background(AppTheme.Colors.cardSurface)
         .cornerRadius(16)
         .overlay(
             RoundedRectangle(cornerRadius: 16)
-                .stroke(Color.yellow.opacity(0.25), lineWidth: 1)
+                .stroke(AppTheme.Colors.cardBorder, lineWidth: 1)
         )
     }
 
     // MARK: - Hero Card
     private var portfolioHeroCard: some View {
         let summary = viewModel.summary
-        let isGain = summary.unrealizedReturn >= 0
 
-        return VStack(alignment: .leading, spacing: 10) {
+        // If user is scrubbing the chart, dynamically display scrubbed balance and delta
+        let displayValue: Double = scrubbedPoint?.price ?? summary.totalValue
+        let baseValue = viewModel.portfolioSnapshots.first?.price ?? summary.totalDeposited
+        let deltaFromStart: Double = scrubbedPoint != nil ? (displayValue - baseValue) : summary.unrealizedReturn
+        let deltaPercent: Double = scrubbedPoint != nil ? ((deltaFromStart / max(1.0, baseValue)) * 100) : summary.unrealizedReturnPercent
+        let isScrubGain = deltaFromStart >= 0
+
+        return VStack(alignment: .leading, spacing: 12) {
             HStack {
-                Text("TOTAL PORTFOLIO VALUE")
-                    .font(.system(.caption, design: .rounded, weight: .bold))
-                    .foregroundColor(.secondary)
-                    .tracking(1.0)
+                Text("INVESTING")
+                    .font(.system(size: 11, weight: .bold, design: .rounded))
+                    .foregroundColor(AppTheme.Colors.secondaryText)
+                    .tracking(1.2)
+
                 Spacer()
+
                 Button {
                     viewModel.togglePrivacyMode()
                 } label: {
                     Image(systemName: viewModel.isPrivacyMode ? "eye.slash.fill" : "eye.fill")
-                        .font(.caption2)
-                        .foregroundColor(.secondary)
-                        .padding(5)
-                        .background(Color(UIColor.tertiarySystemGroupedBackground))
+                        .font(.system(size: 12, weight: .semibold))
+                        .foregroundColor(AppTheme.Colors.secondaryText)
+                        .padding(6)
+                        .background(AppTheme.Colors.elevatedSurface)
                         .clipShape(Circle())
                 }
                 .buttonStyle(.plain)
 
                 HStack(spacing: 4) {
                     Image(systemName: "icloud.fill")
-                        .font(.caption2)
+                        .font(.system(size: 10, weight: .semibold))
                     Text(StorageService.shared.isICloudAvailable ? "iCloud" : "Local")
-                        .font(.caption2)
-                        .fontWeight(.semibold)
+                        .font(.system(size: 11, weight: .bold, design: .rounded))
                 }
-                .foregroundColor(.blue.opacity(0.85))
-                .padding(.horizontal, 6)
-                .padding(.vertical, 2)
+                .foregroundColor(Color.blue.opacity(0.9))
+                .padding(.horizontal, 7)
+                .padding(.vertical, 3)
                 .background(Color.blue.opacity(0.12))
                 .cornerRadius(6)
             }
 
-            Text(viewModel.isPrivacyMode ? "$ ••••••••" : "$\(formatCurrency(summary.totalValue))")
-                .font(.system(size: 38, weight: .heavy, design: .rounded))
+            Text(viewModel.isPrivacyMode ? "$ ••••••••" : "$\(formatCurrency(displayValue))")
+                .font(AppTheme.Fonts.heroBalance)
                 .foregroundColor(.primary)
+                .monospacedDigit()
 
             HStack(spacing: 8) {
                 HStack(spacing: 4) {
-                    Image(systemName: isGain ? "arrow.up.right" : "arrow.down.right")
-                        .font(.caption)
-                    Text(viewModel.isPrivacyMode ? "$ ••••" : "\(isGain ? "+" : "")$\(formatCurrency(abs(summary.unrealizedReturn)))")
-                        .font(.system(.subheadline, design: .rounded, weight: .semibold))
-                    Text(viewModel.isPrivacyMode ? "(••••%)" : "(\(String(format: "%.2f", summary.unrealizedReturnPercent))%)")
-                        .font(.caption)
+                    Image(systemName: isScrubGain ? "arrow.up.right" : "arrow.down.right")
+                        .font(.system(size: 10, weight: .bold))
+                    Text(viewModel.isPrivacyMode ? "$ ••••" : "\(isScrubGain ? "+" : "")$\(formatCurrency(abs(deltaFromStart)))")
+                        .font(.system(.subheadline, design: .rounded, weight: .bold))
+                        .monospacedDigit()
+                    Text(viewModel.isPrivacyMode ? "(••••%)" : "(\(String(format: "%.2f", deltaPercent))%)")
+                        .font(.system(.caption, design: .rounded, weight: .semibold))
+                        .monospacedDigit()
                 }
-                .foregroundColor(isGain ? .green : .red)
+                .foregroundColor(isScrubGain ? AppTheme.Colors.gain : AppTheme.Colors.loss)
                 .padding(.horizontal, 8)
                 .padding(.vertical, 4)
-                .background((isGain ? Color.green : Color.red).opacity(0.15))
+                .background(isScrubGain ? AppTheme.Colors.gainBadge : AppTheme.Colors.lossBadge)
                 .cornerRadius(8)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 8)
+                        .stroke((isScrubGain ? AppTheme.Colors.gain : AppTheme.Colors.loss).opacity(0.2), lineWidth: 0.5)
+                )
 
-                Text("unrealized return")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
+                if let scrub = scrubbedPoint {
+                    Text(formatDate(scrub.timestamp))
+                        .font(.system(size: 12, weight: .medium, design: .rounded))
+                        .foregroundColor(AppTheme.Colors.secondaryText)
+                } else {
+                    Text("Total Return")
+                        .font(.system(size: 12, weight: .medium, design: .rounded))
+                        .foregroundColor(AppTheme.Colors.secondaryText)
+                }
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(20)
-        .background(Color(UIColor.secondarySystemGroupedBackground))
+        .background(AppTheme.Colors.cardSurface)
         .cornerRadius(20)
-        .shadow(color: Color.black.opacity(0.04), radius: 8, x: 0, y: 3)
+        .overlay(
+            RoundedRectangle(cornerRadius: 20)
+                .stroke(AppTheme.Colors.cardBorder, lineWidth: 1)
+        )
     }
 
     // MARK: - Action Buttons
@@ -201,30 +225,36 @@ public struct PortfolioView: View {
             Button {
                 showDepositSheet = true
             } label: {
-                HStack {
+                HStack(spacing: 6) {
                     Image(systemName: "plus.circle.fill")
+                        .font(.system(size: 15, weight: .bold))
                     Text("Deposit Money")
-                        .fontWeight(.semibold)
+                        .font(.system(.subheadline, design: .rounded, weight: .bold))
                 }
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 14)
-                .background(Color.green)
-                .foregroundColor(.white)
+                .background(AppTheme.Colors.gain)
+                .foregroundColor(.black)
                 .cornerRadius(14)
             }
 
             if let mover = topMover {
                 NavigationLink(value: mover) {
-                    HStack {
+                    HStack(spacing: 6) {
                         Image(systemName: "chart.line.uptrend.xyaxis")
+                            .font(.system(size: 15, weight: .bold))
                         Text("Top Mover")
-                            .fontWeight(.semibold)
+                            .font(.system(.subheadline, design: .rounded, weight: .bold))
                     }
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 14)
-                    .background(Color(UIColor.tertiarySystemGroupedBackground))
-                    .foregroundColor(.primary)
+                    .background(AppTheme.Colors.elevatedSurface)
+                    .foregroundColor(.white)
                     .cornerRadius(14)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 14)
+                            .stroke(AppTheme.Colors.cardBorder, lineWidth: 1)
+                    )
                 }
             }
         }
@@ -260,25 +290,30 @@ public struct PortfolioView: View {
         VStack(alignment: .leading, spacing: 8) {
             HStack {
                 Text("Portfolio Performance")
-                    .font(.caption)
-                    .fontWeight(.bold)
-                    .foregroundColor(.secondary)
+                    .font(.system(size: 11, weight: .bold, design: .rounded))
+                    .foregroundColor(AppTheme.Colors.secondaryText)
                     .textCase(.uppercase)
+                    .tracking(0.8)
                 Spacer()
                 Text("\(viewModel.portfolioSnapshots.count) snapshots")
                     .font(.caption2)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(AppTheme.Colors.secondaryText)
             }
 
             InteractiveChartView(
                 points: viewModel.portfolioSnapshots,
-                isPositive: viewModel.summary.unrealizedReturn >= 0
+                isPositive: viewModel.summary.unrealizedReturn >= 0,
+                externalSelectedPoint: $scrubbedPoint
             )
-            .frame(height: 120)
+            .frame(height: 130)
         }
         .padding(16)
-        .background(Color(UIColor.secondarySystemGroupedBackground))
+        .background(AppTheme.Colors.cardSurface)
         .cornerRadius(16)
+        .overlay(
+            RoundedRectangle(cornerRadius: 16)
+                .stroke(AppTheme.Colors.cardBorder, lineWidth: 1)
+        )
     }
 
     // MARK: - Asset Allocation Section
@@ -290,7 +325,7 @@ public struct PortfolioView: View {
                 Spacer()
                 Text("100% Capital")
                     .font(.caption)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(AppTheme.Colors.secondaryText)
             }
 
             // Segmented Progress Bar
@@ -328,8 +363,12 @@ public struct PortfolioView: View {
             }
         }
         .padding(16)
-        .background(Color(UIColor.secondarySystemGroupedBackground))
+        .background(AppTheme.Colors.cardSurface)
         .cornerRadius(16)
+        .overlay(
+            RoundedRectangle(cornerRadius: 16)
+                .stroke(AppTheme.Colors.cardBorder, lineWidth: 1)
+        )
     }
 
     private func allocationLegendItem(slice: PortfolioViewModel.AssetSlice) -> some View {
@@ -410,8 +449,12 @@ public struct PortfolioView: View {
                 }
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 36)
-                .background(Color(UIColor.secondarySystemGroupedBackground))
+                .background(AppTheme.Colors.cardSurface)
                 .cornerRadius(16)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 16)
+                        .stroke(AppTheme.Colors.cardBorder, lineWidth: 1)
+                )
             } else {
                 VStack(spacing: 0) {
                     ForEach(viewModel.positions) { position in
@@ -423,6 +466,7 @@ public struct PortfolioView: View {
 
                             if position.id != viewModel.positions.last?.id {
                                 Divider()
+                                    .background(AppTheme.Colors.cardBorder)
                                     .padding(.leading, 8)
                             }
                         }
@@ -430,10 +474,20 @@ public struct PortfolioView: View {
                 }
                 .padding(.horizontal, 16)
                 .padding(.vertical, 8)
-                .background(Color(UIColor.secondarySystemGroupedBackground))
+                .background(AppTheme.Colors.cardSurface)
                 .cornerRadius(16)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 16)
+                        .stroke(AppTheme.Colors.cardBorder, lineWidth: 1)
+                )
             }
         }
+    }
+
+    private func formatDate(_ date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "MMM d, h:mm a"
+        return formatter.string(from: date)
     }
 
     private func formatCurrency(_ value: Double) -> String {
@@ -442,31 +496,5 @@ public struct PortfolioView: View {
         formatter.minimumFractionDigits = 2
         formatter.maximumFractionDigits = 2
         return formatter.string(from: NSNumber(value: value)) ?? String(format: "%.2f", value)
-    }
-}
-
-private extension Color {
-    init(hex: String) {
-        let hex = hex.trimmingCharacters(in: CharacterSet.alphanumerics.inverted)
-        var int: UInt64 = 0
-        Scanner(string: hex).scanHexInt64(&int)
-        let a, r, g, b: UInt64
-        switch hex.count {
-        case 3: // RGB (12-bit)
-            (a, r, g, b) = (255, (int >> 8) * 17, (int >> 4 & 0xF) * 17, (int & 0xF) * 17)
-        case 6: // RGB (24-bit)
-            (a, r, g, b) = (255, int >> 16, int >> 8 & 0xFF, int & 0xFF)
-        case 8: // ARGB (32-bit)
-            (a, r, g, b) = (int >> 24, int >> 16 & 0xFF, int >> 8 & 0xFF, int & 0xFF)
-        default:
-            (a, r, g, b) = (255, 0, 0, 0)
-        }
-        self.init(
-            .sRGB,
-            red: Double(r) / 255,
-            green: Double(g) / 255,
-            blue: Double(b) / 255,
-            opacity: Double(a) / 255
-        )
     }
 }

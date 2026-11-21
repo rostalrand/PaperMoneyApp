@@ -16,22 +16,32 @@ public struct StatBoxView: View {
     public var body: some View {
         VStack(alignment: .leading, spacing: 4) {
             Text(title)
-                .font(.caption)
-                .foregroundColor(.secondary)
+                .font(.system(size: 11, weight: .semibold, design: .rounded))
+                .foregroundColor(AppTheme.Colors.secondaryText)
+                .textCase(.uppercase)
+                .tracking(0.5)
+
             Text(value)
-                .font(.system(.subheadline, design: .rounded, weight: .semibold))
+                .font(.system(.subheadline, design: .rounded, weight: .bold))
                 .foregroundColor(.primary)
+                .monospacedDigit()
+
             if let sub = subtitle {
                 Text(sub)
-                    .font(.caption2)
+                    .font(.system(size: 11, weight: .medium, design: .rounded))
                     .foregroundColor(
-                        isPositive == nil ? .secondary : (isPositive! ? .green : .red)
+                        isPositive == nil ? AppTheme.Colors.secondaryText : (isPositive! ? AppTheme.Colors.gain : AppTheme.Colors.loss)
                     )
+                    .monospacedDigit()
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(12)
-        .background(Color(UIColor.secondarySystemGroupedBackground))
-        .cornerRadius(12)
+        .background(AppTheme.Colors.cardSurface)
+        .cornerRadius(14)
+        .overlay(
+            RoundedRectangle(cornerRadius: 14)
+                .stroke(AppTheme.Colors.cardBorder, lineWidth: 1)
+        )
     }
 }

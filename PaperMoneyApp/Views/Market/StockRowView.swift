@@ -30,26 +30,33 @@ public struct StockRowView: View {
             // Price & Change
             VStack(alignment: .trailing, spacing: 3) {
                 Text("$\(String(format: "%.2f", stock.currentPrice))")
-                    .font(.system(.subheadline, design: .rounded, weight: .semibold))
+                    .font(.system(.subheadline, design: .rounded, weight: .bold))
+                    .monospacedDigit()
 
                 Button {
-                    metricMode = (metricMode + 1) % 3
+                    withAnimation(.spring(response: 0.25, dampingFraction: 0.7)) {
+                        metricMode = (metricMode + 1) % 3
+                    }
                     HapticsService.shared.selection()
                 } label: {
                     HStack(spacing: 3) {
                         if metricMode != 2 {
                             Image(systemName: stock.isPositive ? "arrow.up.right" : "arrow.down.right")
-                                .font(.caption2)
+                                .font(.system(size: 9, weight: .bold))
                         }
                         Text(metricLabel)
-                            .font(.caption2)
-                            .fontWeight(.semibold)
+                            .font(.system(size: 11, weight: .bold, design: .rounded))
+                            .monospacedDigit()
                     }
-                    .padding(.horizontal, 6)
-                    .padding(.vertical, 2)
-                    .background((stock.isPositive ? Color.green : Color.red).opacity(0.15))
-                    .foregroundColor(stock.isPositive ? .green : .red)
-                    .cornerRadius(6)
+                    .padding(.horizontal, 7)
+                    .padding(.vertical, 3)
+                    .background(stock.isPositive ? AppTheme.Colors.gainBadge : AppTheme.Colors.lossBadge)
+                    .foregroundColor(stock.isPositive ? AppTheme.Colors.gain : AppTheme.Colors.loss)
+                    .cornerRadius(8)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 8)
+                            .stroke((stock.isPositive ? AppTheme.Colors.gain : AppTheme.Colors.loss).opacity(0.2), lineWidth: 0.5)
+                    )
                 }
                 .buttonStyle(.plain)
             }
