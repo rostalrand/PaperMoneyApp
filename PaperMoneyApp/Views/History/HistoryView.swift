@@ -487,14 +487,6 @@ public struct HistoryView: View {
         }
         .padding(.vertical, 4)
     }
-                            .cornerRadius(6)
-                    }
-                    .buttonStyle(.plain)
-                }
-            }
-        }
-        .padding(.vertical, 4)
-    }
 
     private func orderIcon(for order: LimitOrder) -> String {
         switch order.kind {
