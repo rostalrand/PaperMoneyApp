@@ -1,18 +1,15 @@
-name: iOS CI & Automated Tests
+name: iOS CI & Build Simulator App
 
 on:
   push:
     branches: [ main, develop ]
   pull_request:
     branches: [ main, develop ]
-
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  workflow_dispatch:
 
 jobs:
-  test:
-    name: Build & Run Unit Tests
+  build-and-test:
+    name: Build, Test & Package Simulator App
     runs-on: macos-14
 
     steps:
@@ -21,11 +18,6 @@ jobs:
 
       - name: Select Xcode Version
         run: sudo xcode-select -switch /Applications/Xcode_15.4.app
-
-      - name: Verify Xcode Version & Available Simulators
-        run: |
-          xcodebuild -version
-          xcrun simctl list devices available
 
       - name: Execute XCTest Suite
         run: |
@@ -36,16 +28,28 @@ jobs:
             -configuration Debug \
             CODE_SIGN_IDENTITY="" \
             CODE_SIGNING_REQUIRED=NO \
-            CODE_SIGNING_ALLOWED=NO \
-            | xcbeautify || true
+            CODE_SIGNING_ALLOWED=NO
 
-      - name: Build Release Archive Check
+      - name: Build Native iOS Simulator App Bundle
         run: |
-          xcodebuild clean build \
+          xcodebuild build \
             -project PaperMoneyApp.xcodeproj \
             -scheme PaperMoneyApp \
-            -destination 'generic/platform=iOS' \
-            -configuration Release \
+            -destination 'platform=iOS Simulator,name=iPhone 15 Pro,OS=latest' \
+            -configuration Debug \
+            -derivedDataPath derived_data \
             CODE_SIGN_IDENTITY="" \
             CODE_SIGNING_REQUIRED=NO \
             CODE_SIGNING_ALLOWED=NO
+
+      - name: Compress Simulator App for Cloud Streaming
+        run: |
+          cd derived_data/Build/Products/Debug-iphonesimulator
+          zip -r PaperMoneyApp-Simulator.app.zip PaperMoneyApp.app
+
+      - name: Upload Simulator App Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: PaperMoneyApp-Simulator-Build
+          path: derived_data/Build/Products/Debug-iphonesimulator/PaperMoneyApp-Simulator.app.zip
+          retention-days: 14
