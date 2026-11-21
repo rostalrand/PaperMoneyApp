@@ -83,6 +83,7 @@ public struct StockDetailView: View {
                         Image(systemName: "bell.badge")
                             .foregroundColor(AppTheme.Colors.subheadline)
                     }
+                    .accessibilityLabel("Set price alert for \(liveStock.symbol)")
 
                     Button {
                         viewModel.toggleWatchlist(symbol: liveStock.symbol)
@@ -90,6 +91,7 @@ public struct StockDetailView: View {
                         Image(systemName: isWatchlisted ? "star.fill" : "star")
                             .foregroundColor(isWatchlisted ? Color(hex: "#FFD700") : AppTheme.Colors.muted)
                     }
+                    .accessibilityLabel(isWatchlisted ? "Remove \(liveStock.symbol) from watchlist" : "Add \(liveStock.symbol) to watchlist")
                 }
             }
         }

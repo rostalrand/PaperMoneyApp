@@ -436,7 +436,7 @@ final class PortfolioTests: XCTestCase {
         XCTAssertEqual(terms.title, "Terms of Service")
     }
 
-    func testCancelLimitOrder() {
+    func testCancelPendingBuyLimitOrder() {
         let result = viewModel.placeLimitOrder(symbol: "NVDA", type: .buy, shares: 5, targetPrice: 100.0)
         XCTAssertTrue(caseIsSuccess(result))
         guard let order = viewModel.pendingOrders.first else {
@@ -450,7 +450,7 @@ final class PortfolioTests: XCTestCase {
         XCTAssertEqual(updated?.status, .cancelled)
     }
 
-    func testRemovePriceAlert() {
+    func testRemoveActivePriceAlert() {
         viewModel.addPriceAlert(symbol: "TSLA", targetPrice: 250.0, condition: .above)
         XCTAssertEqual(viewModel.priceAlerts.count, 1)
         guard let alert = viewModel.priceAlerts.first else {
@@ -507,6 +507,73 @@ final class PortfolioTests: XCTestCase {
 
         viewModel.toggleWatchlist(symbol: "AAPL")
         XCTAssertFalse(viewModel.isWatchlisted(symbol: "AAPL"))
+    }
+
+    func testAppThemeColorTokens() {
+        XCTAssertNotNil(AppTheme.Colors.obsidianCanvas)
+        XCTAssertNotNil(AppTheme.Colors.canvas)
+        XCTAssertNotNil(AppTheme.Colors.cardSurface)
+        XCTAssertNotNil(AppTheme.Colors.elevatedSurface)
+        XCTAssertNotNil(AppTheme.Colors.cardHighlight)
+        XCTAssertNotNil(AppTheme.Colors.cardBorder)
+        XCTAssertNotNil(AppTheme.Colors.gain)
+        XCTAssertNotNil(AppTheme.Colors.loss)
+        XCTAssertNotNil(AppTheme.Colors.gainBadge)
+        XCTAssertNotNil(AppTheme.Colors.lossBadge)
+        XCTAssertNotNil(AppTheme.Colors.headline)
+        XCTAssertNotNil(AppTheme.Colors.subheadline)
+        XCTAssertNotNil(AppTheme.Colors.secondaryText)
+        XCTAssertNotNil(AppTheme.Colors.tertiaryText)
+        XCTAssertNotNil(AppTheme.Colors.muted)
+    }
+
+    func testOfflineMarketSynthesisValidity() {
+        let service = MarketDataService.shared
+        guard let stock = viewModel.getStock(for: "AAPL") else {
+            XCTFail("AAPL not found")
+            return
+        }
+
+        for tf in ChartTimeframe.allCases {
+            let points = service.generateChartData(for: stock, timeframe: tf)
+            XCTAssertFalse(points.isEmpty)
+            for p in points {
+                XCTAssertFalse(p.price.isNaN, "Price must not be NaN")
+                XCTAssertFalse(p.price.isInfinite, "Price must not be Infinite")
+                XCTAssertGreaterThan(p.price, 0.0, "Price must be strictly positive")
+            }
+        }
+
+        let tickedStocks = service.simulatePriceTicks(for: viewModel.stocks)
+        XCTAssertEqual(tickedStocks.count, viewModel.stocks.count)
+        for s in tickedStocks {
+            XCTAssertGreaterThan(s.currentPrice, 0.0)
+            XCTAssertFalse(s.currentPrice.isNaN)
+        }
+    }
+
+    func testTradeErrorDescriptions() {
+        let insufficientFunds = TradeError.insufficientFunds(required: 1500.0, available: 500.0)
+        XCTAssertTrue(insufficientFunds.errorDescription?.contains("Required: $1500.00") ?? false)
+        XCTAssertTrue(insufficientFunds.errorDescription?.contains("Available: $500.00") ?? false)
+
+        let insufficientShares = TradeError.insufficientShares(owned: 2.0, requested: 10.0)
+        XCTAssertTrue(insufficientShares.errorDescription?.contains("Cannot sell 10.00 shares") ?? false)
+        XCTAssertTrue(insufficientShares.errorDescription?.contains("only own 2.00 shares") ?? false)
+
+        let invalid = TradeError.invalidAmount
+        XCTAssertTrue(invalid.errorDescription?.contains("valid amount") ?? false)
+    }
+
+    func testHapticsToggleRespectsUserPreference() {
+        UserDefaults.standard.set(false, forKey: "haptics_enabled")
+        HapticsService.shared.impact(style: .heavy)
+        HapticsService.shared.notification(type: .error)
+        HapticsService.shared.selection()
+
+        UserDefaults.standard.set(true, forKey: "haptics_enabled")
+        HapticsService.shared.impact(style: .light)
+        HapticsService.shared.selection()
     }
 
     private func caseIsSuccess<T, E>(_ result: Result<T, E>) -> Bool {

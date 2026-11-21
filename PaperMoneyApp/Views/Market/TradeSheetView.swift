@@ -426,6 +426,7 @@ public struct TradeSheetView: View {
                                 .cornerRadius(12)
                         }
                         .buttonStyle(.plain)
+                        .accessibilityLabel(key == "⌫" ? "Backspace" : (key == "." ? "Decimal point" : "Digit \(key)"))
                     }
                 }
             }

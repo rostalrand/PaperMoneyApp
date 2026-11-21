@@ -156,6 +156,7 @@ public struct PortfolioView: View {
                         .clipShape(Circle())
                 }
                 .buttonStyle(.plain)
+                .accessibilityLabel(viewModel.isPrivacyMode ? "Show portfolio balance" : "Hide portfolio balance")
 
                 HStack(spacing: 4) {
                     Image(systemName: "icloud.fill")

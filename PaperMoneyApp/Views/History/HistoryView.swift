@@ -225,6 +225,7 @@ public struct HistoryView: View {
                         Image(systemName: "square.and.arrow.up")
                             .font(.system(size: 15, weight: .semibold))
                     }
+                    .accessibilityLabel("Export Statement CSV")
                 }
             }
         }
