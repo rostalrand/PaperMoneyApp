@@ -1,0 +1,542 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		AA0100012CE0000100000001 /* PaperMoneyApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0200012CE0000100000001 /* PaperMoneyApp.swift */; };
+		AA0100022CE0000100000001 /* Stock.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0200022CE0000100000001 /* Stock.swift */; };
+		AA0100032CE0000100000001 /* Position.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0200032CE0000100000001 /* Position.swift */; };
+		AA0100042CE0000100000001 /* Transaction.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0200042CE0000100000001 /* Transaction.swift */; };
+		AA0100052CE0000100000001 /* PortfolioSummary.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0200052CE0000100000001 /* PortfolioSummary.swift */; };
+		AA0100062CE0000100000001 /* PortfolioViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0200062CE0000100000001 /* PortfolioViewModel.swift */; };
+		AA0100072CE0000100000001 /* MarketDataService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0200072CE0000100000001 /* MarketDataService.swift */; };
+		AA0100082CE0000100000001 /* StorageService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0200082CE0000100000001 /* StorageService.swift */; };
+		AA0100092CE0000100000001 /* AdService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0200252CE0000100000001 /* AdService.swift */; };
+		AA0100102CE0000100000001 /* MainTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0200092CE0000100000001 /* MainTabView.swift */; };
+		AA0100112CE0000100000001 /* PortfolioView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0200102CE0000100000001 /* PortfolioView.swift */; };
+		AA0100122CE0000100000001 /* DepositSheetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0200112CE0000100000001 /* DepositSheetView.swift */; };
+		AA0100132CE0000100000001 /* PositionRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0200122CE0000100000001 /* PositionRowView.swift */; };
+		AA0100142CE0000100000001 /* MarketView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0200132CE0000100000001 /* MarketView.swift */; };
+		AA0100152CE0000100000001 /* StockRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0200142CE0000100000001 /* StockRowView.swift */; };
+		AA0100162CE0000100000001 /* StockDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0200152CE0000100000001 /* StockDetailView.swift */; };
+		AA0100172CE0000100000001 /* TradeSheetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0200162CE0000100000001 /* TradeSheetView.swift */; };
+		AA0100182CE0000100000001 /* HistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0200172CE0000100000001 /* HistoryView.swift */; };
+		AA0100192CE0000100000001 /* SparklineView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0200182CE0000100000001 /* SparklineView.swift */; };
+		AA0100202CE0000100000001 /* InteractiveChartView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0200192CE0000100000001 /* InteractiveChartView.swift */; };
+		AA0100212CE0000100000001 /* StatBoxView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0200202CE0000100000001 /* StatBoxView.swift */; };
+		AA0100222CE0000100000001 /* ToastBanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0200212CE0000100000001 /* ToastBanner.swift */; };
+		AA0100232CE0000100000001 /* AppOpenAdOverlayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0200262CE0000100000001 /* AppOpenAdOverlayView.swift */; };
+		AA0100262CE0000100000001 /* LimitOrder.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0200282CE0000100000001 /* LimitOrder.swift */; };
+		AA0100272CE0000100000001 /* HapticsService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0200292CE0000100000001 /* HapticsService.swift */; };
+		AA0100302CE0000100000001 /* NewsArticle.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0200302CE0000100000001 /* NewsArticle.swift */; };
+		AA0100312CE0000100000001 /* PriceAlert.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0200312CE0000100000001 /* PriceAlert.swift */; };
+		AA0100322CE0000100000001 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0200322CE0000100000001 /* SettingsView.swift */; };
+		AA0100332CE0000100000001 /* LegalSheetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0200332CE0000100000001 /* LegalSheetView.swift */; };
+		AA0100242CE0000100000001 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AA0200222CE0000100000001 /* Assets.xcassets */; };
+		AA0100252CE0000100000001 /* PortfolioTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0200232CE0000100000001 /* PortfolioTests.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		AA0000012CE0000100000001 /* PaperMoneyApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PaperMoneyApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		AA0000022CE0000100000001 /* PaperMoneyAppTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = PaperMoneyAppTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		AA0200012CE0000100000001 /* PaperMoneyApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaperMoneyApp.swift; sourceTree = "<group>"; };
+		AA0200022CE0000100000001 /* Stock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Stock.swift; sourceTree = "<group>"; };
+		AA0200032CE0000100000001 /* Position.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Position.swift; sourceTree = "<group>"; };
+		AA0200042CE0000100000001 /* Transaction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Transaction.swift; sourceTree = "<group>"; };
+		AA0200052CE0000100000001 /* PortfolioSummary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PortfolioSummary.swift; sourceTree = "<group>"; };
+		AA0200062CE0000100000001 /* PortfolioViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PortfolioViewModel.swift; sourceTree = "<group>"; };
+		AA0200072CE0000100000001 /* MarketDataService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarketDataService.swift; sourceTree = "<group>"; };
+		AA0200082CE0000100000001 /* StorageService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StorageService.swift; sourceTree = "<group>"; };
+		AA0200252CE0000100000001 /* AdService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdService.swift; sourceTree = "<group>"; };
+		AA0200092CE0000100000001 /* MainTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainTabView.swift; sourceTree = "<group>"; };
+		AA0200102CE0000100000001 /* PortfolioView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PortfolioView.swift; sourceTree = "<group>"; };
+		AA0200112CE0000100000001 /* DepositSheetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DepositSheetView.swift; sourceTree = "<group>"; };
+		AA0200122CE0000100000001 /* PositionRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PositionRowView.swift; sourceTree = "<group>"; };
+		AA0200132CE0000100000001 /* MarketView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarketView.swift; sourceTree = "<group>"; };
+		AA0200142CE0000100000001 /* StockRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StockRowView.swift; sourceTree = "<group>"; };
+		AA0200152CE0000100000001 /* StockDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StockDetailView.swift; sourceTree = "<group>"; };
+		AA0200162CE0000100000001 /* TradeSheetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TradeSheetView.swift; sourceTree = "<group>"; };
+		AA0200172CE0000100000001 /* HistoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryView.swift; sourceTree = "<group>"; };
+		AA0200182CE0000100000001 /* SparklineView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SparklineView.swift; sourceTree = "<group>"; };
+		AA0200192CE0000100000001 /* InteractiveChartView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InteractiveChartView.swift; sourceTree = "<group>"; };
+		AA0200202CE0000100000001 /* StatBoxView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatBoxView.swift; sourceTree = "<group>"; };
+		AA0200212CE0000100000001 /* ToastBanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToastBanner.swift; sourceTree = "<group>"; };
+		AA0200262CE0000100000001 /* AppOpenAdOverlayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppOpenAdOverlayView.swift; sourceTree = "<group>"; };
+		AA0200282CE0000100000001 /* LimitOrder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LimitOrder.swift; sourceTree = "<group>"; };
+		AA0200292CE0000100000001 /* HapticsService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HapticsService.swift; sourceTree = "<group>"; };
+		AA0200302CE0000100000001 /* NewsArticle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewsArticle.swift; sourceTree = "<group>"; };
+		AA0200312CE0000100000001 /* PriceAlert.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PriceAlert.swift; sourceTree = "<group>"; };
+		AA0200322CE0000100000001 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		AA0200332CE0000100000001 /* LegalSheetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LegalSheetView.swift; sourceTree = "<group>"; };
+		AA0200222CE0000100000001 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		AA0200232CE0000100000001 /* PortfolioTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PortfolioTests.swift; sourceTree = "<group>"; };
+		AA0200242CE0000100000001 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		AA0200272CE0000100000001 /* PaperMoneyApp.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = PaperMoneyApp.entitlements; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		AA0300012CE0000100000001 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		AA0300022CE0000100000001 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		AA0400012CE0000100000001 = {
+			isa = PBXGroup;
+			children = (
+				AA0400022CE0000100000001 /* PaperMoneyApp */,
+				AA0400092CE0000100000001 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		AA0400022CE0000100000001 /* PaperMoneyApp */ = {
+			isa = PBXGroup;
+			children = (
+				AA0400032CE0000100000001 /* App */,
+				AA0400042CE0000100000001 /* Models */,
+				AA0400052CE0000100000001 /* ViewModels */,
+				AA0400062CE0000100000001 /* Services */,
+				AA0400072CE0000100000001 /* Views */,
+				AA0400082CE0000100000001 /* Resources */,
+				AA0400152CE0000100000001 /* Tests */,
+			);
+			path = PaperMoneyApp;
+			sourceTree = "<group>";
+		};
+		AA0400032CE0000100000001 /* App */ = {
+			isa = PBXGroup;
+			children = (
+				AA0200012CE0000100000001 /* PaperMoneyApp.swift */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+		AA0400042CE0000100000001 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				AA0200022CE0000100000001 /* Stock.swift */,
+				AA0200032CE0000100000001 /* Position.swift */,
+				AA0200042CE0000100000001 /* Transaction.swift */,
+				AA0200052CE0000100000001 /* PortfolioSummary.swift */,
+				AA0200282CE0000100000001 /* LimitOrder.swift */,
+				AA0200302CE0000100000001 /* NewsArticle.swift */,
+				AA0200312CE0000100000001 /* PriceAlert.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		AA0400052CE0000100000001 /* ViewModels */ = {
+			isa = PBXGroup;
+			children = (
+				AA0200062CE0000100000001 /* PortfolioViewModel.swift */,
+			);
+			path = ViewModels;
+			sourceTree = "<group>";
+		};
+		AA0400062CE0000100000001 /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				AA0200072CE0000100000001 /* MarketDataService.swift */,
+				AA0200082CE0000100000001 /* StorageService.swift */,
+				AA0200252CE0000100000001 /* AdService.swift */,
+				AA0200292CE0000100000001 /* HapticsService.swift */,
+			);
+			path = Services;
+			sourceTree = "<group>";
+		};
+		AA0400072CE0000100000001 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				AA0200092CE0000100000001 /* MainTabView.swift */,
+				AA0400102CE0000100000001 /* Portfolio */,
+				AA0400112CE0000100000001 /* Market */,
+				AA0400122CE0000100000001 /* History */,
+				AA0400132CE0000100000001 /* Components */,
+				AA0400142CE0000100000001 /* Settings */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		AA0400102CE0000100000001 /* Portfolio */ = {
+			isa = PBXGroup;
+			children = (
+				AA0200102CE0000100000001 /* PortfolioView.swift */,
+				AA0200112CE0000100000001 /* DepositSheetView.swift */,
+				AA0200122CE0000100000001 /* PositionRowView.swift */,
+			);
+			path = Portfolio;
+			sourceTree = "<group>";
+		};
+		AA0400112CE0000100000001 /* Market */ = {
+			isa = PBXGroup;
+			children = (
+				AA0200132CE0000100000001 /* MarketView.swift */,
+				AA0200142CE0000100000001 /* StockRowView.swift */,
+				AA0200152CE0000100000001 /* StockDetailView.swift */,
+				AA0200162CE0000100000001 /* TradeSheetView.swift */,
+			);
+			path = Market;
+			sourceTree = "<group>";
+		};
+		AA0400122CE0000100000001 /* History */ = {
+			isa = PBXGroup;
+			children = (
+				AA0200172CE0000100000001 /* HistoryView.swift */,
+			);
+			path = History;
+			sourceTree = "<group>";
+		};
+		AA0400132CE0000100000001 /* Components */ = {
+			isa = PBXGroup;
+			children = (
+				AA0200182CE0000100000001 /* SparklineView.swift */,
+				AA0200192CE0000100000001 /* InteractiveChartView.swift */,
+				AA0200202CE0000100000001 /* StatBoxView.swift */,
+				AA0200212CE0000100000001 /* ToastBanner.swift */,
+				AA0200262CE0000100000001 /* AppOpenAdOverlayView.swift */,
+			);
+			path = Components;
+			sourceTree = "<group>";
+		};
+		AA0400142CE0000100000001 /* Settings */ = {
+			isa = PBXGroup;
+			children = (
+				AA0200322CE0000100000001 /* SettingsView.swift */,
+				AA0200332CE0000100000001 /* LegalSheetView.swift */,
+			);
+			path = Settings;
+			sourceTree = "<group>";
+		};
+		AA0400082CE0000100000001 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				AA0200222CE0000100000001 /* Assets.xcassets */,
+				AA0200242CE0000100000001 /* Info.plist */,
+				AA0200272CE0000100000001 /* PaperMoneyApp.entitlements */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+		AA0400152CE0000100000001 /* Tests */ = {
+			isa = PBXGroup;
+			children = (
+				AA0200232CE0000100000001 /* PortfolioTests.swift */,
+			);
+			path = Tests;
+			sourceTree = "<group>";
+		};
+		AA0400092CE0000100000001 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				AA0000012CE0000100000001 /* PaperMoneyApp.app */,
+				AA0000022CE0000100000001 /* PaperMoneyAppTests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		AA0500012CE0000100000001 /* PaperMoneyApp */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = AA0600012CE0000100000001 /* Build configuration list for PBXNativeTarget "PaperMoneyApp" */;
+			buildPhases = (
+				AA0700012CE0000100000001 /* Sources */,
+				AA0300012CE0000100000001 /* Frameworks */,
+				AA0800012CE0000100000001 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = PaperMoneyApp;
+			productName = PaperMoneyApp;
+			productReference = AA0000012CE0000100000001 /* PaperMoneyApp.app */;
+			productType = "com.apple.product-type.application";
+		};
+		AA0500022CE0000100000001 /* PaperMoneyAppTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = AA0600022CE0000100000001 /* Build configuration list for PBXNativeTarget "PaperMoneyAppTests" */;
+			buildPhases = (
+				AA0700022CE0000100000001 /* Sources */,
+				AA0300022CE0000100000001 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = PaperMoneyAppTests;
+			productName = PaperMoneyAppTests;
+			productReference = AA0000022CE0000100000001 /* PaperMoneyAppTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		AA0900012CE0000100000001 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1500;
+				LastUpgradeCheck = 1500;
+				TargetAttributes = {
+					AA0500012CE0000100000001 = {
+						CreatedOnToolsVersion = 15.0;
+					};
+					AA0500022CE0000100000001 = {
+						CreatedOnToolsVersion = 15.0;
+						TestTargetID = AA0500012CE0000100000001;
+					};
+				};
+			};
+			buildConfigurationList = AA0600032CE0000100000001 /* Build configuration list for PBXProject "PaperMoneyApp" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = AA0400012CE0000100000001;
+			productRefGroup = AA0400092CE0000100000001 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				AA0500012CE0000100000001 /* PaperMoneyApp */,
+				AA0500022CE0000100000001 /* PaperMoneyAppTests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		AA0800012CE0000100000001 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				AA0100242CE0000100000001 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		AA0700012CE0000100000001 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				AA0100012CE0000100000001 /* PaperMoneyApp.swift in Sources */,
+				AA0100022CE0000100000001 /* Stock.swift in Sources */,
+				AA0100032CE0000100000001 /* Position.swift in Sources */,
+				AA0100042CE0000100000001 /* Transaction.swift in Sources */,
+				AA0100052CE0000100000001 /* PortfolioSummary.swift in Sources */,
+				AA0100062CE0000100000001 /* PortfolioViewModel.swift in Sources */,
+				AA0100072CE0000100000001 /* MarketDataService.swift in Sources */,
+				AA0100082CE0000100000001 /* StorageService.swift in Sources */,
+				AA0100092CE0000100000001 /* AdService.swift in Sources */,
+				AA0100102CE0000100000001 /* MainTabView.swift in Sources */,
+				AA0100112CE0000100000001 /* PortfolioView.swift in Sources */,
+				AA0100122CE0000100000001 /* DepositSheetView.swift in Sources */,
+				AA0100132CE0000100000001 /* PositionRowView.swift in Sources */,
+				AA0100142CE0000100000001 /* MarketView.swift in Sources */,
+				AA0100152CE0000100000001 /* StockRowView.swift in Sources */,
+				AA0100162CE0000100000001 /* StockDetailView.swift in Sources */,
+				AA0100172CE0000100000001 /* TradeSheetView.swift in Sources */,
+				AA0100182CE0000100000001 /* HistoryView.swift in Sources */,
+				AA0100192CE0000100000001 /* SparklineView.swift in Sources */,
+				AA0100202CE0000100000001 /* InteractiveChartView.swift in Sources */,
+				AA0100212CE0000100000001 /* StatBoxView.swift in Sources */,
+				AA0100222CE0000100000001 /* ToastBanner.swift in Sources */,
+				AA0100232CE0000100000001 /* AppOpenAdOverlayView.swift in Sources */,
+				AA0100262CE0000100000001 /* LimitOrder.swift in Sources */,
+				AA0100272CE0000100000001 /* HapticsService.swift in Sources */,
+				AA0100302CE0000100000001 /* NewsArticle.swift in Sources */,
+				AA0100312CE0000100000001 /* PriceAlert.swift in Sources */,
+				AA0100322CE0000100000001 /* SettingsView.swift in Sources */,
+				AA0100332CE0000100000001 /* LegalSheetView.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		AA0700022CE0000100000001 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				AA0100252CE0000100000001 /* PortfolioTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		AA1000012CE0000100000001 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = PaperMoneyApp/Resources/PaperMoneyApp.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = PaperMoneyApp/Resources/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.antigravity.papermoney;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+		AA1000022CE0000100000001 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = PaperMoneyApp/Resources/PaperMoneyApp.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = PaperMoneyApp/Resources/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.antigravity.papermoney;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Release;
+		};
+		AA1000032CE0000100000001 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MARKETING_VERSION = 1.0.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.antigravity.papermoney.tests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/PaperMoneyApp.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/PaperMoneyApp";
+			};
+			name = Debug;
+		};
+		AA1000042CE0000100000001 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MARKETING_VERSION = 1.0.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.antigravity.papermoney.tests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/PaperMoneyApp.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/PaperMoneyApp";
+			};
+			name = Release;
+		};
+		AA1000052CE0000100000001 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		AA1000062CE0000100000001 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		AA0600012CE0000100000001 /* Build configuration list for PBXNativeTarget "PaperMoneyApp" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				AA1000012CE0000100000001 /* Debug */,
+				AA1000022CE0000100000001 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		AA0600022CE0000100000001 /* Build configuration list for PBXNativeTarget "PaperMoneyAppTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				AA1000032CE0000100000001 /* Debug */,
+				AA1000042CE0000100000001 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		AA0600032CE0000100000001 /* Build configuration list for PBXProject "PaperMoneyApp" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				AA1000052CE0000100000001 /* Debug */,
+				AA1000062CE0000100000001 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+
+	};
+	rootObject = AA0900012CE0000100000001 /* Project object */;
+}

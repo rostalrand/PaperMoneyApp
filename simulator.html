@@ -1,0 +1,2300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Paper Money - iOS Stock Trading App</title>
+  <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@400;500;600;700;800&family=SF+Pro+Text:wght@400;500;600&display=swap');
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Segoe UI", Roboto, sans-serif;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+    .tap-effect:active {
+      transform: scale(0.97);
+      opacity: 0.85;
+      transition: transform 0.1s ease;
+    }
+    .green-glow {
+      box-shadow: 0 4px 20px -2px rgba(52, 199, 89, 0.35);
+    }
+  </style>
+</head>
+<body class="bg-[#0b0e14] text-white flex items-center justify-center min-h-screen p-4 antialiased">
+
+  <!-- iPhone Outer Chassis Container -->
+  <div class="relative w-full max-w-[390px] h-[844px] bg-[#000000] rounded-[52px] shadow-2xl border-[10px] border-[#2c2d30] overflow-hidden flex flex-col justify-between">
+    
+    <!-- Dynamic Island / Status Bar -->
+    <div class="relative z-40 pt-3 px-7 flex justify-between items-center text-xs text-white/90 font-medium select-none">
+      <span id="statusBarTime">9:41</span>
+      
+      <!-- Dynamic Island Capsule -->
+      <div class="absolute left-1/2 -translate-x-1/2 top-3 w-28 h-7 bg-black rounded-full flex items-center justify-between px-2.5 border border-white/5">
+        <div class="w-2.5 h-2.5 rounded-full bg-[#1a1a1a]"></div>
+        <div class="flex items-center gap-1.5">
+          <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+          <span class="text-[9px] font-mono text-emerald-400 font-bold">PAPER</span>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-1.5">
+        <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24"><path d="M12 3c-4.97 0-9 4.03-9 9 0 2.12.74 4.07 1.97 5.61L4.35 18.23c-.39.39-.39 1.02 0 1.41.39.39 1.02.39 1.41 0l.62-.62C7.93 20.26 9.88 21 12 21c4.97 0 9-4.03 9-9s-4.03-9-9-9zm0 16c-3.87 0-7-3.13-7-7s3.13-7 7-7 7 3.13 7 7-3.13 7-7 7z"/></svg>
+        <span class="text-[10px] font-semibold">5G</span>
+        <!-- Battery Icon -->
+        <div class="w-5 h-2.5 border border-white/80 rounded-sm p-0.5 flex items-center">
+          <div class="w-full h-full bg-white rounded-2xs"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Floating In-App Toast Banner -->
+    <div id="toastBanner" class="absolute top-14 left-4 right-4 z-50 bg-[#1e2025]/95 backdrop-blur-md border border-white/10 rounded-2xl p-3 shadow-2xl transition-all duration-300 transform -translate-y-20 opacity-0 pointer-events-none flex items-center gap-3">
+      <div id="toastIconContainer" class="w-8 h-8 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold text-sm">
+        ✓
+      </div>
+      <div class="flex-1 text-xs">
+        <div id="toastTitle" class="font-bold text-white">Order Filled</div>
+        <div id="toastMessage" class="text-gray-400 text-[11px] truncate">10.00 AAPL bought @ $228.45</div>
+      </div>
+    </div>
+
+    <!-- ==================== GOOGLE ADMOB APP OPEN LAUNCH AD (1-TIME ONLY) ==================== -->
+    <div id="adMobLaunchOverlay" class="absolute inset-0 bg-[#0d0f14] z-50 flex flex-col justify-between p-6">
+      <!-- Ad Top Bar -->
+      <div class="flex justify-between items-center pt-8">
+        <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500/20 text-amber-400 border border-amber-500/30">
+          <span>Ad</span>
+          <span>·</span>
+          <span>Google AdMob</span>
+        </span>
+        <button id="adSkipButton" onclick="dismissLaunchAd()" class="px-3 py-1 rounded-full bg-white/10 text-xs font-semibold text-gray-300 hover:bg-white/20 hover:text-white transition">
+          <span id="adSkipText">Skip in 3s</span>
+        </button>
+      </div>
+
+      <!-- Ad Creative Body -->
+      <div class="space-y-4 my-auto text-center px-4">
+        <div class="w-20 h-20 mx-auto rounded-3xl bg-gradient-to-tr from-emerald-600 via-teal-500 to-blue-500 p-0.5 shadow-xl flex items-center justify-center">
+          <div class="w-full h-full bg-[#12141a] rounded-[22px] flex items-center justify-center text-3xl">
+            📈
+          </div>
+        </div>
+
+        <div>
+          <span class="text-xs font-mono text-emerald-400 font-bold uppercase tracking-wider">Sponsored Partner</span>
+          <h2 class="text-xl font-extrabold text-white mt-1">AlphaTrade Pro Terminal</h2>
+          <p class="text-xs text-gray-400 mt-1 max-w-[260px] mx-auto">
+            Zero-commission algorithmic execution & institutional market depth for options & equities.
+          </p>
+        </div>
+
+        <div class="pt-2">
+          <button onclick="dismissLaunchAd()" class="tap-effect w-full py-3 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-400 text-black font-extrabold text-xs shadow-lg shadow-emerald-500/20">
+            Open in App Store ↗
+          </button>
+        </div>
+      </div>
+
+      <!-- Ad Bottom Footer (Clean Commitment Note) -->
+      <div class="text-center pb-4">
+        <p class="text-[10px] text-gray-500">
+          1-Time Launch Sponsor Overlay. No banners or trade interrupts inside.
+        </p>
+      </div>
+    </div>
+
+    <!-- MAIN SCROLLABLE APP BODY -->
+    <div id="appScrollContainer" class="flex-1 overflow-y-auto no-scrollbar px-4 pt-3 pb-24 space-y-4">
+
+      <!-- ==================== TAB 1: PORTFOLIO ==================== -->
+      <div id="viewPortfolio" class="space-y-4">
+        
+        <!-- App Title Header -->
+        <div class="flex justify-between items-center pt-1">
+          <div>
+            <h1 class="text-xl font-extrabold tracking-tight text-white">Paper Portfolio</h1>
+            <p class="text-xs text-gray-400">Zero-login · Apple iCloud Synced</p>
+          </div>
+          <div class="flex items-center gap-1.5">
+            <button onclick="openSettingsModal()" title="App Settings & Diagnostics" class="tap-effect p-2 rounded-full bg-white/5 hover:bg-white/10 text-gray-300 border border-white/10">
+              <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>
+            </button>
+            <button onclick="openDepositModal()" title="Deposit Cash" class="tap-effect p-2 rounded-full bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/20">
+              <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Onboarding Welcome Card (Dismissible) -->
+        <div id="simWelcomeCard" class="p-3.5 rounded-2xl bg-[#181a1f] border border-amber-400/30 flex items-start gap-3">
+          <div class="w-8 h-8 rounded-full bg-amber-400/20 text-amber-400 flex items-center justify-center font-bold text-sm shrink-0">
+            ✨
+          </div>
+          <div class="flex-1 text-xs space-y-1">
+            <div class="flex justify-between items-center">
+              <span class="font-bold text-white">Welcome to Paper Money!</span>
+              <button onclick="dismissSimWelcome()" class="text-gray-400 hover:text-white text-xs">✕</button>
+            </div>
+            <p class="text-[11px] text-gray-400 leading-tight">
+              You've been granted $100,000 in virtual paper capital to practice trading US stocks without risk. All state is automatically mirrored to Apple iCloud.
+            </p>
+            <div class="flex items-center gap-2 pt-1 text-[11px]">
+              <button onclick="openDepositModal()" class="text-emerald-400 font-bold hover:underline">Add Funds</button>
+              <span class="text-gray-600">·</span>
+              <button onclick="switchTab('market')" class="text-blue-400 font-bold hover:underline">Start Trading</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Hero Balance Card -->
+        <div class="p-5 rounded-3xl bg-gradient-to-br from-[#1c1d22] to-[#121316] border border-white/10 shadow-lg">
+          <div class="flex justify-between items-center">
+            <span class="text-xs text-gray-400 font-medium tracking-wide">TOTAL VALUE</span>
+            
+            <div class="flex items-center gap-2">
+              <!-- Privacy Eye Toggle Button -->
+              <button onclick="togglePrivacyMode()" title="Toggle Privacy Mode" class="p-1 rounded-full bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white transition">
+                <span id="privacyEyeIcon" class="text-xs">👁️</span>
+              </button>
+
+              <!-- Frictionless iCloud Sync Badge -->
+              <button onclick="openSettingsModal()" title="View iCloud Sync Status" class="tap-effect inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-semibold bg-blue-500/15 text-blue-400 border border-blue-500/25 hover:bg-blue-500/25 transition">
+                <span>☁️</span>
+                <span>iCloud Synced</span>
+              </button>
+            </div>
+          </div>
+
+          <div id="heroTotalValue" class="text-3xl font-extrabold text-white mt-1 tracking-tight">$100,000.00</div>
+          
+          <div class="flex items-center gap-2 mt-2">
+            <span id="heroReturnPill" class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-bold bg-emerald-500/20 text-emerald-400">
+              <span id="heroReturnArrow">▲</span>
+              <span id="heroReturnValue">+$0.00 (0.00%)</span>
+            </span>
+            <span class="text-[11px] text-gray-500">unrealized return</span>
+          </div>
+
+          <!-- Divider & Stat Strip -->
+          <div class="grid grid-cols-3 gap-2 mt-4 pt-3 border-t border-white/5 text-center">
+            <div class="bg-black/30 p-2 rounded-xl">
+              <div class="text-[10px] text-gray-400 font-medium">Paper Cash</div>
+              <div id="heroCashBalance" class="text-xs font-bold text-white mt-0.5">$100,000.00</div>
+            </div>
+            <div class="bg-black/30 p-2 rounded-xl">
+              <div class="text-[10px] text-gray-400 font-medium">Stocks Held</div>
+              <div id="heroStockEquity" class="text-xs font-bold text-white mt-0.5">$0.00</div>
+            </div>
+            <div class="bg-black/30 p-2 rounded-xl">
+              <div class="text-[10px] text-gray-400 font-medium">Total Deposited</div>
+              <div id="heroTotalDeposited" class="text-xs font-bold text-gray-300 mt-0.5">$100,000.00</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="grid grid-cols-2 gap-3">
+          <button onclick="openDepositModal()" class="tap-effect py-3 px-4 rounded-2xl bg-emerald-500 hover:bg-emerald-400 text-black font-bold text-xs flex items-center justify-center gap-2 green-glow">
+            <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 14h-2v-4H7l5-5 5 5h-4v4z"/></svg>
+            Deposit Paper Cash
+          </button>
+          <button onclick="switchTab('market')" class="tap-effect py-3 px-4 rounded-2xl bg-[#1e2025] hover:bg-[#25282f] text-white font-bold text-xs flex items-center justify-center gap-2 border border-white/5">
+            <svg class="w-4 h-4 fill-current text-blue-400" viewBox="0 0 24 24"><path d="M3.5 18.49l6-6.01 4 4L22 6.92l-1.41-1.41-7.09 7.97-4-4L2 16.99z"/></svg>
+            Explore Market
+          </button>
+        </div>
+
+        <!-- Asset Allocation Bar -->
+        <div class="p-4 rounded-3xl bg-[#181a1f] border border-white/5 space-y-2.5">
+          <div class="flex justify-between items-center text-xs">
+            <span class="font-bold text-white">Asset Allocation</span>
+            <span class="text-gray-400 text-[11px]">100% Capital</span>
+          </div>
+          <div id="allocationBar" class="w-full h-2.5 bg-white/5 rounded-full flex overflow-hidden gap-0.5">
+            <!-- Injected dynamically -->
+          </div>
+          <div id="allocationLegend" class="flex flex-wrap gap-2 text-[10px]">
+            <!-- Injected dynamically -->
+          </div>
+        </div>
+
+        <!-- Holdings Section -->
+        <div class="space-y-2 pt-2">
+          <div class="flex justify-between items-center px-1">
+            <h2 class="text-sm font-bold text-white">Your Stock Holdings</h2>
+            <span id="holdingsCountBadge" class="text-[11px] font-semibold text-gray-400 bg-white/5 px-2 py-0.5 rounded-full">0 active</span>
+          </div>
+
+          <div id="holdingsListContainer" class="space-y-2">
+            <!-- Injected dynamically -->
+          </div>
+        </div>
+      </div>
+
+      <!-- ==================== TAB 2: MARKET ==================== -->
+      <div id="viewMarket" class="space-y-4 hidden">
+        <div>
+          <h1 class="text-xl font-extrabold text-white">Stock Market</h1>
+          <p class="text-xs text-gray-400 mt-0.5">Live quotes · Screener & simulated execution</p>
+          
+          <div class="relative mt-3">
+            <svg class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 fill-current" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+            <input id="marketSearchInput" oninput="renderMarketList()" type="text" placeholder="Search symbol or company..." class="w-full bg-[#16181d] border border-white/10 rounded-xl py-2.5 pl-9 pr-3 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-emerald-500">
+          </div>
+        </div>
+
+        <!-- Screener / Category Pills -->
+        <div class="flex gap-2 overflow-x-auto no-scrollbar py-1">
+          <button onclick="setCategoryFilter('all', this)" class="category-pill tap-effect active px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500 text-black">All</button>
+          <button onclick="setCategoryFilter('gainers', this)" class="category-pill tap-effect px-3 py-1 rounded-full text-xs font-semibold bg-[#1a1c22] text-emerald-400 border border-emerald-500/20">Gainers 🟢</button>
+          <button onclick="setCategoryFilter('losers', this)" class="category-pill tap-effect px-3 py-1 rounded-full text-xs font-semibold bg-[#1a1c22] text-red-400 border border-red-500/20">Losers 🔴</button>
+          <button onclick="setCategoryFilter('watchlist', this)" class="category-pill tap-effect px-3 py-1 rounded-full text-xs font-semibold bg-[#1a1c22] text-amber-400 border border-amber-500/20">Watchlist ⭐</button>
+          <button onclick="setCategoryFilter('Tech', this)" class="category-pill tap-effect px-3 py-1 rounded-full text-xs font-semibold bg-[#1a1c22] text-gray-300 border border-white/5">Tech</button>
+          <button onclick="setCategoryFilter('ETF', this)" class="category-pill tap-effect px-3 py-1 rounded-full text-xs font-semibold bg-[#1a1c22] text-gray-300 border border-white/5">ETFs</button>
+        </div>
+
+        <!-- Stocks List -->
+        <div id="marketListContainer" class="space-y-2">
+          <!-- Injected dynamically -->
+        </div>
+      </div>
+
+      <!-- ==================== TAB 3: ACTIVITY HISTORY ==================== -->
+      <div id="viewHistory" class="space-y-4 hidden">
+        <div class="flex justify-between items-center">
+          <div>
+            <h1 class="text-xl font-extrabold text-white">Activity History</h1>
+            <p class="text-xs text-gray-400 mt-0.5">Paper deposits, trades & alerts</p>
+          </div>
+          <!-- Export CSV Statement Button -->
+          <button onclick="openExportModal()" title="Export CSV Statement" class="tap-effect p-2 rounded-xl bg-white/5 hover:bg-white/10 text-gray-300 hover:text-white border border-white/5 flex items-center gap-1.5 text-xs font-semibold">
+            <svg class="w-4 h-4 fill-current text-emerald-400" viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
+            <span>CSV</span>
+          </button>
+        </div>
+
+        <!-- Trader Performance Card -->
+        <div id="traderAnalyticsCard" class="p-3.5 rounded-2xl bg-gradient-to-r from-[#181a1f] to-[#121316] border border-white/10 grid grid-cols-3 gap-2 text-center">
+          <div>
+            <div class="text-[9px] text-gray-400 font-bold uppercase tracking-wider">Realized P&L</div>
+            <div id="statRealizedPnL" class="text-xs font-extrabold text-emerald-400 mt-0.5">+$0.00</div>
+          </div>
+          <div>
+            <div class="text-[9px] text-gray-400 font-bold uppercase tracking-wider">Win Rate</div>
+            <div id="statWinRate" class="text-xs font-extrabold text-white mt-0.5">0.0%</div>
+          </div>
+          <div>
+            <div class="text-[9px] text-gray-400 font-bold uppercase tracking-wider">Trades</div>
+            <div id="statTotalTrades" class="text-xs font-extrabold text-gray-300 mt-0.5">1</div>
+          </div>
+        </div>
+
+        <!-- History Filter Bar -->
+        <div class="flex gap-1.5 bg-[#15171b] p-1 rounded-xl border border-white/5 text-xs overflow-x-auto no-scrollbar">
+          <button onclick="setHistoryFilter('all', this)" class="history-pill flex-1 py-1.5 px-2 rounded-lg font-bold text-center bg-white/10 text-white whitespace-nowrap">All</button>
+          <button onclick="setHistoryFilter('Orders', this)" class="history-pill flex-1 py-1.5 px-2 rounded-lg font-bold text-center text-gray-400 whitespace-nowrap">Orders</button>
+          <button onclick="setHistoryFilter('Alerts', this)" class="history-pill flex-1 py-1.5 px-2 rounded-lg font-bold text-center text-gray-400 whitespace-nowrap">Alerts</button>
+          <button onclick="setHistoryFilter('Deposit', this)" class="history-pill flex-1 py-1.5 px-2 rounded-lg font-bold text-center text-gray-400 whitespace-nowrap">Deposits</button>
+          <button onclick="setHistoryFilter('Buy', this)" class="history-pill flex-1 py-1.5 px-2 rounded-lg font-bold text-center text-gray-400 whitespace-nowrap">Buys</button>
+          <button onclick="setHistoryFilter('Sell', this)" class="history-pill flex-1 py-1.5 px-2 rounded-lg font-bold text-center text-gray-400 whitespace-nowrap">Sells</button>
+        </div>
+
+        <div id="historyListContainer" class="space-y-2">
+          <!-- Injected dynamically -->
+        </div>
+      </div>
+
+    </div>
+
+    <!-- NATIVE-STYLE BOTTOM TAB BAR -->
+    <div class="relative z-30 bg-[#121316]/95 backdrop-blur-xl border-t border-white/10 px-6 py-2 flex justify-between items-center text-gray-500">
+      
+      <!-- Tab 1: Portfolio -->
+      <button onclick="switchTab('portfolio')" id="tabPortfolio" class="flex flex-col items-center gap-1 text-emerald-400 tap-effect">
+        <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M21 18v1c0 1.1-.9 2-2 2H5c-1.11 0-2-.9-2-2V5c0-1.1.89-2 2-2h14c1.1 0 2 .9 2 2v1h-9c-1.11 0-2 .9-2 2v8c0 1.1.89 2 2 2h9zm-9-2h10V8H12v8zm4-2.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/></svg>
+        <span class="text-[10px] font-bold">Portfolio</span>
+      </button>
+
+      <!-- Tab 2: Market -->
+      <button onclick="switchTab('market')" id="tabMarket" class="flex flex-col items-center gap-1 hover:text-gray-300 tap-effect">
+        <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6z"/></svg>
+        <span class="text-[10px] font-medium">Market</span>
+      </button>
+
+      <!-- Tab 3: History -->
+      <button onclick="switchTab('history')" id="tabHistory" class="flex flex-col items-center gap-1 hover:text-gray-300 tap-effect">
+        <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M13 3c-4.97 0-9 4.03-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42C8.27 19.99 10.51 21 13 21c4.97 0 9-4.03 9-9s-4.03-9-9-9zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z"/></svg>
+        <span class="text-[10px] font-medium">History</span>
+      </button>
+    </div>
+
+    <!-- Home Indicator Bar -->
+    <div class="absolute bottom-1 left-1/2 -translate-x-1/2 w-32 h-1 bg-white/40 rounded-full z-40"></div>
+
+    <!-- ==================== MODAL 1: CUSTOM DEPOSIT ==================== -->
+    <div id="modalDeposit" class="absolute inset-0 bg-black/85 backdrop-blur-md z-40 flex flex-col justify-end transition-opacity duration-300 hidden">
+      <div class="bg-[#181a1f] rounded-t-[36px] p-6 border-t border-white/10 space-y-4 max-h-[90%] overflow-y-auto no-scrollbar">
+        
+        <div class="flex justify-between items-center">
+          <h3 class="text-lg font-bold text-white">Deposit Paper Money</h3>
+          <button onclick="closeDepositModal()" class="w-7 h-7 rounded-full bg-white/10 flex items-center justify-center text-gray-400 hover:text-white">✕</button>
+        </div>
+
+        <p class="text-xs text-gray-400">
+          Add any custom dollar amount to your paper trading account. Zero real money involved.
+        </p>
+
+        <!-- Custom Input -->
+        <div class="space-y-1">
+          <label class="text-xs font-semibold text-gray-300">Custom Amount ($)</label>
+          <div class="relative">
+            <span class="absolute left-4 top-1/2 -translate-y-1/2 text-lg font-bold text-gray-400">$</span>
+            <input id="depositAmountInput" type="number" step="1000" placeholder="50,000" class="w-full bg-[#101114] border border-white/10 rounded-2xl py-3 pl-9 pr-4 text-xl font-extrabold text-white focus:outline-none focus:border-emerald-500">
+          </div>
+        </div>
+
+        <!-- Preset Chips -->
+        <div class="grid grid-cols-4 gap-2 pt-1">
+          <button onclick="setDepositAmount(10000)" class="tap-effect py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/5 text-xs font-bold text-gray-200">+$10k</button>
+          <button onclick="setDepositAmount(25000)" class="tap-effect py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/5 text-xs font-bold text-gray-200">+$25k</button>
+          <button onclick="setDepositAmount(100000)" class="tap-effect py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/5 text-xs font-bold text-emerald-400">+$100k</button>
+          <button onclick="setDepositAmount(1000000)" class="tap-effect py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/5 text-xs font-bold text-purple-400">+$1M</button>
+        </div>
+
+        <!-- Note Input -->
+        <div class="space-y-1">
+          <label class="text-xs font-semibold text-gray-300">Note (Optional)</label>
+          <input id="depositNoteInput" type="text" placeholder="e.g. Monthly Practice Grant" class="w-full bg-[#101114] border border-white/10 rounded-xl py-2 px-3 text-xs text-white focus:outline-none focus:border-emerald-500">
+        </div>
+
+        <!-- Deposit Action Button -->
+        <button onclick="executeDeposit()" class="tap-effect w-full py-3.5 rounded-2xl bg-emerald-500 hover:bg-emerald-400 text-black font-extrabold text-sm green-glow">
+          Confirm Paper Deposit
+        </button>
+
+        <div class="pt-2 border-t border-white/5 text-center">
+          <button onclick="resetAccount()" class="text-xs text-red-400 hover:underline">
+            Reset Account to Initial $100,000
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== MODAL 2: STOCK DETAIL VIEW ==================== -->
+    <div id="modalStockDetail" class="absolute inset-0 bg-[#121316] z-40 flex flex-col justify-between overflow-y-auto no-scrollbar hidden">
+      <div class="p-6 space-y-4">
+        
+        <!-- Detail Header -->
+        <div class="flex justify-between items-center pt-6">
+          <div class="flex items-center gap-2">
+            <h2 id="detailSymbol" class="text-xl font-extrabold text-white">AAPL</h2>
+            <span id="detailSector" class="text-[10px] px-2 py-0.5 rounded-full bg-white/5 text-gray-400 border border-white/5">Technology</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <!-- Price Alert Button -->
+            <button onclick="openPriceAlertModal()" class="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-gray-300 hover:text-white" title="Set Price Alert">🔔</button>
+            <button onclick="closeStockDetailModal()" class="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-gray-400 hover:text-white">✕</button>
+          </div>
+        </div>
+
+        <div>
+          <div id="detailName" class="text-xs text-gray-400">Apple Inc.</div>
+          <div class="flex items-baseline gap-2 mt-1">
+            <span id="detailPrice" class="text-3xl font-extrabold text-white">$228.45</span>
+            <span id="detailChangeBadge" class="text-xs font-bold text-emerald-400">+$3.35 (+1.49%)</span>
+          </div>
+        </div>
+
+        <!-- Canvas Chart -->
+        <div class="bg-black/40 p-3 rounded-2xl border border-white/5 space-y-2.5">
+          <!-- Chart Style Toggle & OHLC Readout -->
+          <div class="flex justify-between items-center text-xs">
+            <div class="flex items-center gap-1 bg-[#16171b] p-0.5 rounded-lg border border-white/5">
+              <button id="chartModeLineBtn" onclick="setChartMode('line')" class="px-2.5 py-1 rounded-md text-[10px] font-bold bg-white/15 text-white">Line</button>
+              <button id="chartModeCandleBtn" onclick="setChartMode('candle')" class="px-2.5 py-1 rounded-md text-[10px] font-bold text-gray-400 hover:text-white">Candles 🕯️</button>
+            </div>
+            <div id="chartOhlcReadout" class="text-[9px] font-mono text-gray-400 flex items-center gap-1.5">
+              <span>O: <b class="text-white">$225.10</b></span>
+              <span>H: <b class="text-white">$229.40</b></span>
+              <span>L: <b class="text-white">$224.80</b></span>
+              <span>C: <b class="text-white">$228.45</b></span>
+            </div>
+          </div>
+
+          <canvas id="stockCanvasChart" class="w-full h-36"></canvas>
+          <div class="flex justify-between text-[10px] text-gray-500 font-mono">
+            <button onclick="setTimeframe('1D')" class="chart-tf active text-emerald-400 font-bold">1D</button>
+            <button onclick="setTimeframe('1W')" class="chart-tf text-gray-400">1W</button>
+            <button onclick="setTimeframe('1M')" class="chart-tf text-gray-400">1M</button>
+            <button onclick="setTimeframe('1Y')" class="chart-tf text-gray-400">1Y</button>
+            <button onclick="setTimeframe('ALL')" class="chart-tf text-gray-400">ALL</button>
+          </div>
+        </div>
+
+        <!-- Stats Grid -->
+        <div class="grid grid-cols-2 gap-2 text-xs">
+          <div class="bg-black/30 p-2.5 rounded-xl border border-white/5">
+            <div class="text-[10px] text-gray-400">Market Cap</div>
+            <div id="detailMarketCap" class="font-bold text-white mt-0.5">$3.48T</div>
+          </div>
+          <div class="bg-black/30 p-2.5 rounded-xl border border-white/5">
+            <div class="text-[10px] text-gray-400">P/E Ratio</div>
+            <div id="detailPeRatio" class="font-bold text-white mt-0.5">34.2</div>
+          </div>
+          <div class="bg-black/30 p-2.5 rounded-xl border border-white/5">
+            <div class="text-[10px] text-gray-400">52W Range</div>
+            <div id="detailRange" class="font-bold text-white mt-0.5">$164 - $237</div>
+          </div>
+          <div class="bg-black/30 p-2.5 rounded-xl border border-white/5">
+            <div class="text-[10px] text-gray-400">Avg Volume</div>
+            <div id="detailVolume" class="font-bold text-white mt-0.5">48.2M</div>
+          </div>
+        </div>
+
+        <!-- Market News & Analysis Section -->
+        <div class="p-3.5 bg-black/30 rounded-2xl border border-white/5 space-y-2">
+          <div class="flex justify-between items-center text-xs">
+            <span class="font-bold text-white">Market News & Headlines</span>
+            <span class="text-[9px] px-1.5 py-0.5 rounded bg-emerald-500/15 text-emerald-400 font-bold">LIVE FEED</span>
+          </div>
+          <div id="detailNewsContainer" class="space-y-2 text-xs">
+            <!-- News injected dynamically -->
+          </div>
+        </div>
+
+        <!-- User Holding Info in this Stock -->
+        <div id="detailHoldingStrip" class="p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl flex justify-between items-center text-xs hidden">
+          <div>
+            <div class="text-[10px] text-emerald-400/80 font-bold">YOU OWN</div>
+            <div id="detailHoldingShares" class="font-extrabold text-white">0 shares</div>
+          </div>
+          <div class="text-right">
+            <div class="text-[10px] text-emerald-400/80 font-bold">EQUITY VALUE</div>
+            <div id="detailHoldingValue" class="font-extrabold text-emerald-400">$0.00</div>
+          </div>
+        </div>
+
+        <!-- Trade Buttons -->
+        <div class="grid grid-cols-2 gap-3 pt-1">
+          <button onclick="openTradeModal('Sell')" id="btnDetailSell" class="tap-effect py-3 rounded-2xl bg-red-500/20 hover:bg-red-500/30 text-red-400 border border-red-500/30 font-bold text-xs">
+            Sell
+          </button>
+          <button onclick="openTradeModal('Buy')" id="btnDetailBuy" class="tap-effect py-3 rounded-2xl bg-emerald-500 hover:bg-emerald-400 text-black font-extrabold text-xs green-glow">
+            Buy Now
+          </button>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ==================== MODAL 3: TRADE EXECUTION ==================== -->
+    <div id="modalTrade" class="absolute inset-0 bg-black/90 backdrop-blur-md z-40 flex flex-col justify-end transition-opacity duration-300 hidden">
+      <div class="bg-[#181a1f] rounded-t-[36px] p-6 border-t border-white/10 space-y-4 max-h-[92%] overflow-y-auto no-scrollbar">
+        
+        <div class="flex justify-between items-center">
+          <h3 id="tradeModalTitle" class="text-lg font-bold text-white">Buy AAPL</h3>
+          <button onclick="closeTradeModal()" class="w-7 h-7 rounded-full bg-white/10 flex items-center justify-center text-gray-400 hover:text-white">✕</button>
+        </div>
+
+        <!-- Segmented Buy / Sell -->
+        <div class="grid grid-cols-2 gap-1 p-1 bg-black/50 rounded-xl border border-white/5 text-center text-xs">
+          <button onclick="setTradeType('Buy')" id="tradeTypeBuyBtn" class="py-2 rounded-lg font-bold bg-emerald-500 text-black">Buy</button>
+          <button onclick="setTradeType('Sell')" id="tradeTypeSellBtn" class="py-2 rounded-lg font-bold text-gray-400">Sell</button>
+        </div>
+
+        <!-- Order Style: Market, Limit, Stop Loss, Take Profit -->
+        <div class="grid grid-cols-4 gap-1 p-1 bg-black/40 rounded-xl border border-white/5 text-center text-[10px]">
+          <button onclick="setOrderKind('Market')" id="orderKindMarketBtn" class="py-1.5 rounded-lg font-bold bg-white/10 text-white">Market</button>
+          <button onclick="setOrderKind('Limit')" id="orderKindLimitBtn" class="py-1.5 rounded-lg font-bold text-gray-400">Limit</button>
+          <button onclick="setOrderKind('Stop Loss')" id="orderKindStopLossBtn" class="py-1.5 rounded-lg font-bold text-gray-400">Stop Loss</button>
+          <button onclick="setOrderKind('Take Profit')" id="orderKindTakeProfitBtn" class="py-1.5 rounded-lg font-bold text-gray-400">Take Profit</button>
+        </div>
+
+        <!-- Target Price Input (Hidden for Market) -->
+        <div id="limitPriceGroup" class="space-y-1 hidden">
+          <label id="targetPriceLabel" class="text-xs font-semibold text-gray-300">Target Limit Price ($)</label>
+          <div class="relative">
+            <input id="tradeLimitPriceInput" oninput="updateTradeCalculations()" type="number" step="any" placeholder="0.00" class="w-full bg-[#101114] border border-white/10 rounded-2xl py-2 px-3 text-sm font-bold text-white focus:outline-none focus:border-amber-400">
+          </div>
+          <div id="targetPriceGuidance" class="text-[10px] text-gray-400">Executes automatically when live price crosses this target.</div>
+        </div>
+
+        <!-- Available Resources -->
+        <div class="p-3 bg-black/30 rounded-2xl flex justify-between items-center text-xs border border-white/5">
+          <span id="tradeAvailableLabel" class="text-gray-400">Available Paper Cash:</span>
+          <span id="tradeAvailableValue" class="font-bold text-emerald-400">$100,000.00</span>
+        </div>
+
+        <!-- Shares Input -->
+        <div class="space-y-1">
+          <div class="flex justify-between items-center text-xs">
+            <span class="font-semibold text-gray-300">Quantity (Shares)</span>
+            <button onclick="setMaxShares()" class="text-emerald-400 font-bold hover:underline">MAX</button>
+          </div>
+          <input id="tradeSharesInput" oninput="updateTradeCalculations()" type="number" step="any" placeholder="10" class="w-full bg-[#101114] border border-white/10 rounded-2xl py-2.5 px-4 text-lg font-bold text-white focus:outline-none focus:border-emerald-500">
+
+          <!-- Quick Percentage Position Sizing Chips -->
+          <div class="grid grid-cols-4 gap-1.5 pt-1">
+            <button onclick="setPercentShares(0.25)" class="tap-effect py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-xs font-bold text-gray-300">25%</button>
+            <button onclick="setPercentShares(0.50)" class="tap-effect py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-xs font-bold text-gray-300">50%</button>
+            <button onclick="setPercentShares(0.75)" class="tap-effect py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-xs font-bold text-gray-300">75%</button>
+            <button onclick="setMaxShares()" class="tap-effect py-1.5 rounded-lg bg-emerald-500/20 text-emerald-400 text-xs font-bold">MAX</button>
+          </div>
+        </div>
+
+        <!-- Trade Execution Calculation -->
+        <div class="p-3 bg-black/40 rounded-2xl space-y-1.5 text-xs border border-white/5">
+          <div class="flex justify-between text-gray-400">
+            <span>Execution Price:</span>
+            <span id="tradeSummaryPrice" class="font-semibold text-white">$228.45</span>
+          </div>
+          <div class="flex justify-between text-gray-400">
+            <span>Estimated Total:</span>
+            <span id="tradeSummaryTotal" class="font-bold text-emerald-400">$0.00</span>
+          </div>
+          <div class="flex justify-between text-gray-400">
+            <span>Cash After Trade:</span>
+            <span id="tradeSummaryCashRemaining" class="text-gray-300">$100,000.00</span>
+          </div>
+        </div>
+
+        <!-- Execute Action -->
+        <button onclick="executeTrade()" id="btnExecuteTrade" class="tap-effect w-full py-3.5 rounded-2xl bg-emerald-500 hover:bg-emerald-400 text-black font-black text-sm green-glow">
+          Confirm Paper Buy
+        </button>
+
+      </div>
+    </div>
+
+    <!-- ==================== MODAL 4: CSV STATEMENT EXPORT ==================== -->
+    <div id="modalExport" class="absolute inset-0 bg-black/90 backdrop-blur-md z-40 flex flex-col justify-end transition-opacity duration-300 hidden">
+      <div class="bg-[#181a1f] rounded-t-[36px] p-6 border-t border-white/10 space-y-4 max-h-[92%] overflow-y-auto no-scrollbar">
+        
+        <div class="flex justify-between items-center">
+          <div class="flex items-center gap-2">
+            <span class="text-lg font-bold text-white">Export Statement</span>
+            <span class="text-[9px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 font-bold">CSV</span>
+          </div>
+          <button onclick="closeExportModal()" class="w-7 h-7 rounded-full bg-white/10 flex items-center justify-center text-gray-400 hover:text-white">✕</button>
+        </div>
+
+        <p class="text-xs text-gray-400">
+          Raw transaction log formatted in standard RFC-4180 CSV for analysis in Excel, Numbers, or Google Sheets.
+        </p>
+
+        <div class="relative">
+          <textarea id="csvExportArea" readonly class="w-full h-44 bg-black/60 border border-white/10 rounded-2xl p-3 font-mono text-[10px] text-gray-300 focus:outline-none resize-none"></textarea>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3 pt-1">
+          <button onclick="copyCSVToClipboard()" class="tap-effect py-3 rounded-2xl bg-emerald-500 text-black font-bold text-xs green-glow flex items-center justify-center gap-1.5">
+            <span>📋</span>
+            <span>Copy CSV</span>
+          </button>
+          <button onclick="closeExportModal()" class="tap-effect py-3 rounded-2xl bg-white/10 text-white font-bold text-xs">
+            Done
+          </button>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ==================== MODAL 5: PRICE ALERT SETUP ==================== -->
+    <div id="modalPriceAlert" class="absolute inset-0 bg-black/90 backdrop-blur-md z-40 flex flex-col justify-end transition-opacity duration-300 hidden">
+      <div class="bg-[#181a1f] rounded-t-[36px] p-6 border-t border-white/10 space-y-4 max-h-[90%] overflow-y-auto no-scrollbar">
+        
+        <div class="flex justify-between items-center">
+          <div class="flex items-center gap-2">
+            <span class="text-lg font-bold text-white">Set Price Alert</span>
+            <span id="alertModalSymbol" class="text-xs px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-400 font-bold">AAPL</span>
+          </div>
+          <button onclick="closePriceAlertModal()" class="w-7 h-7 rounded-full bg-white/10 flex items-center justify-center text-gray-400 hover:text-white">✕</button>
+        </div>
+
+        <!-- Condition Toggle -->
+        <div class="grid grid-cols-2 gap-1 p-1 bg-black/40 rounded-xl border border-white/5 text-center text-xs">
+          <button onclick="setAlertCondition('above')" id="alertCondAboveBtn" class="py-2 rounded-lg font-bold bg-emerald-500 text-black">Rises Above 🟢</button>
+          <button onclick="setAlertCondition('below')" id="alertCondBelowBtn" class="py-2 rounded-lg font-bold text-gray-400">Drops Below 🔴</button>
+        </div>
+
+        <!-- Target Price Input -->
+        <div class="space-y-1">
+          <label class="text-xs font-semibold text-gray-300">Target Trigger Price ($)</label>
+          <div class="relative">
+            <span class="absolute left-4 top-1/2 -translate-y-1/2 text-lg font-bold text-gray-400">$</span>
+            <input id="alertTargetPriceInput" type="number" step="any" placeholder="230.00" class="w-full bg-[#101114] border border-white/10 rounded-2xl py-3 pl-9 pr-4 text-xl font-extrabold text-white focus:outline-none focus:border-emerald-500">
+          </div>
+          <div class="text-[10px] text-gray-400 flex justify-between pt-1">
+            <span>Current Market Price:</span>
+            <span id="alertModalCurPrice" class="font-bold text-white">$228.45</span>
+          </div>
+        </div>
+
+        <button onclick="savePriceAlert()" class="tap-effect w-full py-3.5 rounded-2xl bg-emerald-500 hover:bg-emerald-400 text-black font-extrabold text-sm green-glow">
+          Confirm Price Alert
+        </button>
+
+      </div>
+    </div>
+
+    <!-- ==================== MODAL 6: SETTINGS & ICLOUD DIAGNOSTICS ==================== -->
+    <div id="modalSettings" class="absolute inset-0 bg-black/90 backdrop-blur-md z-40 flex flex-col justify-end transition-opacity duration-300 hidden">
+      <div class="bg-[#181a1f] rounded-t-[36px] p-6 border-t border-white/10 space-y-4 max-h-[92%] overflow-y-auto no-scrollbar">
+        
+        <div class="flex justify-between items-center">
+          <div class="flex items-center gap-2">
+            <span class="text-lg font-bold text-white">Settings & Diagnostics</span>
+            <span class="text-xs px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-400 font-bold">iCloud KVS</span>
+          </div>
+          <button onclick="closeSettingsModal()" class="w-7 h-7 rounded-full bg-white/10 flex items-center justify-center text-gray-400 hover:text-white">✕</button>
+        </div>
+
+        <!-- iCloud Diagnostics Card -->
+        <div class="p-3.5 bg-black/40 rounded-2xl border border-white/10 space-y-2.5">
+          <div class="flex justify-between items-center">
+            <span class="text-xs font-bold text-white flex items-center gap-1.5">
+              <span>☁️</span>
+              <span>Apple iCloud KVS</span>
+            </span>
+            <span class="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 font-bold flex items-center gap-1">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+              <span>Connected</span>
+            </span>
+          </div>
+
+          <div class="grid grid-cols-2 gap-2 text-[11px] pt-1 border-t border-white/5">
+            <div>
+              <span class="text-gray-400">Container ID:</span>
+              <div class="font-mono text-gray-300 text-[10px] truncate">iCloud.com.papermoney.app</div>
+            </div>
+            <div>
+              <span class="text-gray-400">Last Synced:</span>
+              <div id="settingsLastSyncTime" class="font-mono text-emerald-400 text-[10px]">Just now</div>
+            </div>
+          </div>
+
+          <div class="text-[10px] text-gray-400 pt-1">
+            Zero-login architecture: your portfolio, trades, and limit orders automatically mirror across your Apple devices via <span class="font-mono text-gray-300">NSUbiquitousKeyValueStore</span>.
+          </div>
+
+          <button onclick="triggerForceSync()" class="tap-effect w-full py-2 rounded-xl bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 border border-blue-500/30 font-bold text-xs flex items-center justify-center gap-1.5">
+            <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24"><path d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46C19.54 15.03 20 13.57 20 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.97.7-2.8L5.24 7.74C4.46 8.97 4 10.43 4 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3z"/></svg>
+            <span>Force iCloud Sync Now</span>
+          </button>
+        </div>
+
+        <!-- Quick Capital Reset Section -->
+        <div class="p-3.5 bg-black/40 rounded-2xl border border-white/10 space-y-2.5">
+          <div class="text-xs font-bold text-white">Reset Starting Capital</div>
+          <p class="text-[11px] text-gray-400">Select starting paper balance to wipe all positions and start fresh:</p>
+          <div class="grid grid-cols-3 gap-1.5 text-xs">
+            <button onclick="resetWithCapital(10000)" class="tap-effect py-2 rounded-xl bg-white/5 hover:bg-emerald-500/20 hover:text-emerald-400 border border-white/5 font-bold text-white">$10,000</button>
+            <button onclick="resetWithCapital(25000)" class="tap-effect py-2 rounded-xl bg-white/5 hover:bg-emerald-500/20 hover:text-emerald-400 border border-white/5 font-bold text-white">$25,000</button>
+            <button onclick="resetWithCapital(50000)" class="tap-effect py-2 rounded-xl bg-white/5 hover:bg-emerald-500/20 hover:text-emerald-400 border border-white/5 font-bold text-white">$50,000</button>
+            <button onclick="resetWithCapital(100000)" class="tap-effect py-2 rounded-xl bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 font-extrabold">$100,000</button>
+            <button onclick="resetWithCapital(500000)" class="tap-effect py-2 rounded-xl bg-white/5 hover:bg-emerald-500/20 hover:text-emerald-400 border border-white/5 font-bold text-white">$500,000</button>
+            <button onclick="resetWithCapital(1000000)" class="tap-effect py-2 rounded-xl bg-white/5 hover:bg-amber-500/20 hover:text-amber-400 border border-white/5 font-bold text-white">$1,000,000</button>
+          </div>
+        </div>
+
+        <!-- Preferences Section -->
+        <div class="p-3.5 bg-black/40 rounded-2xl border border-white/10 space-y-3">
+          <div class="text-xs font-bold text-white">Preferences</div>
+          
+          <div class="flex justify-between items-center text-xs">
+            <div>
+              <div class="font-semibold text-white">Privacy Mode</div>
+              <div class="text-[10px] text-gray-400">Mask total balances and P&L</div>
+            </div>
+            <button onclick="togglePrivacyMode()" id="settingsPrivacyToggle" class="w-11 h-6 rounded-full bg-white/10 p-0.5 transition flex items-center">
+              <div id="settingsPrivacyKnob" class="w-5 h-5 rounded-full bg-white shadow transform translate-x-0 transition"></div>
+            </button>
+          </div>
+
+          <div class="flex justify-between items-center text-xs pt-2 border-t border-white/5">
+            <div>
+              <div class="font-semibold text-white">Haptic Feedback</div>
+              <div class="text-[10px] text-gray-400">Tactile buzz on trades and alerts</div>
+            </div>
+            <button onclick="toggleHapticsSetting()" id="settingsHapticToggle" class="w-11 h-6 rounded-full bg-emerald-500 p-0.5 transition flex items-center">
+              <div id="settingsHapticKnob" class="w-5 h-5 rounded-full bg-black shadow transform translate-x-5 transition"></div>
+            </button>
+          </div>
+
+          <div class="flex justify-between items-center text-xs pt-2 border-t border-white/5">
+            <div>
+              <div class="font-semibold text-white">Live Micro-Ticks</div>
+              <div class="text-[10px] text-gray-400">24/7 background price simulation</div>
+            </div>
+            <button onclick="toggleTicksSetting()" id="settingsTicksToggle" class="w-11 h-6 rounded-full bg-emerald-500 p-0.5 transition flex items-center">
+              <div id="settingsTicksKnob" class="w-5 h-5 rounded-full bg-black shadow transform translate-x-5 transition"></div>
+            </button>
+          </div>
+        </div>
+
+        <!-- Legal & Compliance Section -->
+        <div class="p-3.5 bg-black/40 rounded-2xl border border-white/10 space-y-2">
+          <div class="text-xs font-bold text-white">Legal & App Store Compliance</div>
+          
+          <button onclick="showLegalModal('disclaimer')" class="w-full py-2 px-3 rounded-xl bg-white/5 hover:bg-white/10 text-xs text-white flex justify-between items-center transition">
+            <span class="flex items-center gap-2">
+              <span>🛡️</span>
+              <span>Regulatory Disclaimer</span>
+            </span>
+            <span class="text-gray-400 text-xs">›</span>
+          </button>
+
+          <button onclick="showLegalModal('privacy')" class="w-full py-2 px-3 rounded-xl bg-white/5 hover:bg-white/10 text-xs text-white flex justify-between items-center transition">
+            <span class="flex items-center gap-2">
+              <span>🔒</span>
+              <span>Privacy Policy</span>
+            </span>
+            <span class="text-gray-400 text-xs">›</span>
+          </button>
+
+          <button onclick="showLegalModal('terms')" class="w-full py-2 px-3 rounded-xl bg-white/5 hover:bg-white/10 text-xs text-white flex justify-between items-center transition">
+            <span class="flex items-center gap-2">
+              <span>📄</span>
+              <span>Terms of Service</span>
+            </span>
+            <span class="text-gray-400 text-xs">›</span>
+          </button>
+        </div>
+
+        <!-- Ad & Architecture Notice -->
+        <div class="text-center space-y-1 pt-1 pb-2">
+          <div class="text-[10px] text-gray-500 font-medium">Paper Money iOS · Version 1.0.0 (Build 1)</div>
+          <div class="text-[9px] text-gray-600">Single AdMob launch overlay policy · 0 in-app banners · 100% private</div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ==================== MODAL 7: LEGAL & COMPLIANCE VIEWER ==================== -->
+    <div id="modalLegal" class="absolute inset-0 bg-black/90 backdrop-blur-md z-50 flex flex-col justify-end transition-opacity duration-300 hidden">
+      <div class="bg-[#181a1f] rounded-t-[36px] p-6 border-t border-white/10 space-y-4 max-h-[88%] overflow-y-auto no-scrollbar">
+        <div class="flex justify-between items-center">
+          <div class="flex items-center gap-2">
+            <span id="legalModalIcon" class="text-xl">🛡️</span>
+            <span id="legalModalTitle" class="text-base font-bold text-white">Regulatory Disclaimer</span>
+          </div>
+          <button onclick="closeLegalModal()" class="w-7 h-7 rounded-full bg-white/10 flex items-center justify-center text-gray-400 hover:text-white">✕</button>
+        </div>
+
+        <div id="legalModalBody" class="text-xs text-gray-300 leading-relaxed space-y-3 pt-1">
+          <!-- Injected dynamically -->
+        </div>
+
+        <button onclick="closeLegalModal()" class="tap-effect w-full py-3 rounded-2xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs">
+          Done
+        </button>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    // ==================== APP STATE & STORAGE ====================
+    const STOCKS_DATABASE = [
+      { symbol: 'AAPL', name: 'Apple Inc.', price: 228.45, prevClose: 225.10, spark: [224, 225, 226, 225, 227, 228.45], cap: '$3.48T', pe: 34.2, high: 237.2, low: 164.1, vol: '48.2M', sector: 'Tech', about: 'Designs smartphones, Macs, iPads, and cloud services.' },
+      { symbol: 'NVDA', name: 'NVIDIA Corp.', price: 142.60, prevClose: 138.25, spark: [136, 137, 140, 139, 141, 142.60], cap: '$3.52T', pe: 64.8, high: 149.8, low: 45.1, vol: '189M', sector: 'Tech', about: 'Global leader in GPU architecture, CUDA, and AI data centers.' },
+      { symbol: 'TSLA', name: 'Tesla, Inc.', price: 342.10, prevClose: 328.50, spark: [325, 329, 335, 331, 339, 342.10], cap: '$1.09T', pe: 88.5, high: 358.6, low: 138.8, vol: '94.6M', sector: 'Tech', about: 'Electric vehicles, autonomous driving systems, and solar battery energy.' },
+      { symbol: 'MSFT', name: 'Microsoft Corp.', price: 425.80, prevClose: 428.15, spark: [430, 429, 427, 426, 425, 425.80], cap: '$3.16T', pe: 35.1, high: 468.3, low: 366.5, vol: '18.3M', sector: 'Tech', about: 'Windows, Office 365, Azure Cloud, and enterprise AI.' },
+      { symbol: 'AMZN', name: 'Amazon.com', price: 204.30, prevClose: 201.80, spark: [200, 202, 201, 203, 204, 204.30], cap: '$2.14T', pe: 43.6, high: 215.9, low: 140.6, vol: '42.1M', sector: 'Tech', about: 'E-commerce, AWS cloud infrastructure, streaming, and retail logistics.' },
+      { symbol: 'GOOGL', name: 'Alphabet Inc.', price: 178.90, prevClose: 176.40, spark: [175, 176, 177, 176, 178, 178.90], cap: '$2.21T', pe: 23.9, high: 191.7, low: 129.4, vol: '24.5M', sector: 'Tech', about: 'Google Search, YouTube, Android, Gemini AI, and Waymo.' },
+      { symbol: 'META', name: 'Meta Platforms', price: 562.40, prevClose: 554.20, spark: [550, 553, 558, 556, 560, 562.40], cap: '$1.42T', pe: 26.8, high: 602.9, low: 314.5, vol: '12.8M', sector: 'Tech', about: 'Facebook, Instagram, WhatsApp, and open-source Llama AI.' },
+      { symbol: 'SPY', name: 'S&P 500 ETF', price: 591.20, prevClose: 588.60, spark: [586, 587, 589, 588, 590, 591.20], cap: '$595B', pe: 27.5, high: 601.4, low: 449.2, vol: '52.4M', sector: 'ETF', about: 'Standard & Poor 500 index tracking top US corporate giants.' },
+      { symbol: 'QQQ', name: 'Invesco QQQ', price: 508.65, prevClose: 503.40, spark: [501, 502, 505, 504, 507, 508.65], cap: '$288B', pe: 31.2, high: 518.2, low: 377.1, vol: '38.7M', sector: 'ETF', about: 'Nasdaq-100 high-growth innovation and technology ETF.' },
+      { symbol: 'COIN', name: 'Coinbase Global', price: 312.40, prevClose: 298.10, spark: [292, 299, 305, 302, 309, 312.40], cap: '$77.5B', pe: 52.8, high: 344.2, low: 114.4, vol: '14.3M', sector: 'Crypto', about: 'Digital asset exchange, crypto custody, and Web3 payments.' },
+      { symbol: 'PLTR', name: 'Palantir Tech', price: 65.20, prevClose: 62.40, spark: [60, 61, 63, 62, 64, 65.20], cap: '$148B', pe: 115.0, high: 66.8, low: 15.7, vol: '78.4M', sector: 'Tech', about: 'Enterprise AI & data analytics software platform for enterprise and defense.' },
+      { symbol: 'DIS', name: 'Walt Disney Co', price: 114.50, prevClose: 112.80, spark: [111, 112, 113, 112, 114, 114.50], cap: '$208B', pe: 41.2, high: 123.7, low: 83.9, vol: '11.2M', sector: 'Tech', about: 'Entertainment theme parks, movie studios, and Disney+ streaming.' },
+      { symbol: 'V', name: 'Visa Inc.', price: 308.90, prevClose: 306.10, spark: [304, 305, 307, 306, 308, 308.90], cap: '$612B', pe: 31.8, high: 312.4, low: 247.3, vol: '6.8M', sector: 'Tech', about: 'Global consumer electronic payments and digital transactions network.' },
+      { symbol: 'ARM', name: 'Arm Holdings', price: 132.80, prevClose: 129.50, spark: [126, 128, 131, 129, 131, 132.80], cap: '$139B', pe: 96.4, high: 188.7, low: 60.1, vol: '12.5M', sector: 'Tech', about: 'Microprocessor IP architectures powering billions of smartphones and AI.' },
+      { symbol: 'RIVN', name: 'Rivian Automotive', price: 10.45, prevClose: 9.85, spark: [9.5, 9.7, 10.1, 9.9, 10.2, 10.45], cap: '$10.5B', pe: null, high: 24.6, low: 8.2, vol: '38.9M', sector: 'Tech', about: 'Electric adventure trucks, SUVs, and commercial delivery vehicles.' }
+    ];
+
+    const NEWS_DATABASE = {
+      'AAPL': [
+        { publisher: 'Bloomberg', time: '2h ago', sentiment: 'BULLISH', title: 'Apple Expands On-Device AI Architecture Across Next-Gen iPhone Lineup', snippet: 'Enhanced neural processing capabilities and developer SDKs for local multimodal models.' },
+        { publisher: 'WSJ', time: '5h ago', sentiment: 'BULLISH', title: 'Services Revenue Hits Record High Driven by Cloud Subscriptions', snippet: 'High-margin services division continues double-digit expansion, boosting gross margins.' }
+      ],
+      'NVDA': [
+        { publisher: 'Financial Times', time: '1h ago', sentiment: 'BULLISH', title: 'Next-Gen AI Accelerators Report Surging Enterprise Order Backlog', snippet: 'Hyperscalers expand capital expenditure commitments for high-density compute clusters.' },
+        { publisher: 'Barron\'s', time: '8h ago', sentiment: 'NEUTRAL', title: 'Semiconductor Analysts Model Extended Margin Durability', snippet: 'Wall Street price targets shift higher as supply constraints ease.' }
+      ],
+      'TSLA': [
+        { publisher: 'Reuters', time: '3h ago', sentiment: 'BULLISH', title: 'Autonomous Ride-Hailing Regulatory Filings Advance in Key States', snippet: 'Tesla submits safety validation metrics and operational framework documentation.' },
+        { publisher: 'Electrek', time: '6h ago', sentiment: 'BULLISH', title: 'Energy Storage Megapack Deployments Break Capacity Record', snippet: 'Utility-scale battery segment represents the fastest growing division.' }
+      ]
+    };
+
+    let state = {
+      cashBalance: 100000.0,
+      totalDeposited: 100000.0,
+      positions: {},
+      transactions: [],
+      pendingOrders: [],
+      priceAlerts: [],
+      stocks: [...STOCKS_DATABASE],
+      activeTab: 'portfolio',
+      activeCategory: 'all',
+      selectedStock: null,
+      currentTradeType: 'Buy',
+      orderKind: 'Market',
+      selectedTimeframe: '1D',
+      chartMode: 'line',
+      hapticsEnabled: true,
+      ticksEnabled: true,
+      lastSyncTime: 'Just now',
+      isPrivacyMode: false,
+      hasDismissedWelcome: false,
+      alertCondition: 'above'
+    };
+
+    function loadState() {
+      try {
+        const saved = localStorage.getItem('paper_money_app_state');
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          state.cashBalance = parsed.cashBalance ?? 100000.0;
+          state.totalDeposited = parsed.totalDeposited ?? 100000.0;
+          state.positions = parsed.positions ?? {};
+          state.transactions = parsed.transactions ?? [];
+          state.pendingOrders = parsed.pendingOrders ?? [];
+          state.priceAlerts = parsed.priceAlerts ?? [];
+          state.isPrivacyMode = parsed.isPrivacyMode ?? false;
+          state.hasDismissedWelcome = parsed.hasDismissedWelcome ?? false;
+          state.chartMode = parsed.chartMode ?? 'line';
+          state.hapticsEnabled = parsed.hapticsEnabled ?? true;
+          state.ticksEnabled = parsed.ticksEnabled ?? true;
+          state.lastSyncTime = parsed.lastSyncTime ?? 'Just now';
+        } else {
+          state.transactions = [{
+            id: Date.now(),
+            type: 'Deposit',
+            amount: 100000.0,
+            date: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+            note: 'Initial Welcome Paper Money (iCloud Synced)'
+          }];
+          saveState();
+        }
+
+        if (state.hasDismissedWelcome) {
+          const card = document.getElementById('simWelcomeCard');
+          if (card) card.classList.add('hidden');
+        }
+      } catch (e) {
+        console.error("Storage error:", e);
+      }
+    }
+
+    function saveState() {
+      try {
+        localStorage.setItem('paper_money_app_state', JSON.stringify({
+          cashBalance: state.cashBalance,
+          totalDeposited: state.totalDeposited,
+          positions: state.positions,
+          transactions: state.transactions,
+          pendingOrders: state.pendingOrders,
+          priceAlerts: state.priceAlerts,
+          isPrivacyMode: state.isPrivacyMode,
+          hasDismissedWelcome: state.hasDismissedWelcome,
+          chartMode: state.chartMode,
+          hapticsEnabled: state.hapticsEnabled,
+          ticksEnabled: state.ticksEnabled,
+          lastSyncTime: state.lastSyncTime
+        }));
+      } catch (e) {}
+    }
+
+    // ==================== GOOGLE ADMOB APP OPEN AD LOGIC ====================
+    let adTimeRemaining = 3;
+    let adTimerInterval = null;
+
+    function initLaunchAd() {
+      const overlay = document.getElementById('adMobLaunchOverlay');
+      const skipText = document.getElementById('adSkipText');
+
+      adTimerInterval = setInterval(() => {
+        if (adTimeRemaining > 1) {
+          adTimeRemaining--;
+          skipText.innerText = `Skip in ${adTimeRemaining}s`;
+        } else {
+          clearInterval(adTimerInterval);
+          skipText.innerText = `Skip Ad`;
+        }
+      }, 1000);
+    }
+
+    function dismissLaunchAd() {
+      if (adTimerInterval) clearInterval(adTimerInterval);
+      const overlay = document.getElementById('adMobLaunchOverlay');
+      overlay.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
+      overlay.style.opacity = '0';
+      overlay.style.transform = 'translateY(-100%)';
+      setTimeout(() => {
+        overlay.classList.add('hidden');
+      }, 400);
+    }
+
+    // ==================== PRIVACY MODE ====================
+    function togglePrivacyMode() {
+      state.isPrivacyMode = !state.isPrivacyMode;
+      saveState();
+      updateHero();
+      updateSettingsTogglesUI();
+      showToast(state.isPrivacyMode ? "Privacy Mode Enabled" : "Privacy Mode Disabled", false);
+    }
+
+    // ==================== UI RENDERING ====================
+    function formatMoney(amount) {
+      return '$' + amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+
+    function updateHero() {
+      let stockEquity = 0;
+      let totalCostBasis = 0;
+
+      for (const sym in state.positions) {
+        const pos = state.positions[sym];
+        const stock = state.stocks.find(s => s.symbol === sym);
+        const curPrice = stock ? stock.price : 0;
+        stockEquity += pos.shares * curPrice;
+        totalCostBasis += pos.totalCost;
+      }
+
+      const totalValue = state.cashBalance + stockEquity;
+      const unrealizedPnl = totalValue - state.totalDeposited;
+      const pnlPercent = state.totalDeposited > 0 ? (unrealizedPnl / state.totalDeposited) * 100 : 0;
+      const isPositive = unrealizedPnl >= 0;
+
+      // Privacy Mode Masking
+      const eyeIcon = document.getElementById('privacyEyeIcon');
+      eyeIcon.innerText = state.isPrivacyMode ? '🙈' : '👁️';
+
+      if (state.isPrivacyMode) {
+        document.getElementById('heroTotalValue').innerText = "$ ••••••••";
+        document.getElementById('heroReturnValue').innerText = "+••••%";
+        document.getElementById('heroCashBalance').innerText = "$ ••••••";
+        document.getElementById('heroStockEquity').innerText = "$ ••••••";
+        document.getElementById('heroTotalDeposited').innerText = "$ ••••••";
+      } else {
+        document.getElementById('heroTotalValue').innerText = formatMoney(totalValue);
+        document.getElementById('heroCashBalance').innerText = formatMoney(state.cashBalance);
+        document.getElementById('heroStockEquity').innerText = formatMoney(stockEquity);
+        document.getElementById('heroTotalDeposited').innerText = formatMoney(state.totalDeposited);
+
+        const returnPill = document.getElementById('heroReturnPill');
+        const returnArrow = document.getElementById('heroReturnArrow');
+        const returnValue = document.getElementById('heroReturnValue');
+
+        returnArrow.innerText = isPositive ? '▲' : '▼';
+        returnValue.innerText = `${isPositive ? '+' : ''}${formatMoney(Math.abs(unrealizedPnl))} (${pnlPercent.toFixed(2)}%)`;
+
+        if (isPositive) {
+          returnPill.className = "inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-bold bg-emerald-500/20 text-emerald-400";
+        } else {
+          returnPill.className = "inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-bold bg-red-500/20 text-red-400";
+        }
+      }
+
+      renderAllocationBar(totalValue, stockEquity);
+      renderHoldings();
+      updateTraderAnalytics();
+    }
+
+    function updateTraderAnalytics() {
+      const buys = state.transactions.filter(t => t.type === 'Buy');
+      const sells = state.transactions.filter(t => t.type === 'Sell');
+
+      let realizedPnL = 0;
+      let winCount = 0;
+      let lossCount = 0;
+
+      sells.forEach(s => {
+        const priorBuys = buys.filter(b => b.symbol === s.symbol);
+        const totalBuyShares = priorBuys.reduce((sum, b) => sum + (b.shares || 0), 0);
+        const totalBuyCost = priorBuys.reduce((sum, b) => sum + (b.amount || 0), 0);
+        const avgCost = totalBuyShares > 0 ? (totalBuyCost / totalBuyShares) : s.price;
+        const pnl = (s.price - avgCost) * s.shares;
+        realizedPnL += pnl;
+        if (pnl > 0.01) winCount++;
+        else if (pnl < -0.01) lossCount++;
+      });
+
+      const totalClosed = winCount + lossCount;
+      const winRate = totalClosed > 0 ? (winCount / totalClosed) * 100 : 0;
+
+      const pnlEl = document.getElementById('statRealizedPnL');
+      if (pnlEl) {
+        const isPos = realizedPnL >= 0;
+        pnlEl.innerText = `${isPos ? '+' : ''}${formatMoney(realizedPnL)}`;
+        pnlEl.className = `text-xs font-extrabold ${isPos ? 'text-emerald-400' : 'text-red-400'} mt-0.5`;
+      }
+
+      const winRateEl = document.getElementById('statWinRate');
+      if (winRateEl) {
+        winRateEl.innerText = totalClosed > 0 ? `${winRate.toFixed(1)}%` : '—';
+      }
+
+      const totalTradesEl = document.getElementById('statTotalTrades');
+      if (totalTradesEl) {
+        totalTradesEl.innerText = buys.length + sells.length;
+      }
+    }
+
+    function renderAllocationBar(totalValue, stockEquity) {
+      const bar = document.getElementById('allocationBar');
+      const legend = document.getElementById('allocationLegend');
+      if (!bar || !legend) return;
+
+      if (totalValue <= 0) {
+        bar.innerHTML = '<div class="w-full h-full bg-emerald-500"></div>';
+        legend.innerHTML = '<span class="text-emerald-400">Cash 100%</span>';
+        return;
+      }
+
+      const cashPct = (state.cashBalance / totalValue) * 100;
+      let barHtml = `<div style="width: ${cashPct.toFixed(1)}%" class="h-full bg-emerald-500 transition-all duration-300" title="Cash ${cashPct.toFixed(1)}%"></div>`;
+      let legendHtml = `<span class="inline-flex items-center gap-1 text-emerald-400"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>Cash ${cashPct.toFixed(0)}%</span>`;
+
+      const colors = ['bg-blue-500', 'bg-purple-500', 'bg-amber-500', 'bg-pink-500', 'bg-cyan-500'];
+      let idx = 0;
+      for (const sym in state.positions) {
+        const pos = state.positions[sym];
+        const stock = state.stocks.find(s => s.symbol === sym);
+        if (!stock) continue;
+        const val = pos.shares * stock.price;
+        const pct = (val / totalValue) * 100;
+        if (pct > 0.5) {
+          const c = colors[idx % colors.length];
+          barHtml += `<div style="width: ${pct.toFixed(1)}%" class="h-full ${c} transition-all duration-300" title="${sym} ${pct.toFixed(1)}%"></div>`;
+          legendHtml += `<span class="inline-flex items-center gap-1 text-gray-300"><span class="w-1.5 h-1.5 rounded-full ${c}"></span>${sym} ${pct.toFixed(0)}%</span>`;
+          idx++;
+        }
+      }
+
+      bar.innerHTML = barHtml;
+      legend.innerHTML = legendHtml;
+    }
+
+    function renderHoldings() {
+      const container = document.getElementById('holdingsListContainer');
+      const badge = document.getElementById('holdingsCountBadge');
+      const activeSymbols = Object.keys(state.positions).filter(sym => state.positions[sym].shares > 0.0001);
+
+      badge.innerText = `${activeSymbols.length} active`;
+
+      if (activeSymbols.length === 0) {
+        container.innerHTML = `
+          <div class="p-8 text-center bg-[#15171b] rounded-3xl border border-white/5 space-y-2">
+            <div class="text-3xl">📊</div>
+            <div class="text-sm font-bold text-white">No Holdings Yet</div>
+            <div class="text-xs text-gray-400">Search top tickers in the Market tab to execute your first paper trade!</div>
+          </div>
+        `;
+        return;
+      }
+
+      let html = '';
+      activeSymbols.forEach(sym => {
+        const pos = state.positions[sym];
+        const stock = state.stocks.find(s => s.symbol === sym);
+        const curPrice = stock ? stock.price : 0;
+        const curVal = pos.shares * curPrice;
+        const costBasis = pos.totalCost;
+        const pnl = curVal - costBasis;
+        const pnlPercent = costBasis > 0 ? (pnl / costBasis) * 100 : 0;
+        const isPos = pnl >= 0;
+
+        html += `
+          <div onclick="openStockDetail('${sym}')" class="tap-effect p-3 rounded-2xl bg-[#181a1f] border border-white/5 flex justify-between items-center cursor-pointer hover:border-white/10">
+            <div>
+              <div class="font-extrabold text-sm text-white">${sym}</div>
+              <div class="text-[11px] text-gray-400">${pos.shares.toFixed(2)} shares @ avg ${formatMoney(costBasis / pos.shares)}</div>
+            </div>
+
+            <div class="text-right">
+              <div class="font-extrabold text-sm text-white">${formatMoney(curVal)}</div>
+              <div class="text-[11px] font-bold ${isPos ? 'text-emerald-400' : 'text-red-400'}">
+                ${isPos ? '+' : ''}${formatMoney(Math.abs(pnl))} (${pnlPercent.toFixed(2)}%)
+              </div>
+            </div>
+          </div>
+        `;
+      });
+      container.innerHTML = html;
+    }
+
+    function renderMarketList() {
+      const container = document.getElementById('marketListContainer');
+      const query = (document.getElementById('marketSearchInput').value || '').toLowerCase();
+      
+      let filtered = [...state.stocks];
+
+      if (state.activeCategory === 'gainers') {
+        filtered = filtered.sort((a, b) => ((b.price - b.prevClose) / b.prevClose) - ((a.price - a.prevClose) / a.prevClose));
+      } else if (state.activeCategory === 'losers') {
+        filtered = filtered.sort((a, b) => ((a.price - a.prevClose) / a.prevClose) - ((b.price - b.prevClose) / b.prevClose));
+      } else if (state.activeCategory === 'watchlist') {
+        filtered = filtered.filter(s => ['AAPL', 'NVDA', 'TSLA', 'SPY'].includes(s.symbol));
+      } else if (state.activeCategory !== 'all') {
+        filtered = filtered.filter(s => s.sector.toLowerCase().includes(state.activeCategory.toLowerCase()));
+      }
+
+      if (query.trim()) {
+        filtered = filtered.filter(s => s.symbol.toLowerCase().includes(query) || s.name.toLowerCase().includes(query));
+      }
+
+      if (filtered.length === 0) {
+        container.innerHTML = `<div class="p-8 text-center text-xs text-gray-500">No stocks match your search.</div>`;
+        return;
+      }
+
+      let html = '';
+      filtered.forEach(s => {
+        const chg = s.price - s.prevClose;
+        const chgPct = (chg / s.prevClose) * 100;
+        const isPos = chg >= 0;
+
+        html += `
+          <div onclick="openStockDetail('${s.symbol}')" class="tap-effect p-3 rounded-2xl bg-[#181a1f] border border-white/5 flex justify-between items-center cursor-pointer hover:border-white/10">
+            <div>
+              <div class="font-extrabold text-sm text-white">${s.symbol}</div>
+              <div class="text-[11px] text-gray-400">${s.name}</div>
+            </div>
+
+            <div class="w-16 h-6">
+              <svg class="w-full h-full overflow-visible" viewBox="0 0 60 20">
+                <path d="${generateSparklinePath(s.spark, isPos)}" fill="none" stroke="${isPos ? '#34c759' : '#ff453a'}" stroke-width="2" stroke-linecap="round"/>
+              </svg>
+            </div>
+
+            <div class="text-right">
+              <div class="font-extrabold text-sm text-white">${formatMoney(s.price)}</div>
+              <div class="text-[10px] font-bold px-1.5 py-0.5 rounded ${isPos ? 'bg-emerald-500/20 text-emerald-400' : 'bg-red-500/20 text-red-400'}">
+                ${isPos ? '+' : ''}${chgPct.toFixed(2)}%
+              </div>
+            </div>
+          </div>
+        `;
+      });
+      container.innerHTML = html;
+    }
+
+    function generateSparklinePath(spark, isPos) {
+      if (!spark || spark.length < 2) return "M 0 10 L 60 10";
+      const min = Math.min(...spark);
+      const max = Math.max(...spark);
+      const range = Math.max(max - min, 0.1);
+      const stepX = 60 / (spark.length - 1);
+
+      return spark.map((val, idx) => {
+        const x = idx * stepX;
+        const normY = (val - min) / range;
+        const y = 18 - (normY * 16);
+        return `${idx === 0 ? 'M' : 'L'} ${x.toFixed(1)} ${y.toFixed(1)}`;
+      }).join(' ');
+    }
+
+    function renderHistoryList() {
+      const container = document.getElementById('historyListContainer');
+      const filter = window.currentHistoryFilter || 'all';
+
+      if (filter === 'Orders') {
+        const orders = state.pendingOrders || [];
+        if (orders.length === 0) {
+          container.innerHTML = `<div class="p-8 text-center text-xs text-gray-500">No Orders placed yet. Set limit or stop prices in the trade sheet!</div>`;
+          return;
+        }
+        let html = '';
+        orders.forEach(o => {
+          const isPending = o.status === 'pending';
+          const badgeClass = isPending ? 'bg-amber-500/20 text-amber-400' : (o.status === 'filled' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-gray-500/20 text-gray-400');
+          
+          let kindBadge = 'bg-blue-500/20 text-blue-400';
+          if (o.kind === 'Stop Loss') kindBadge = 'bg-red-500/20 text-red-400';
+          if (o.kind === 'Take Profit') kindBadge = 'bg-emerald-500/20 text-emerald-400';
+
+          html += `
+            <div class="p-3 rounded-2xl bg-[#181a1f] border border-white/5 flex justify-between items-center">
+              <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-sm">${o.kind === 'Stop Loss' ? '🛡️' : (o.kind === 'Take Profit' ? '🎯' : (o.type === 'Buy' ? '📉' : '📈'))}</div>
+                <div>
+                  <div class="flex items-center gap-1.5">
+                    <span class="font-bold text-xs text-white">${o.type} ${o.symbol}</span>
+                    <span class="text-[9px] font-bold px-1.5 py-0.5 rounded ${kindBadge}">${(o.kind || 'LIMIT').toUpperCase()}</span>
+                    <span class="text-[9px] font-black px-1.5 py-0.5 rounded ${badgeClass}">${o.status.toUpperCase()}</span>
+                  </div>
+                  <div class="text-[10px] text-gray-400">Target ${formatMoney(o.targetPrice)} · ${o.shares.toFixed(2)} sh</div>
+                  <div class="text-[9px] text-gray-500">${o.date}</div>
+                </div>
+              </div>
+
+              <div class="text-right">
+                <div class="font-bold text-xs text-white">${formatMoney(o.shares * o.targetPrice)}</div>
+                ${isPending ? `<button onclick="cancelLimitOrder(${o.id})" class="mt-1 text-[10px] font-semibold text-red-400 bg-red-500/10 hover:bg-red-500/20 px-2 py-0.5 rounded">Cancel</button>` : ''}
+              </div>
+            </div>
+          `;
+        });
+        container.innerHTML = html;
+        return;
+      }
+
+      if (filter === 'Alerts') {
+        const alerts = state.priceAlerts || [];
+        if (alerts.length === 0) {
+          container.innerHTML = `<div class="p-8 text-center text-xs text-gray-500">No Price Alerts set yet. Tap 🔔 on any stock detail to set one!</div>`;
+          return;
+        }
+        let html = '';
+        alerts.forEach(a => {
+          html += `
+            <div class="p-3 rounded-2xl bg-[#181a1f] border border-white/5 flex justify-between items-center">
+              <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-full ${a.isTriggered ? 'bg-amber-500/20 text-amber-400' : 'bg-blue-500/20 text-blue-400'} flex items-center justify-center text-sm">🔔</div>
+                <div>
+                  <div class="flex items-center gap-1.5">
+                    <span class="font-bold text-xs text-white">${a.symbol}</span>
+                    <span class="text-[9px] font-bold px-1.5 py-0.5 rounded ${a.isTriggered ? 'bg-amber-500/20 text-amber-400' : 'bg-emerald-500/20 text-emerald-400'}">${a.isTriggered ? 'TRIGGERED' : 'ACTIVE'}</span>
+                  </div>
+                  <div class="text-[10px] text-gray-400">${a.condition === 'above' ? 'Rises Above' : 'Drops Below'} ${formatMoney(a.targetPrice)}</div>
+                  <div class="text-[9px] text-gray-500">${a.date}</div>
+                </div>
+              </div>
+              <button onclick="removePriceAlert(${a.id})" class="text-xs text-red-400 hover:text-red-300 p-2">✕</button>
+            </div>
+          `;
+        });
+        container.innerHTML = html;
+        return;
+      }
+
+      let txs = state.transactions;
+      if (filter !== 'all') {
+        txs = txs.filter(t => t.type.toLowerCase() === filter.toLowerCase());
+      }
+
+      if (txs.length === 0) {
+        container.innerHTML = `<div class="p-8 text-center text-xs text-gray-500">No transactions recorded for this filter.</div>`;
+        return;
+      }
+
+      let html = '';
+      txs.forEach(t => {
+        let icon = '💵';
+        let color = 'text-emerald-400';
+        let prefix = '+';
+
+        if (t.type === 'Buy') {
+          icon = '📉';
+          color = 'text-white';
+          prefix = '-';
+        } else if (t.type === 'Sell') {
+          icon = '📈';
+          color = 'text-purple-400';
+          prefix = '+';
+        }
+
+        html += `
+          <div class="p-3 rounded-2xl bg-[#181a1f] border border-white/5 flex justify-between items-center">
+            <div class="flex items-center gap-3">
+              <div class="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-sm">${icon}</div>
+              <div>
+                <div class="font-bold text-xs text-white">${t.type} ${t.symbol ? t.symbol : ''}</div>
+                <div class="text-[10px] text-gray-400">${t.note || (t.shares ? `${t.shares.toFixed(2)} shares @ ${formatMoney(t.price)}` : '')}</div>
+                <div class="text-[9px] text-gray-500">${t.date}</div>
+              </div>
+            </div>
+
+            <div class="text-right">
+              <div class="font-bold text-xs ${color}">${prefix}${formatMoney(t.amount)}</div>
+            </div>
+          </div>
+        `;
+      });
+      container.innerHTML = html;
+    }
+
+    // ==================== TAB NAVIGATION ====================
+    function switchTab(tab) {
+      state.activeTab = tab;
+      
+      document.getElementById('viewPortfolio').classList.add('hidden');
+      document.getElementById('viewMarket').classList.add('hidden');
+      document.getElementById('viewHistory').classList.add('hidden');
+
+      document.getElementById('tabPortfolio').className = 'flex flex-col items-center gap-1 hover:text-gray-300 tap-effect text-gray-500';
+      document.getElementById('tabMarket').className = 'flex flex-col items-center gap-1 hover:text-gray-300 tap-effect text-gray-500';
+      document.getElementById('tabHistory').className = 'flex flex-col items-center gap-1 hover:text-gray-300 tap-effect text-gray-500';
+
+      if (tab === 'portfolio') {
+        document.getElementById('viewPortfolio').classList.remove('hidden');
+        document.getElementById('tabPortfolio').className = 'flex flex-col items-center gap-1 text-emerald-400 tap-effect font-bold';
+        updateHero();
+      } else if (tab === 'market') {
+        document.getElementById('viewMarket').classList.remove('hidden');
+        document.getElementById('tabMarket').className = 'flex flex-col items-center gap-1 text-emerald-400 tap-effect font-bold';
+        renderMarketList();
+      } else if (tab === 'history') {
+        document.getElementById('viewHistory').classList.remove('hidden');
+        document.getElementById('tabHistory').className = 'flex flex-col items-center gap-1 text-emerald-400 tap-effect font-bold';
+        renderHistoryList();
+      }
+    }
+
+    function setCategoryFilter(cat, btn) {
+      state.activeCategory = cat;
+      document.querySelectorAll('.category-pill').forEach(el => {
+        el.className = 'category-pill tap-effect px-3 py-1 rounded-full text-xs font-semibold bg-[#1a1c22] text-gray-300 border border-white/5';
+      });
+      btn.className = 'category-pill tap-effect active px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500 text-black';
+      renderMarketList();
+    }
+
+    function setHistoryFilter(f, btn) {
+      window.currentHistoryFilter = f;
+      document.querySelectorAll('.history-pill').forEach(el => {
+        el.className = 'history-pill flex-1 py-1.5 px-2 rounded-lg font-bold text-center text-gray-400 whitespace-nowrap';
+      });
+      btn.className = 'history-pill flex-1 py-1.5 px-2 rounded-lg font-bold text-center bg-white/10 text-white whitespace-nowrap';
+      renderHistoryList();
+    }
+
+    // ==================== DEPOSIT MODAL ====================
+    function openDepositModal() {
+      document.getElementById('modalDeposit').classList.remove('hidden');
+    }
+    function closeDepositModal() {
+      document.getElementById('modalDeposit').classList.add('hidden');
+    }
+    function setDepositAmount(amt) {
+      document.getElementById('depositAmountInput').value = amt;
+    }
+
+    function executeDeposit() {
+      const amt = parseFloat(document.getElementById('depositAmountInput').value);
+      if (!amt || amt <= 0) {
+        showToast("Please enter an amount > $0", false);
+        return;
+      }
+      const note = document.getElementById('depositNoteInput').value || 'Paper Cash Deposit';
+
+      state.cashBalance += amt;
+      state.totalDeposited += amt;
+
+      state.transactions.unshift({
+        id: Date.now(),
+        type: 'Deposit',
+        amount: amt,
+        date: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        note: note
+      });
+
+      saveState();
+      updateHero();
+      closeDepositModal();
+      showToast(`Deposited +${formatMoney(amt)} paper cash!`, true);
+    }
+
+    function resetAccount() {
+      if (confirm("Reset account back to clean $100,000 state?")) {
+        state.cashBalance = 100000.0;
+        state.totalDeposited = 100000.0;
+        state.positions = {};
+        state.transactions = [{
+          id: Date.now(),
+          type: 'Deposit',
+          amount: 100000.0,
+          date: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          note: 'Paper Money Reset'
+        }];
+        state.pendingOrders = [];
+        state.priceAlerts = [];
+        saveState();
+        updateHero();
+        closeDepositModal();
+        showToast("Account reset to $100,000", true);
+      }
+    }
+
+    // ==================== STOCK DETAIL & CHART ====================
+    function openStockDetail(sym) {
+      const stock = state.stocks.find(s => s.symbol === sym);
+      if (!stock) return;
+      state.selectedStock = stock;
+
+      document.getElementById('detailSymbol').innerText = stock.symbol;
+      document.getElementById('detailSector').innerText = stock.sector;
+      document.getElementById('detailName').innerText = stock.name;
+      document.getElementById('detailPrice').innerText = formatMoney(stock.price);
+
+      const chg = stock.price - stock.prevClose;
+      const chgPct = (chg / stock.prevClose) * 100;
+      const isPos = chg >= 0;
+      const badge = document.getElementById('detailChangeBadge');
+      badge.innerText = `${isPos ? '+' : ''}${formatMoney(chg)} (${chgPct.toFixed(2)}%)`;
+      badge.className = `text-xs font-bold ${isPos ? 'text-emerald-400' : 'text-red-400'}`;
+
+      document.getElementById('detailMarketCap').innerText = stock.cap;
+      document.getElementById('detailPeRatio').innerText = stock.pe || '—';
+      document.getElementById('detailRange').innerText = `$${stock.low} - $${stock.high}`;
+      document.getElementById('detailVolume').innerText = stock.vol;
+
+      // Render News
+      const newsContainer = document.getElementById('detailNewsContainer');
+      const newsItems = NEWS_DATABASE[sym] || [
+        { publisher: 'Dow Jones', time: '2h ago', sentiment: 'NEUTRAL', title: `${sym} Trading Volume Elevates Following Sector Momentum`, snippet: 'Institutional flows remain active as key technical support levels hold.' },
+        { publisher: 'MarketBeat', time: '5h ago', sentiment: 'BULLISH', title: `Wall Street Analysts Update Consensus Target for ${sym}`, snippet: 'Revenue growth assumptions and operating margin expectations updated for next quarter.' }
+      ];
+
+      let newsHtml = '';
+      newsItems.forEach(n => {
+        let sentBadge = 'bg-emerald-500/15 text-emerald-400';
+        if (n.sentiment === 'BEARISH') sentBadge = 'bg-red-500/15 text-red-400';
+        if (n.sentiment === 'NEUTRAL') sentBadge = 'bg-gray-500/15 text-gray-400';
+
+        newsHtml += `
+          <div class="p-2.5 rounded-xl bg-white/5 space-y-1">
+            <div class="flex justify-between items-center text-[10px]">
+              <span class="font-bold text-gray-300">${n.publisher} · ${n.time}</span>
+              <span class="px-1.5 py-0.5 rounded text-[8px] font-bold ${sentBadge}">${n.sentiment}</span>
+            </div>
+            <div class="font-bold text-white text-[11px] leading-tight">${n.title}</div>
+            <div class="text-[10px] text-gray-400 leading-tight">${n.snippet}</div>
+          </div>
+        `;
+      });
+      newsContainer.innerHTML = newsHtml;
+
+      const pos = state.positions[sym];
+      const strip = document.getElementById('detailHoldingStrip');
+      const sellBtn = document.getElementById('btnDetailSell');
+
+      if (pos && pos.shares > 0.0001) {
+        strip.classList.remove('hidden');
+        document.getElementById('detailHoldingShares').innerText = `${pos.shares.toFixed(2)} shares`;
+        document.getElementById('detailHoldingValue').innerText = formatMoney(pos.shares * stock.price);
+        sellBtn.classList.remove('hidden');
+      } else {
+        strip.classList.add('hidden');
+        sellBtn.classList.add('hidden');
+      }
+
+      document.getElementById('modalStockDetail').classList.remove('hidden');
+      setChartMode(state.chartMode || 'line');
+    }
+
+    function closeStockDetailModal() {
+      document.getElementById('modalStockDetail').classList.add('hidden');
+    }
+
+    function setTimeframe(tf) {
+      state.selectedTimeframe = tf;
+      document.querySelectorAll('.chart-tf').forEach(el => {
+        el.className = 'chart-tf text-gray-400';
+      });
+      event.target.className = 'chart-tf text-emerald-400 font-bold';
+      if (state.selectedStock) {
+        const isPos = (state.selectedStock.price - state.selectedStock.prevClose) >= 0;
+        drawCanvasChart(state.selectedStock, isPos);
+      }
+    }
+
+    function setChartMode(mode) {
+      state.chartMode = mode;
+      saveState();
+      const lineBtn = document.getElementById('chartModeLineBtn');
+      const candleBtn = document.getElementById('chartModeCandleBtn');
+      if (lineBtn && candleBtn) {
+        if (mode === 'candle') {
+          candleBtn.className = "px-2.5 py-1 rounded-md text-[10px] font-bold bg-white/15 text-white";
+          lineBtn.className = "px-2.5 py-1 rounded-md text-[10px] font-bold text-gray-400 hover:text-white";
+        } else {
+          lineBtn.className = "px-2.5 py-1 rounded-md text-[10px] font-bold bg-white/15 text-white";
+          candleBtn.className = "px-2.5 py-1 rounded-md text-[10px] font-bold text-gray-400 hover:text-white";
+        }
+      }
+      if (state.selectedStock) {
+        const isPos = (state.selectedStock.price - state.selectedStock.prevClose) >= 0;
+        drawCanvasChart(state.selectedStock, isPos);
+      }
+    }
+
+    function drawCanvasChart(stock, isPos) {
+      const canvas = document.getElementById('stockCanvasChart');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      const dpr = window.devicePixelRatio || 1;
+
+      const rect = canvas.getBoundingClientRect();
+      canvas.width = rect.width * dpr;
+      canvas.height = rect.height * dpr;
+      ctx.scale(dpr, dpr);
+
+      const w = rect.width;
+      const h = rect.height;
+      ctx.clearRect(0, 0, w, h);
+
+      let points = stock.spark;
+      if (state.selectedTimeframe !== '1D') {
+        const factor = state.selectedTimeframe === '1W' ? 1.02 : (state.selectedTimeframe === '1M' ? 1.05 : 1.15);
+        points = stock.spark.map((v, i) => v * (1 + (Math.sin(i * 1.5) * (factor - 1))));
+      }
+
+      const ohlcEl = document.getElementById('chartOhlcReadout');
+
+      // CANDLESTICK OHLC MODE
+      if (state.chartMode === 'candle') {
+        const numCandles = 16;
+        const candleStep = w / numCandles;
+        const candleW = Math.max(candleStep * 0.52, 4);
+
+        const candles = [];
+        const volatility = (stock.high - stock.low) * 0.035;
+
+        for (let i = 0; i < numCandles; i++) {
+          const t = i / (numCandles - 1);
+          const sparkIdx = Math.min(Math.floor(t * (points.length - 1)), points.length - 1);
+          const p = points[sparkIdx];
+          const open = p + Math.sin(i * 1.4) * volatility * 0.7;
+          const close = (i === numCandles - 1) ? stock.price : (p + Math.cos(i * 1.8) * volatility * 0.8);
+          const high = Math.max(open, close) + Math.abs(Math.sin(i * 2.1)) * volatility * 0.75;
+          const low = Math.min(open, close) - Math.abs(Math.cos(i * 2.3)) * volatility * 0.75;
+          candles.push({ open, high, low, close });
+        }
+
+        const allLows = candles.map(c => c.low);
+        const allHighs = candles.map(c => c.high);
+        const cMin = Math.min(...allLows) * 0.999;
+        const cMax = Math.max(...allHighs) * 1.001;
+        const cRange = cMax - cMin || 1;
+
+        candles.forEach((c, i) => {
+          const cx = i * candleStep + candleStep / 2;
+          const isGreen = c.close >= c.open;
+          const color = isGreen ? '#34c759' : '#ff453a';
+
+          const yHigh = h - ((c.high - cMin) / cRange) * (h - 24) - 12;
+          const yLow = h - ((c.low - cMin) / cRange) * (h - 24) - 12;
+          const yOpen = h - ((c.open - cMin) / cRange) * (h - 24) - 12;
+          const yClose = h - ((c.close - cMin) / cRange) * (h - 24) - 12;
+
+          // Wick
+          ctx.strokeStyle = color;
+          ctx.lineWidth = 1.3;
+          ctx.beginPath();
+          ctx.moveTo(cx, yHigh);
+          ctx.lineTo(cx, yLow);
+          ctx.stroke();
+
+          // Body
+          const bodyTop = Math.min(yOpen, yClose);
+          const bodyH = Math.max(Math.abs(yClose - yOpen), 2.5);
+          ctx.fillStyle = color;
+          ctx.fillRect(cx - candleW / 2, bodyTop, candleW, bodyH);
+        });
+
+        if (ohlcEl) {
+          const lastC = candles[candles.length - 1];
+          ohlcEl.innerHTML = `
+            <span>O: <b class="text-white">${formatMoney(lastC.open)}</b></span>
+            <span>H: <b class="text-emerald-400">${formatMoney(lastC.high)}</b></span>
+            <span>L: <b class="text-red-400">${formatMoney(lastC.low)}</b></span>
+            <span>C: <b class="text-white">${formatMoney(lastC.close)}</b></span>
+          `;
+        }
+        return;
+      }
+
+      // LINE CHART MODE
+      if (ohlcEl) {
+        ohlcEl.innerHTML = `<span>Close: <b class="text-white">${formatMoney(stock.price)}</b></span>`;
+      }
+
+      const min = Math.min(...points) * 0.998;
+      const max = Math.max(...points) * 1.002;
+      const range = max - min;
+      const stepX = w / (points.length - 1);
+
+      ctx.beginPath();
+      points.forEach((val, i) => {
+        const x = i * stepX;
+        const y = h - ((val - min) / range) * (h - 20) - 10;
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      });
+
+      ctx.strokeStyle = isPos ? '#34c759' : '#ff453a';
+      ctx.lineWidth = 2.5;
+      ctx.stroke();
+
+      ctx.lineTo(w, h);
+      ctx.lineTo(0, h);
+      ctx.closePath();
+      const grad = ctx.createLinearGradient(0, 0, 0, h);
+      grad.addColorStop(0, isPos ? 'rgba(52, 199, 89, 0.25)' : 'rgba(255, 69, 58, 0.25)');
+      grad.addColorStop(1, 'rgba(0,0,0,0)');
+      ctx.fillStyle = grad;
+      ctx.fill();
+    }
+
+    // ==================== PRICE ALERT MODAL ====================
+    function openPriceAlertModal() {
+      if (!state.selectedStock) return;
+      document.getElementById('alertModalSymbol').innerText = state.selectedStock.symbol;
+      document.getElementById('alertModalCurPrice').innerText = formatMoney(state.selectedStock.price);
+      document.getElementById('alertTargetPriceInput').value = (state.selectedStock.price * 1.05).toFixed(2);
+      setAlertCondition('above');
+      document.getElementById('modalPriceAlert').classList.remove('hidden');
+    }
+
+    function closePriceAlertModal() {
+      document.getElementById('modalPriceAlert').classList.add('hidden');
+    }
+
+    function setAlertCondition(cond) {
+      state.alertCondition = cond;
+      const abBtn = document.getElementById('alertCondAboveBtn');
+      const blBtn = document.getElementById('alertCondBelowBtn');
+
+      if (cond === 'above') {
+        abBtn.className = "py-2 rounded-lg font-bold bg-emerald-500 text-black";
+        blBtn.className = "py-2 rounded-lg font-bold text-gray-400";
+        if (state.selectedStock) {
+          document.getElementById('alertTargetPriceInput').value = (state.selectedStock.price * 1.05).toFixed(2);
+        }
+      } else {
+        blBtn.className = "py-2 rounded-lg font-bold bg-red-500 text-white";
+        abBtn.className = "py-2 rounded-lg font-bold text-gray-400";
+        if (state.selectedStock) {
+          document.getElementById('alertTargetPriceInput').value = (state.selectedStock.price * 0.95).toFixed(2);
+        }
+      }
+    }
+
+    function savePriceAlert() {
+      const target = parseFloat(document.getElementById('alertTargetPriceInput').value);
+      if (!target || target <= 0) {
+        showToast("Please enter a valid price target", false);
+        return;
+      }
+
+      state.priceAlerts.unshift({
+        id: Date.now(),
+        symbol: state.selectedStock.symbol,
+        targetPrice: target,
+        condition: state.alertCondition,
+        isTriggered: false,
+        date: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      });
+
+      saveState();
+      closePriceAlertModal();
+      showToast(`🔔 Alert set for ${state.selectedStock.symbol} ${state.alertCondition} ${formatMoney(target)}`, true);
+    }
+
+    function removePriceAlert(id) {
+      state.priceAlerts = state.priceAlerts.filter(a => a.id !== id);
+      saveState();
+      renderHistoryList();
+      showToast("Alert removed", false);
+    }
+
+    function checkPriceAlerts() {
+      if (!state.priceAlerts || state.priceAlerts.length === 0) return;
+      state.priceAlerts.forEach(a => {
+        if (a.isTriggered) return;
+        const stock = state.stocks.find(s => s.symbol === a.symbol);
+        if (!stock) return;
+
+        let triggered = false;
+        if (a.condition === 'above' && stock.price >= a.targetPrice) triggered = true;
+        if (a.condition === 'below' && stock.price <= a.targetPrice) triggered = true;
+
+        if (triggered) {
+          a.isTriggered = true;
+          saveState();
+          showToast(`🚨 PRICE ALERT: ${a.symbol} crossed ${formatMoney(a.targetPrice)} (Now: ${formatMoney(stock.price)})`, true);
+        }
+      });
+    }
+
+    // ==================== TRADE MODAL & EXECUTION ====================
+    function setOrderKind(kind) {
+      state.orderKind = kind;
+      const mBtn = document.getElementById('orderKindMarketBtn');
+      const lBtn = document.getElementById('orderKindLimitBtn');
+      const slBtn = document.getElementById('orderKindStopLossBtn');
+      const tpBtn = document.getElementById('orderKindTakeProfitBtn');
+      const grp = document.getElementById('limitPriceGroup');
+      const label = document.getElementById('targetPriceLabel');
+      const guidance = document.getElementById('targetPriceGuidance');
+      const submitBtn = document.getElementById('btnExecuteTrade');
+
+      [mBtn, lBtn, slBtn, tpBtn].forEach(b => b.className = "py-1.5 rounded-lg font-bold text-gray-400");
+
+      if (kind === 'Market') {
+        mBtn.className = "py-1.5 rounded-lg font-bold bg-white/10 text-white";
+        grp.classList.add('hidden');
+      } else {
+        grp.classList.remove('hidden');
+        if (kind === 'Limit') {
+          lBtn.className = "py-1.5 rounded-lg font-bold bg-blue-500 text-white";
+          label.innerText = "Target Limit Price ($)";
+          guidance.innerText = state.currentTradeType === 'Buy' ? "Fills only when market price drops to or below this target." : "Fills only when market price rises to or above this target.";
+          if (state.selectedStock) document.getElementById('tradeLimitPriceInput').value = state.selectedStock.price.toFixed(2);
+        } else if (kind === 'Stop Loss') {
+          slBtn.className = "py-1.5 rounded-lg font-bold bg-red-500 text-white";
+          setTradeType('Sell'); // Stop Loss is an exit risk order
+          label.innerText = "Stop Trigger Price ($)";
+          guidance.innerText = "Automatically sells your shares if price drops below this level to cut losses.";
+          if (state.selectedStock) document.getElementById('tradeLimitPriceInput').value = (state.selectedStock.price * 0.95).toFixed(2);
+        } else if (kind === 'Take Profit') {
+          tpBtn.className = "py-1.5 rounded-lg font-bold bg-emerald-500 text-black";
+          setTradeType('Sell'); // Take Profit locks in gains
+          label.innerText = "Profit Target Price ($)";
+          guidance.innerText = "Automatically sells your shares when price surges to this target to secure profits.";
+          if (state.selectedStock) document.getElementById('tradeLimitPriceInput').value = (state.selectedStock.price * 1.10).toFixed(2);
+        }
+      }
+
+      updateTradeCalculations();
+    }
+
+    function cancelLimitOrder(id) {
+      const order = state.pendingOrders.find(o => o.id === id);
+      if (order) {
+        order.status = 'cancelled';
+        saveState();
+        renderHistoryList();
+        showToast(`Cancelled order for ${order.symbol}`, true);
+      }
+    }
+
+    function checkLimitOrders() {
+      if (!state.pendingOrders || state.pendingOrders.length === 0) return;
+      state.pendingOrders.forEach(o => {
+        if (o.status !== 'pending') return;
+        const stock = state.stocks.find(s => s.symbol === o.symbol);
+        if (!stock) return;
+
+        let shouldExecute = false;
+        const kind = o.kind || 'Limit';
+
+        if (kind === 'Limit') {
+          if (o.type === 'Buy' && stock.price <= o.targetPrice) shouldExecute = true;
+          if (o.type === 'Sell' && stock.price >= o.targetPrice) shouldExecute = true;
+        } else if (kind === 'Stop Loss') {
+          if (stock.price <= o.targetPrice) shouldExecute = true;
+        } else if (kind === 'Take Profit') {
+          if (stock.price >= o.targetPrice) shouldExecute = true;
+        }
+
+        if (shouldExecute) {
+          o.status = 'filled';
+          const totalCost = o.shares * stock.price;
+
+          if (o.type === 'Buy') {
+            state.cashBalance -= totalCost;
+            if (!state.positions[stock.symbol]) {
+              state.positions[stock.symbol] = { shares: 0, totalCost: 0 };
+            }
+            state.positions[stock.symbol].shares += o.shares;
+            state.positions[stock.symbol].totalCost += totalCost;
+
+            state.transactions.unshift({
+              id: Date.now(),
+              type: 'Buy',
+              symbol: stock.symbol,
+              shares: o.shares,
+              price: stock.price,
+              amount: totalCost,
+              date: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+              note: `⚡ ${kind} Buy Filled @ ${formatMoney(stock.price)}`
+            });
+          } else {
+            const pos = state.positions[stock.symbol];
+            if (pos) {
+              const costPerShare = pos.totalCost / pos.shares;
+              const soldBasis = o.shares * costPerShare;
+              state.cashBalance += totalCost;
+              pos.shares -= o.shares;
+              pos.totalCost -= soldBasis;
+              if (pos.shares <= 0.001) delete state.positions[stock.symbol];
+
+              state.transactions.unshift({
+                id: Date.now(),
+                type: 'Sell',
+                symbol: stock.symbol,
+                shares: o.shares,
+                price: stock.price,
+                amount: totalCost,
+                date: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                note: `⚡ ${kind} Sell Filled @ ${formatMoney(stock.price)}`
+              });
+            }
+          }
+
+          saveState();
+          updateHero();
+          showToast(`⚡ ${kind} Triggered: Sold ${o.shares.toFixed(2)} ${o.symbol} @ ${formatMoney(stock.price)}!`, true);
+        }
+      });
+    }
+
+    function openTradeModal(type) {
+      if (!state.selectedStock) return;
+      state.currentTradeType = type;
+      setOrderKind('Market');
+      document.getElementById('modalTrade').classList.remove('hidden');
+      setTradeType(type);
+    }
+
+    function closeTradeModal() {
+      document.getElementById('modalTrade').classList.add('hidden');
+    }
+
+    function setTradeType(type) {
+      state.currentTradeType = type;
+      const buyBtn = document.getElementById('tradeTypeBuyBtn');
+      const sellBtn = document.getElementById('tradeTypeSellBtn');
+      const modalTitle = document.getElementById('tradeModalTitle');
+
+      modalTitle.innerText = `${type} ${state.selectedStock.symbol}`;
+
+      if (type === 'Buy') {
+        buyBtn.className = "py-2 rounded-lg font-bold bg-emerald-500 text-black";
+        sellBtn.className = "py-2 rounded-lg font-bold text-gray-400";
+        document.getElementById('tradeAvailableLabel').innerText = "Available Paper Cash:";
+        document.getElementById('tradeAvailableValue').innerText = formatMoney(state.cashBalance);
+      } else {
+        sellBtn.className = "py-2 rounded-lg font-bold bg-red-500 text-white";
+        buyBtn.className = "py-2 rounded-lg font-bold text-gray-400";
+        document.getElementById('tradeAvailableLabel').innerText = "Shares Owned:";
+        const pos = state.positions[state.selectedStock.symbol];
+        document.getElementById('tradeAvailableValue').innerText = `${pos ? pos.shares.toFixed(2) : '0.00'} shares`;
+      }
+
+      updateTradeCalculations();
+    }
+
+    function setPercentShares(fraction) {
+      if (!state.selectedStock) return;
+      const curPrice = state.orderKind !== 'Market' ? parseFloat(document.getElementById('tradeLimitPriceInput').value || state.selectedStock.price) : state.selectedStock.price;
+
+      if (state.currentTradeType === 'Buy') {
+        const availableCash = state.cashBalance * fraction;
+        const count = Math.floor((availableCash / curPrice) * 100) / 100;
+        document.getElementById('tradeSharesInput').value = count > 0 ? count : 0;
+      } else {
+        const pos = state.positions[state.selectedStock.symbol];
+        const owned = pos ? pos.shares : 0;
+        const count = Math.floor((owned * fraction) * 100) / 100;
+        document.getElementById('tradeSharesInput').value = count > 0 ? count : 0;
+      }
+      updateTradeCalculations();
+    }
+
+    function setMaxShares() {
+      setPercentShares(1.0);
+    }
+
+    function updateTradeCalculations() {
+      if (!state.selectedStock) return;
+      const shares = parseFloat(document.getElementById('tradeSharesInput').value) || 0;
+      let effPrice = state.selectedStock.price;
+
+      if (state.orderKind !== 'Market') {
+        const inputLimit = parseFloat(document.getElementById('tradeLimitPriceInput').value);
+        if (inputLimit && inputLimit > 0) effPrice = inputLimit;
+      }
+
+      const total = shares * effPrice;
+      document.getElementById('tradeSummaryPrice').innerText = formatMoney(effPrice);
+      document.getElementById('tradeSummaryTotal').innerText = formatMoney(total);
+
+      const cashRem = state.currentTradeType === 'Buy'
+        ? Math.max(0, state.cashBalance - total)
+        : state.cashBalance + total;
+
+      document.getElementById('tradeSummaryCashRemaining').innerText = formatMoney(cashRem);
+
+      const submitBtn = document.getElementById('btnExecuteTrade');
+      if (state.orderKind === 'Market') {
+        submitBtn.innerText = `Confirm Paper ${state.currentTradeType}`;
+        submitBtn.className = state.currentTradeType === 'Buy'
+          ? "tap-effect w-full py-3.5 rounded-2xl bg-emerald-500 hover:bg-emerald-400 text-black font-black text-sm green-glow"
+          : "tap-effect w-full py-3.5 rounded-2xl bg-red-500 hover:bg-red-400 text-white font-black text-sm";
+      } else {
+        submitBtn.innerText = `Place ${state.orderKind} @ ${formatMoney(effPrice)}`;
+        submitBtn.className = state.orderKind === 'Stop Loss'
+          ? "tap-effect w-full py-3.5 rounded-2xl bg-red-500 hover:bg-red-400 text-white font-black text-sm"
+          : "tap-effect w-full py-3.5 rounded-2xl bg-amber-400 hover:bg-amber-300 text-black font-black text-sm";
+      }
+    }
+
+    function executeTrade() {
+      const shares = parseFloat(document.getElementById('tradeSharesInput').value);
+      if (!shares || shares <= 0) {
+        showToast("Please enter a valid share count > 0", false);
+        return;
+      }
+
+      let effPrice = state.selectedStock.price;
+      if (state.orderKind !== 'Market') {
+        effPrice = parseFloat(document.getElementById('tradeLimitPriceInput').value) || effPrice;
+      }
+
+      const total = shares * effPrice;
+
+      // Pending Order Placement (Limit, Stop Loss, Take Profit)
+      if (state.orderKind !== 'Market') {
+        if (state.currentTradeType === 'Buy' && state.cashBalance < total) {
+          showToast("Insufficient cash for order reserve!", false);
+          return;
+        }
+        if (state.currentTradeType === 'Sell') {
+          const pos = state.positions[state.selectedStock.symbol];
+          if (!pos || pos.shares < shares) {
+            showToast("Cannot place sell order for more shares than owned!", false);
+            return;
+          }
+        }
+
+        state.pendingOrders.unshift({
+          id: Date.now(),
+          symbol: state.selectedStock.symbol,
+          type: state.currentTradeType,
+          kind: state.orderKind,
+          shares: shares,
+          targetPrice: effPrice,
+          status: 'pending',
+          date: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        });
+
+        saveState();
+        closeTradeModal();
+        showToast(`${state.orderKind} placed for ${shares.toFixed(2)} ${state.selectedStock.symbol} @ ${formatMoney(effPrice)}`, true);
+        return;
+      }
+
+      // Market Execution
+      if (state.currentTradeType === 'Buy') {
+        if (state.cashBalance < total) {
+          showToast(`Insufficient funds: Need ${formatMoney(total)}`, false);
+          return;
+        }
+
+        state.cashBalance -= total;
+        if (!state.positions[state.selectedStock.symbol]) {
+          state.positions[state.selectedStock.symbol] = { shares: 0, totalCost: 0 };
+        }
+        state.positions[state.selectedStock.symbol].shares += shares;
+        state.positions[state.selectedStock.symbol].totalCost += total;
+
+        state.transactions.unshift({
+          id: Date.now(),
+          type: 'Buy',
+          symbol: state.selectedStock.symbol,
+          shares: shares,
+          price: state.selectedStock.price,
+          amount: total,
+          date: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          note: 'Market Execution'
+        });
+
+        saveState();
+        updateHero();
+        closeTradeModal();
+        showToast(`Bought ${shares.toFixed(2)} ${state.selectedStock.symbol} for ${formatMoney(total)}`, true);
+      } else {
+        const pos = state.positions[state.selectedStock.symbol];
+        if (!pos || pos.shares < shares) {
+          showToast(`Cannot sell ${shares.toFixed(2)} shares (You own ${pos ? pos.shares.toFixed(2) : 0})`, false);
+          return;
+        }
+
+        const costPerShare = pos.totalCost / pos.shares;
+        const soldBasis = shares * costPerShare;
+
+        state.cashBalance += total;
+        pos.shares -= shares;
+        pos.totalCost -= soldBasis;
+
+        if (pos.shares <= 0.0001) {
+          delete state.positions[state.selectedStock.symbol];
+        }
+
+        state.transactions.unshift({
+          id: Date.now(),
+          type: 'Sell',
+          symbol: state.selectedStock.symbol,
+          shares: shares,
+          price: state.selectedStock.price,
+          amount: total,
+          date: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          note: 'Market Execution'
+        });
+
+        saveState();
+        updateHero();
+        closeTradeModal();
+        showToast(`Sold ${shares.toFixed(2)} ${state.selectedStock.symbol} for +${formatMoney(total)}`, true);
+      }
+    }
+
+    // ==================== CSV STATEMENT EXPORT ====================
+    function openExportModal() {
+      let csv = "Timestamp,Type,Symbol,Shares,Price,TotalAmount,Note\n";
+      state.transactions.forEach(t => {
+        csv += `${t.date},${t.type},${t.symbol || ''},${t.shares ? t.shares.toFixed(4) : ''},${t.price ? t.price.toFixed(2) : ''},${t.amount.toFixed(2)},"${(t.note || '').replace(/"/g, '""')}"\n`;
+      });
+      document.getElementById('csvExportArea').value = csv;
+      document.getElementById('modalExport').classList.remove('hidden');
+    }
+
+    function closeExportModal() {
+      document.getElementById('modalExport').classList.add('hidden');
+    }
+
+    function copyCSVToClipboard() {
+      const area = document.getElementById('csvExportArea');
+      area.select();
+      navigator.clipboard.writeText(area.value);
+      showToast("CSV Copied to Clipboard!", true);
+    }
+
+    // ==================== TOAST MESSAGES ====================
+    let toastTimeout = null;
+    function showToast(msg, isSuccess) {
+      const banner = document.getElementById('toastBanner');
+      const icon = document.getElementById('toastIconContainer');
+      const title = document.getElementById('toastTitle');
+      const body = document.getElementById('toastMessage');
+
+      title.innerText = isSuccess ? "Success" : "Notice";
+      body.innerText = msg;
+
+      if (isSuccess) {
+        icon.className = "w-8 h-8 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold text-sm";
+        icon.innerText = "✓";
+      } else {
+        icon.className = "w-8 h-8 rounded-full bg-amber-500/20 text-amber-400 flex items-center justify-center font-bold text-sm";
+        icon.innerText = "!";
+      }
+
+      banner.classList.remove('opacity-0', '-translate-y-20', 'pointer-events-none');
+      banner.classList.add('opacity-100', 'translate-y-0');
+
+      if (toastTimeout) clearTimeout(toastTimeout);
+      toastTimeout = setTimeout(() => {
+        banner.classList.remove('opacity-100', 'translate-y-0');
+        banner.classList.add('opacity-0', '-translate-y-20', 'pointer-events-none');
+      }, 3500);
+    }
+
+    function dismissSimWelcome() {
+      const card = document.getElementById('simWelcomeCard');
+      if (card) card.classList.add('hidden');
+      state.hasDismissedWelcome = true;
+      saveState();
+    }
+
+    const LEGAL_DOCS = {
+      disclaimer: {
+        title: "Regulatory Disclaimer",
+        icon: "🛡️",
+        body: `
+          <div class="font-bold text-white text-sm">Educational Stock Simulator</div>
+          <p>Paper Money is strictly an educational application. All balances, buying power, equity values, deposits, buys, and sells are 100% simulated paper currency with zero real-world monetary value.</p>
+          <div class="font-bold text-white text-sm pt-2">Not a Brokerage or Investment Advisor</div>
+          <p>Paper Money is NOT a registered broker-dealer, financial adviser, or member of FINRA/SIPC. It does not route real market orders to any exchange or hold customer funds.</p>
+        `
+      },
+      privacy: {
+        title: "App Privacy Policy",
+        icon: "🔒",
+        body: `
+          <div class="font-bold text-white text-sm">Zero Personal Data Collection</div>
+          <p>We collect no names, email addresses, phone numbers, or passwords. No account registration is required.</p>
+          <div class="font-bold text-white text-sm pt-2">Apple iCloud Storage</div>
+          <p>Your portfolio holdings, transactions, and price alerts are stored locally on your device and synchronized via your private Apple iCloud NSUbiquitousKeyValueStore.</p>
+          <div class="font-bold text-white text-sm pt-2">Single AdMob Launch Sponsorship</div>
+          <p>Displays once on app cold launch with zero sticky banner interruptions during trading.</p>
+        `
+      },
+      terms: {
+        title: "Terms of Service",
+        icon: "📄",
+        body: `
+          <div class="font-bold text-white text-sm">Permitted Educational Use</div>
+          <p>Paper Money is provided for educational practice only. All simulated trades are subject to virtual assumptions.</p>
+          <div class="font-bold text-white text-sm pt-2">Limitation of Liability</div>
+          <p>The developers are not liable for any real-world financial losses resulting from investment decisions made outside this simulation.</p>
+        `
+      }
+    };
+
+    function showLegalModal(type) {
+      const doc = LEGAL_DOCS[type] || LEGAL_DOCS.disclaimer;
+      document.getElementById('legalModalTitle').innerText = doc.title;
+      document.getElementById('legalModalIcon').innerText = doc.icon;
+      document.getElementById('legalModalBody').innerHTML = doc.body;
+      document.getElementById('modalLegal').classList.remove('hidden');
+    }
+
+    function closeLegalModal() {
+      document.getElementById('modalLegal').classList.add('hidden');
+    }
+
+    // ==================== APP SETTINGS & DIAGNOSTICS ====================
+    function openSettingsModal() {
+      document.getElementById('settingsLastSyncTime').innerText = state.lastSyncTime || 'Just now';
+      updateSettingsTogglesUI();
+      document.getElementById('modalSettings').classList.remove('hidden');
+    }
+
+    function closeSettingsModal() {
+      document.getElementById('modalSettings').classList.add('hidden');
+    }
+
+    function triggerForceSync() {
+      const now = new Date();
+      state.lastSyncTime = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+      document.getElementById('settingsLastSyncTime').innerText = state.lastSyncTime;
+      saveState();
+      showToast('iCloud Synced', '0 conflicts · Ubiquitous state up to date');
+    }
+
+    function resetWithCapital(amount) {
+      if (!confirm(`Reset paper account to starting capital of ${formatMoney(amount)}? All active holdings and orders will be cleared.`)) {
+        return;
+      }
+      state.cashBalance = amount;
+      state.totalDeposited = amount;
+      state.positions = {};
+      state.pendingOrders = [];
+      state.priceAlerts = [];
+      state.transactions = [{
+        id: Date.now(),
+        type: 'Deposit',
+        amount: amount,
+        date: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        note: `Account Reset Grant (${formatMoney(amount)})`
+      }];
+      saveState();
+      updateHero();
+      renderMarketList();
+      renderHistoryList();
+      closeSettingsModal();
+      showToast('Account Reset', `Clean balance of ${formatMoney(amount)} deposited`);
+    }
+
+    function toggleHapticsSetting() {
+      state.hapticsEnabled = !state.hapticsEnabled;
+      saveState();
+      updateSettingsTogglesUI();
+      showToast('Settings Updated', `Haptic Feedback ${state.hapticsEnabled ? 'Enabled' : 'Disabled'}`);
+    }
+
+    function toggleTicksSetting() {
+      state.ticksEnabled = !state.ticksEnabled;
+      saveState();
+      updateSettingsTogglesUI();
+      showToast('Settings Updated', `Micro-ticks ${state.ticksEnabled ? 'Resumed' : 'Paused'}`);
+    }
+
+    function updateSettingsTogglesUI() {
+      const privToggle = document.getElementById('settingsPrivacyToggle');
+      const privKnob = document.getElementById('settingsPrivacyKnob');
+      if (privToggle && privKnob) {
+        if (state.isPrivacyMode) {
+          privToggle.className = "w-11 h-6 rounded-full bg-emerald-500 p-0.5 transition flex items-center";
+          privKnob.className = "w-5 h-5 rounded-full bg-black shadow transform translate-x-5 transition";
+        } else {
+          privToggle.className = "w-11 h-6 rounded-full bg-white/10 p-0.5 transition flex items-center";
+          privKnob.className = "w-5 h-5 rounded-full bg-white shadow transform translate-x-0 transition";
+        }
+      }
+
+      const hapToggle = document.getElementById('settingsHapticToggle');
+      const hapKnob = document.getElementById('settingsHapticKnob');
+      if (hapToggle && hapKnob) {
+        if (state.hapticsEnabled) {
+          hapToggle.className = "w-11 h-6 rounded-full bg-emerald-500 p-0.5 transition flex items-center";
+          hapKnob.className = "w-5 h-5 rounded-full bg-black shadow transform translate-x-5 transition";
+        } else {
+          hapToggle.className = "w-11 h-6 rounded-full bg-white/10 p-0.5 transition flex items-center";
+          hapKnob.className = "w-5 h-5 rounded-full bg-white shadow transform translate-x-0 transition";
+        }
+      }
+
+      const tickToggle = document.getElementById('settingsTicksToggle');
+      const tickKnob = document.getElementById('settingsTicksKnob');
+      if (tickToggle && tickKnob) {
+        if (state.ticksEnabled) {
+          tickToggle.className = "w-11 h-6 rounded-full bg-emerald-500 p-0.5 transition flex items-center";
+          tickKnob.className = "w-5 h-5 rounded-full bg-black shadow transform translate-x-5 transition";
+        } else {
+          tickToggle.className = "w-11 h-6 rounded-full bg-white/10 p-0.5 transition flex items-center";
+          tickKnob.className = "w-5 h-5 rounded-full bg-white shadow transform translate-x-0 transition";
+        }
+      }
+    }
+
+    // ==================== LIVE MARKET TICK SIMULATION ====================
+    setInterval(() => {
+      if (!state.ticksEnabled) return;
+      state.stocks.forEach(s => {
+        const deltaPct = (Math.random() - 0.49) * 0.007; // ±0.35% micro-fluctuation
+        s.price = Math.round((s.price * (1 + deltaPct)) * 100) / 100;
+        s.spark.push(s.price);
+        if (s.spark.length > 30) s.spark.shift();
+      });
+
+      checkLimitOrders();
+      checkPriceAlerts();
+
+      if (state.activeTab === 'portfolio') updateHero();
+      if (state.activeTab === 'market') renderMarketList();
+      if (state.activeTab === 'history') renderHistoryList();
+
+      if (state.selectedStock && !document.getElementById('modalStockDetail').classList.contains('hidden')) {
+        const cur = state.stocks.find(s => s.symbol === state.selectedStock.symbol);
+        if (cur) {
+          document.getElementById('detailPrice').innerText = formatMoney(cur.price);
+          const chg = cur.price - cur.prevClose;
+          const chgPct = (chg / cur.prevClose) * 100;
+          const isPos = chg >= 0;
+          const badge = document.getElementById('detailChangeBadge');
+          badge.innerText = `${isPos ? '+' : ''}${formatMoney(chg)} (${chgPct.toFixed(2)}%)`;
+          badge.className = `text-xs font-bold ${isPos ? 'text-emerald-400' : 'text-red-400'}`;
+        }
+      }
+    }, 4000);
+
+    // ==================== INITIALIZATION ====================
+    window.addEventListener('DOMContentLoaded', () => {
+      loadState();
+      updateHero();
+      initLaunchAd();
+
+      // Update status bar clock
+      const now = new Date();
+      document.getElementById('statusBarTime').innerText = now.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+    });
+  </script>
+</body>
+</html>
