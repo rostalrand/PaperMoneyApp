@@ -3,8 +3,6 @@ import SwiftUI
 public struct PortfolioView: View {
     @ObservedObject var viewModel: PortfolioViewModel
     @State private var showDepositSheet: Bool = false
-    @State private var selectedStockForDetail: Stock? = nil
-    @State private var showSettingsSheet: Bool = false
     @AppStorage("has_dismissed_welcome_guide") private var hasDismissedWelcomeGuide: Bool = false
 
     public init(viewModel: PortfolioViewModel) {
@@ -46,25 +44,13 @@ public struct PortfolioView: View {
                 await viewModel.fetchLiveMarketData()
             }
             .navigationTitle("Paper Portfolio")
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button {
-                        showSettingsSheet = true
-                    } label: {
-                        Image(systemName: "gearshape.fill")
-                            .font(.system(size: 16, weight: .medium))
-                            .foregroundColor(.secondary)
-                    }
-                }
+            .navigationDestination(for: Stock.self) { stock in
+                StockDetailView(stock: stock, viewModel: viewModel)
             }
             .sheet(isPresented: $showDepositSheet) {
                 DepositSheetView(viewModel: viewModel)
-            }
-            .sheet(item: $selectedStockForDetail) { stock in
-                StockDetailView(stock: stock, viewModel: viewModel)
-            }
-            .sheet(isPresented: $showSettingsSheet) {
-                SettingsView(viewModel: viewModel)
+                    .presentationDetents([.medium, .large])
+                    .presentationDragIndicator(.visible)
             }
         }
     }
@@ -115,15 +101,13 @@ public struct PortfolioView: View {
                     Text("·")
                         .foregroundColor(.secondary)
 
-                    Button {
-                        if let first = viewModel.stocks.first {
-                            selectedStockForDetail = first
+                    if let first = viewModel.stocks.first {
+                        NavigationLink(value: first) {
+                            Text("Start Trading")
+                                .font(.caption2)
+                                .fontWeight(.bold)
+                                .foregroundColor(.blue)
                         }
-                    } label: {
-                        Text("Start Trading")
-                            .font(.caption2)
-                            .fontWeight(.bold)
-                            .foregroundColor(.blue)
                     }
                 }
                 .padding(.top, 2)
@@ -214,7 +198,9 @@ public struct PortfolioView: View {
 
     // MARK: - Action Buttons
     private var quickActionButtons: some View {
-        HStack(spacing: 12) {
+        let topMover = viewModel.stocks.max(by: { $0.changePercent < $1.changePercent }) ?? viewModel.stocks.first
+
+        return HStack(spacing: 12) {
             Button {
                 showDepositSheet = true
             } label: {
@@ -230,22 +216,19 @@ public struct PortfolioView: View {
                 .cornerRadius(14)
             }
 
-            Button {
-                // Explore stocks action
-                if let first = viewModel.stocks.first {
-                    selectedStockForDetail = first
+            if let mover = topMover {
+                NavigationLink(value: mover) {
+                    HStack {
+                        Image(systemName: "chart.line.uptrend.xyaxis")
+                        Text("Top Mover")
+                            .fontWeight(.semibold)
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 14)
+                    .background(Color(UIColor.tertiarySystemGroupedBackground))
+                    .foregroundColor(.primary)
+                    .cornerRadius(14)
                 }
-            } label: {
-                HStack {
-                    Image(systemName: "chart.line.uptrend.xyaxis")
-                    Text("Top Mover")
-                        .fontWeight(.semibold)
-                }
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 14)
-                .background(Color(UIColor.tertiarySystemGroupedBackground))
-                .foregroundColor(.primary)
-                .cornerRadius(14)
             }
         }
     }
@@ -380,21 +363,19 @@ public struct PortfolioView: View {
                         .multilineTextAlignment(.center)
                         .padding(.horizontal, 24)
 
-                    Button {
-                        if let first = viewModel.stocks.first {
-                            selectedStockForDetail = first
+                    if let first = viewModel.stocks.first {
+                        NavigationLink(value: first) {
+                            Text("Browse Stock Market")
+                                .font(.footnote)
+                                .fontWeight(.semibold)
+                                .padding(.horizontal, 16)
+                                .padding(.vertical, 8)
+                                .background(Color.green.opacity(0.15))
+                                .foregroundColor(.green)
+                                .cornerRadius(10)
                         }
-                    } label: {
-                        Text("Browse Stock Market")
-                            .font(.footnote)
-                            .fontWeight(.semibold)
-                            .padding(.horizontal, 16)
-                            .padding(.vertical, 8)
-                            .background(Color.green.opacity(0.15))
-                            .foregroundColor(.green)
-                            .cornerRadius(10)
+                        .padding(.top, 4)
                     }
-                    .padding(.top, 4)
                 }
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 36)
@@ -403,19 +384,16 @@ public struct PortfolioView: View {
             } else {
                 VStack(spacing: 0) {
                     ForEach(viewModel.positions) { position in
-                        let stock = viewModel.getStock(for: position.symbol)
-                        Button {
-                            if let s = stock {
-                                selectedStockForDetail = s
+                        if let stock = viewModel.getStock(for: position.symbol) {
+                            NavigationLink(value: stock) {
+                                PositionRowView(position: position, stock: stock)
                             }
-                        } label: {
-                            PositionRowView(position: position, stock: stock)
-                        }
-                        .buttonStyle(.plain)
+                            .buttonStyle(.plain)
 
-                        if position.id != viewModel.positions.last?.id {
-                            Divider()
-                                .padding(.leading, 8)
+                            if position.id != viewModel.positions.last?.id {
+                                Divider()
+                                    .padding(.leading, 8)
+                            }
                         }
                     }
                 }

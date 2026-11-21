@@ -432,6 +432,41 @@ final class PortfolioTests: XCTestCase {
         XCTAssertEqual(terms.title, "Terms of Service")
     }
 
+    func testCancelLimitOrder() {
+        let result = viewModel.placeLimitOrder(symbol: "NVDA", type: .buy, shares: 5, targetPrice: 100.0)
+        XCTAssertTrue(caseIsSuccess(result))
+        guard let order = viewModel.pendingOrders.first else {
+            XCTFail("Limit order not found")
+            return
+        }
+        XCTAssertEqual(order.status, .pending)
+
+        viewModel.cancelLimitOrder(id: order.id)
+        let updated = viewModel.pendingOrders.first(where: { $0.id == order.id })
+        XCTAssertEqual(updated?.status, .cancelled)
+    }
+
+    func testRemovePriceAlert() {
+        viewModel.addPriceAlert(symbol: "TSLA", targetPrice: 250.0, condition: .above)
+        XCTAssertEqual(viewModel.priceAlerts.count, 1)
+        guard let alert = viewModel.priceAlerts.first else {
+            XCTFail("Price alert not found")
+            return
+        }
+
+        viewModel.removePriceAlert(id: alert.id)
+        XCTAssertEqual(viewModel.priceAlerts.count, 0)
+    }
+
+    func testAccountResetWithCustomAmount() {
+        viewModel.resetAccount(startingDeposit: 250_000.0)
+        XCTAssertEqual(viewModel.cashBalance, 250_000.0)
+        XCTAssertEqual(viewModel.totalDeposited, 250_000.0)
+        XCTAssertEqual(viewModel.positions.count, 0)
+        XCTAssertEqual(viewModel.transactions.count, 1)
+        XCTAssertEqual(viewModel.transactions.first?.totalAmount, 250_000.0)
+    }
+
     private func caseIsSuccess<T, E>(_ result: Result<T, E>) -> Bool {
         switch result {
         case .success: return true

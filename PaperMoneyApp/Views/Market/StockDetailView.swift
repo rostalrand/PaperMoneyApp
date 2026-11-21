@@ -33,79 +33,76 @@ public struct StockDetailView: View {
     }
 
     public var body: some View {
-        NavigationStack {
-            ZStack(alignment: .bottom) {
-                ScrollView {
-                    VStack(alignment: .leading, spacing: 20) {
-                        // Header Price and Change
-                        priceHeaderSection
+        ZStack(alignment: .bottom) {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 20) {
+                    // Header Price and Change
+                    priceHeaderSection
 
-                        // Interactive Chart
-                        chartSection
+                    // Interactive Chart
+                    chartSection
 
-                        // User's Position if held
-                        if let pos = ownedPosition {
-                            userPositionCard(pos)
-                        }
-
-                        // Key Statistics Grid
-                        keyStatisticsSection
-
-                        // Company About
-                        aboutSection
-
-                        // Market News & Sentiment Section
-                        newsSection
-
-                        // Bottom padding for sticky button
-                        Spacer().frame(height: 80)
+                    // User's Position if held
+                    if let pos = ownedPosition {
+                        userPositionCard(pos)
                     }
-                    .padding(.horizontal, 16)
-                    .padding(.top, 12)
-                }
 
-                // Sticky Bottom Trade Bar
-                bottomTradeBar
+                    // Key Statistics Grid
+                    keyStatisticsSection
+
+                    // Company About
+                    aboutSection
+
+                    // Market News & Sentiment Section
+                    newsSection
+
+                    // Bottom padding for sticky button
+                    Spacer().frame(height: 80)
+                }
+                .padding(.horizontal, 16)
+                .padding(.top, 12)
             }
-            .navigationTitle(liveStock.symbol)
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .topBarLeading) {
-                    Button("Done") {
-                        dismiss()
-                    }
-                }
-                ToolbarItem(placement: .topBarTrailing) {
-                    HStack(spacing: 14) {
-                        Button {
-                            alertTargetPriceText = String(format: "%.2f", liveStock.currentPrice)
-                            showPriceAlertSheet = true
-                        } label: {
-                            Image(systemName: "bell.badge")
-                                .foregroundColor(.primary)
-                        }
 
-                        Button {
-                            viewModel.toggleWatchlist(symbol: liveStock.symbol)
-                        } label: {
-                            Image(systemName: isWatchlisted ? "star.fill" : "star")
-                                .foregroundColor(isWatchlisted ? .yellow : .secondary)
-                        }
+            // Sticky Bottom Trade Bar
+            bottomTradeBar
+        }
+        .navigationTitle(liveStock.symbol)
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                HStack(spacing: 14) {
+                    Button {
+                        alertTargetPriceText = String(format: "%.2f", liveStock.currentPrice)
+                        showPriceAlertSheet = true
+                    } label: {
+                        Image(systemName: "bell.badge")
+                            .foregroundColor(.primary)
+                    }
+
+                    Button {
+                        viewModel.toggleWatchlist(symbol: liveStock.symbol)
+                    } label: {
+                        Image(systemName: isWatchlisted ? "star.fill" : "star")
+                            .foregroundColor(isWatchlisted ? .yellow : .secondary)
                     }
                 }
             }
-            .onAppear {
-                loadChart()
-            }
-            .onChange(of: selectedTimeframe) { _ in
-                loadChart()
-            }
-            .sheet(isPresented: $showTradeSheet) {
-                TradeSheetView(stock: liveStock, viewModel: viewModel, initialTradeType: tradeType)
-            }
-            .sheet(isPresented: $showPriceAlertSheet) {
-                priceAlertSheetView
-            }
+        }
+        .onAppear {
+            loadChart()
+        }
+        .onChange(of: selectedTimeframe) { _ in
+            loadChart()
+        }
+        .sheet(isPresented: $showTradeSheet) {
+            TradeSheetView(stock: liveStock, viewModel: viewModel, initialTradeType: tradeType)
+                .presentationDetents([.medium, .large])
+                .presentationDragIndicator(.visible)
+        }
+        .sheet(isPresented: $showPriceAlertSheet) {
+            priceAlertSheetView
+                .presentationDetents([.medium])
+                .presentationDragIndicator(.visible)
         }
     }
 

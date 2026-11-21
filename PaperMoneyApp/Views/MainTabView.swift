@@ -21,7 +21,12 @@ public struct MainTabView: View {
 
                 HistoryView(viewModel: viewModel)
                     .tabItem {
-                        Label("History", systemImage: "clock.arrow.circlepath")
+                        Label("Activity", systemImage: "clock.arrow.circlepath")
+                    }
+
+                SettingsView(viewModel: viewModel)
+                    .tabItem {
+                        Label("Settings", systemImage: "gearshape.fill")
                     }
             }
             .tint(.green)

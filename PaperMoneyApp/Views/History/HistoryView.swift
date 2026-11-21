@@ -1,17 +1,26 @@
 import SwiftUI
 
+public enum HistoryDomain: String, CaseIterable, Identifiable {
+    case activity = "Activity"
+    case orders = "Orders"
+    case alerts = "Alerts"
+
+    public var id: String { rawValue }
+}
+
 public struct HistoryView: View {
     @ObservedObject var viewModel: PortfolioViewModel
-    @State private var selectedFilter: String = "All"
+    @State private var selectedDomain: HistoryDomain = .activity
+    @State private var activityFilter: String = "All"
 
-    private let filterOptions = ["All", "Orders", "Alerts", "Deposits", "Buys", "Sells"]
+    private let activityFilterOptions = ["All", "Buys", "Sells", "Deposits"]
 
     public init(viewModel: PortfolioViewModel) {
         self.viewModel = viewModel
     }
 
     private var filteredTransactions: [Transaction] {
-        switch selectedFilter {
+        switch activityFilter {
         case "Deposits":
             return viewModel.transactions.filter { $0.type == .deposit }
         case "Buys":
@@ -26,20 +35,26 @@ public struct HistoryView: View {
     public var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
-                // Filter Segment
-                Picker("Filter", selection: $selectedFilter) {
-                    ForEach(filterOptions, id: \.self) { filter in
-                        Text(filter).tag(filter)
+                // Tier 1: Primary Domain Segment (Activity, Orders, Alerts)
+                Picker("Domain", selection: $selectedDomain) {
+                    ForEach(HistoryDomain.allCases) { domain in
+                        Text(domain.rawValue).tag(domain)
                     }
                 }
                 .pickerStyle(.segmented)
                 .padding(.horizontal, 16)
-                .padding(.vertical, 8)
+                .padding(.top, 8)
+                .padding(.bottom, 6)
 
                 // Trader Performance Card
                 analyticsCard
 
-                if selectedFilter == "Orders" {
+                // Tier 2: Activity Sub-filter Pills (Only shown when domain is Activity)
+                if selectedDomain == .activity {
+                    activityFilterPills
+                }
+
+                if selectedDomain == .orders {
                     if viewModel.pendingOrders.isEmpty {
                         VStack(spacing: 12) {
                             Image(systemName: "clock.badge.checkmark")
@@ -59,11 +74,20 @@ public struct HistoryView: View {
                         List {
                             ForEach(viewModel.pendingOrders) { order in
                                 orderRow(order)
+                                    .swipeActions(edge: .trailing) {
+                                        if order.status == .pending {
+                                            Button(role: .destructive) {
+                                                viewModel.cancelLimitOrder(id: order.id)
+                                            } label: {
+                                                Label("Cancel", systemImage: "xmark.circle")
+                                            }
+                                        }
+                                    }
                             }
                         }
                         .listStyle(.insetGrouped)
                     }
-                } else if selectedFilter == "Alerts" {
+                } else if selectedDomain == .alerts {
                     if viewModel.priceAlerts.isEmpty {
                         VStack(spacing: 12) {
                             Image(systemName: "bell.slash")
@@ -83,6 +107,13 @@ public struct HistoryView: View {
                         List {
                             ForEach(viewModel.priceAlerts) { alert in
                                 alertRow(alert)
+                                    .swipeActions(edge: .trailing) {
+                                        Button(role: .destructive) {
+                                            viewModel.removePriceAlert(id: alert.id)
+                                        } label: {
+                                            Label("Delete", systemImage: "trash")
+                                        }
+                                    }
                             }
                         }
                         .listStyle(.insetGrouped)
@@ -124,6 +155,34 @@ public struct HistoryView: View {
                     }
                 }
             }
+        }
+    }
+
+    // MARK: - Activity Filter Pills Bar
+    private var activityFilterPills: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: 8) {
+                ForEach(activityFilterOptions, id: \.self) { filter in
+                    Button {
+                        activityFilter = filter
+                    } label: {
+                        Text(filter)
+                            .font(.system(.footnote, design: .rounded, weight: .semibold))
+                            .padding(.horizontal, 14)
+                            .padding(.vertical, 6)
+                            .background(
+                                activityFilter == filter
+                                    ? Color.green
+                                    : Color(UIColor.secondarySystemGroupedBackground)
+                            )
+                            .foregroundColor(activityFilter == filter ? .white : .primary)
+                            .cornerRadius(16)
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 6)
         }
     }
 

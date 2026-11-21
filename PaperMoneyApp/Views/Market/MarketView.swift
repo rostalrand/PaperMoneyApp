@@ -4,7 +4,6 @@ public struct MarketView: View {
     @ObservedObject var viewModel: PortfolioViewModel
     @State private var searchText: String = ""
     @State private var selectedFilter: String = "All"
-    @State private var selectedStock: Stock? = nil
 
     private let filterOptions = ["All", "Watchlist ⭐", "Gainers 🟢", "Losers 🔴", "Tech", "ETFs"]
 
@@ -63,12 +62,9 @@ public struct MarketView: View {
                 } else {
                     List {
                         ForEach(filteredStocks) { stock in
-                            Button {
-                                selectedStock = stock
-                            } label: {
+                            NavigationLink(value: stock) {
                                 StockRowView(stock: stock)
                             }
-                            .buttonStyle(.plain)
                         }
                     }
                     .listStyle(.insetGrouped)
@@ -91,7 +87,7 @@ public struct MarketView: View {
             .refreshable {
                 await viewModel.fetchLiveMarketData()
             }
-            .sheet(item: $selectedStock) { stock in
+            .navigationDestination(for: Stock.self) { stock in
                 StockDetailView(stock: stock, viewModel: viewModel)
             }
         }

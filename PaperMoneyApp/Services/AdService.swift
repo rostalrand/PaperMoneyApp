@@ -34,6 +34,12 @@ public final class AdService: ObservableObject {
     public func triggerLaunchAdIfNeeded() {
         guard !hasShownLaunchAdThisSession else { return }
 
+        // First-launch grace period: allow the user to view their welcome grant first
+        guard StorageService.shared.hasInitialized else {
+            hasShownLaunchAdThisSession = true
+            return
+        }
+
         // Slight micro delay for smooth initial frame presentation
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) { [weak self] in
             guard let self = self, !self.hasShownLaunchAdThisSession else { return }

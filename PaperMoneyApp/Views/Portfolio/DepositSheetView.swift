@@ -6,7 +6,6 @@ public struct DepositSheetView: View {
 
     @State private var inputAmountText: String = ""
     @State private var depositNote: String = ""
-    @State private var showResetConfirmation: Bool = false
 
     private let presetAmounts: [Double] = [1_000, 5_000, 10_000, 50_000, 100_000, 1_000_000]
 
@@ -93,23 +92,8 @@ public struct DepositSheetView: View {
                         .padding(.vertical, 4)
                     }
                     .disabled(parsedAmount <= 0)
-                }
-
-                // Account Reset Option
-                Section {
-                    Button(role: .destructive) {
-                        showResetConfirmation = true
-                    } label: {
-                        HStack {
-                            Spacer()
-                            Image(systemName: "arrow.counterclockwise")
-                            Text("Reset Entire Portfolio to $100k")
-                            Spacer()
-                        }
-                        .font(.footnote)
-                    }
                 } footer: {
-                    Text("100% simulated paper money. No login or bank account required — automatically synced to Apple iCloud if enabled.")
+                    Text("100% simulated paper money. Deposits immediately reflect in your trading purchasing power and sync across your Apple devices via iCloud.")
                         .font(.caption2)
                         .foregroundColor(.secondary)
                 }
@@ -122,15 +106,14 @@ public struct DepositSheetView: View {
                         dismiss()
                     }
                 }
-            }
-            .alert("Reset Portfolio?", isPresented: $showResetConfirmation) {
-                Button("Cancel", role: .cancel) {}
-                Button("Reset Account", role: .destructive) {
-                    viewModel.resetAccount()
-                    dismiss()
+                ToolbarItemGroup(placement: .keyboard) {
+                    Spacer()
+                    Button("Done") {
+                        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+                    }
+                    .font(.body.weight(.semibold))
+                    .foregroundColor(.green)
                 }
-            } message: {
-                Text("This will wipe all current stock holdings and order history, resetting your paper cash balance to $100,000.")
             }
         }
     }
