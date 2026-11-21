@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+# Git Pre-Commit Hook for PaperMoneyApp
+
+echo "Running pre-commit quality checks..."
+
+# 1. Check for leftover merge conflict markers
+if git diff --cached --name-only | xargs grep -E '^(<{7}|={7}|>{7})' 2>/dev/null; then
+    echo "ERROR: Merge conflict markers found in staged files. Please resolve before committing."
+    exit 1
+fi
+
+# 2. Check for private API keys or unintended secrets
+FORBIDDEN_PATTERNS="(ghp_[A-Za-z0-9]{36}|AIza[0-9A-Za-z-_]{35}|sk_live_[0-9a-zA-Z]{24})"
+if git diff --cached | grep -E "$FORBIDDEN_PATTERNS" 2>/dev/null; then
+    echo "ERROR: Potential secret or API key detected in commit diff."
+    exit 1
+fi
+
+# 3. Check that project.pbxproj is parseable
+if git diff --cached --name-only | grep -q "project.pbxproj"; then
+    echo "Checking project.pbxproj integrity..."
+    if command -v plutil >/dev/null 2>&1; then
+        plutil -lint PaperMoneyApp.xcodeproj/project.pbxproj || exit 1
+    fi
+fi
+
+echo "Pre-commit checks passed successfully."
+exit 0
