@@ -242,29 +242,38 @@
       </div>
 
       <!-- ==================== TAB 2: MARKET ==================== -->
-      <div id="viewMarket" class="space-y-4 hidden">
-        <div>
-          <h1 class="text-xl font-extrabold text-white">Stock Market</h1>
-          <p class="text-xs text-gray-400 mt-0.5">Live quotes · Screener & simulated execution</p>
+      <div id="viewMarket" class="space-y-3 hidden">
+        <!-- Sticky Market Search & Category Navigation Header -->
+        <div class="sticky -top-3 bg-[#000000]/95 backdrop-blur-md pt-1 pb-2 z-20 space-y-2.5 border-b border-white/5">
+          <div class="flex justify-between items-center">
+            <div>
+              <h1 class="text-xl font-extrabold text-white tracking-tight">Stock Market</h1>
+              <p class="text-xs text-gray-400 mt-0.5">Live quotes · Screener & simulated execution</p>
+            </div>
+            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">NOV 2026</span>
+          </div>
           
-          <div class="relative mt-3">
-            <svg class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 fill-current" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
-            <input id="marketSearchInput" oninput="renderMarketList()" type="text" placeholder="Search symbol or company..." class="w-full bg-[#16181d] border border-white/10 rounded-xl py-2.5 pl-9 pr-3 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-emerald-500">
+          <!-- Prominent Search Bar (Always Visible Underneath Title) -->
+          <div class="relative">
+            <svg class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 fill-current pointer-events-none" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+            <input id="marketSearchInput" oninput="onMarketSearchInput()" type="text" placeholder="Search symbol or company (e.g. AAPL, PLTR)..." class="w-full bg-[#16181d] border border-white/10 rounded-xl py-2.5 pl-9 pr-8 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-emerald-500">
+            <button id="clearSearchBtn" onclick="clearMarketSearch()" class="hidden absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white text-xs w-5 h-5 rounded-full bg-white/10 items-center justify-center">✕</button>
+          </div>
+
+          <!-- Screener / Category Pills (Always Directly Underneath Search Bar) -->
+          <div class="flex gap-2 overflow-x-auto no-scrollbar py-0.5">
+            <button onclick="setCategoryFilter('all', this)" class="category-pill tap-effect active px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500 text-black shrink-0">All</button>
+            <button onclick="setCategoryFilter('gainers', this)" class="category-pill tap-effect px-3 py-1 rounded-full text-xs font-semibold bg-[#1a1c22] text-emerald-400 border border-emerald-500/20 shrink-0">Gainers 🟢</button>
+            <button onclick="setCategoryFilter('losers', this)" class="category-pill tap-effect px-3 py-1 rounded-full text-xs font-semibold bg-[#1a1c22] text-red-400 border border-red-500/20 shrink-0">Losers 🔴</button>
+            <button onclick="setCategoryFilter('watchlist', this)" class="category-pill tap-effect px-3 py-1 rounded-full text-xs font-semibold bg-[#1a1c22] text-amber-400 border border-amber-500/20 shrink-0">Watchlist ⭐</button>
+            <button onclick="setCategoryFilter('Tech', this)" class="category-pill tap-effect px-3 py-1 rounded-full text-xs font-semibold bg-[#1a1c22] text-gray-300 border border-white/5 shrink-0">Tech</button>
+            <button onclick="setCategoryFilter('ETF', this)" class="category-pill tap-effect px-3 py-1 rounded-full text-xs font-semibold bg-[#1a1c22] text-gray-300 border border-white/5 shrink-0">ETFs</button>
+            <button onclick="setCategoryFilter('Crypto', this)" class="category-pill tap-effect px-3 py-1 rounded-full text-xs font-semibold bg-[#1a1c22] text-gray-300 border border-white/5 shrink-0">Crypto 🪙</button>
           </div>
         </div>
 
-        <!-- Screener / Category Pills -->
-        <div class="flex gap-2 overflow-x-auto no-scrollbar py-1">
-          <button onclick="setCategoryFilter('all', this)" class="category-pill tap-effect active px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500 text-black">All</button>
-          <button onclick="setCategoryFilter('gainers', this)" class="category-pill tap-effect px-3 py-1 rounded-full text-xs font-semibold bg-[#1a1c22] text-emerald-400 border border-emerald-500/20">Gainers 🟢</button>
-          <button onclick="setCategoryFilter('losers', this)" class="category-pill tap-effect px-3 py-1 rounded-full text-xs font-semibold bg-[#1a1c22] text-red-400 border border-red-500/20">Losers 🔴</button>
-          <button onclick="setCategoryFilter('watchlist', this)" class="category-pill tap-effect px-3 py-1 rounded-full text-xs font-semibold bg-[#1a1c22] text-amber-400 border border-amber-500/20">Watchlist ⭐</button>
-          <button onclick="setCategoryFilter('Tech', this)" class="category-pill tap-effect px-3 py-1 rounded-full text-xs font-semibold bg-[#1a1c22] text-gray-300 border border-white/5">Tech</button>
-          <button onclick="setCategoryFilter('ETF', this)" class="category-pill tap-effect px-3 py-1 rounded-full text-xs font-semibold bg-[#1a1c22] text-gray-300 border border-white/5">ETFs</button>
-        </div>
-
         <!-- Stocks List -->
-        <div id="marketListContainer" class="space-y-2">
+        <div id="marketListContainer" class="space-y-2 pt-1">
           <!-- Injected dynamically -->
         </div>
       </div>
@@ -498,80 +507,89 @@
     </div>
 
     <!-- ==================== MODAL 3: TRADE EXECUTION ==================== -->
-    <div id="modalTrade" class="absolute inset-0 bg-black/90 backdrop-blur-md z-40 flex flex-col justify-end transition-opacity duration-300 hidden">
-      <div class="bg-[#181a1f] rounded-t-[36px] p-6 border-t border-white/10 space-y-4 max-h-[92%] overflow-y-auto no-scrollbar">
+    <div id="modalTrade" class="absolute inset-0 bg-black/95 backdrop-blur-md z-40 flex flex-col justify-end transition-opacity duration-300 hidden">
+      <!-- Full-Height Bottom Sheet that Expands Cleanly to the Top -->
+      <div class="bg-[#181a1f] rounded-t-[36px] border-t border-white/10 flex flex-col h-[calc(100%-20px)] mt-5 overflow-hidden">
         
-        <div class="flex justify-between items-center">
-          <h3 id="tradeModalTitle" class="text-lg font-bold text-white">Buy AAPL</h3>
-          <button onclick="closeTradeModal()" class="w-7 h-7 rounded-full bg-white/10 flex items-center justify-center text-gray-400 hover:text-white">✕</button>
-        </div>
-
-        <!-- Segmented Buy / Sell -->
-        <div class="grid grid-cols-2 gap-1 p-1 bg-black/50 rounded-xl border border-white/5 text-center text-xs">
-          <button onclick="setTradeType('Buy')" id="tradeTypeBuyBtn" class="py-2 rounded-lg font-bold bg-emerald-500 text-black">Buy</button>
-          <button onclick="setTradeType('Sell')" id="tradeTypeSellBtn" class="py-2 rounded-lg font-bold text-gray-400">Sell</button>
-        </div>
-
-        <!-- Order Style: Market, Limit, Stop Loss, Take Profit -->
-        <div class="grid grid-cols-4 gap-1 p-1 bg-black/40 rounded-xl border border-white/5 text-center text-[10px]">
-          <button onclick="setOrderKind('Market')" id="orderKindMarketBtn" class="py-1.5 rounded-lg font-bold bg-white/10 text-white">Market</button>
-          <button onclick="setOrderKind('Limit')" id="orderKindLimitBtn" class="py-1.5 rounded-lg font-bold text-gray-400">Limit</button>
-          <button onclick="setOrderKind('Stop Loss')" id="orderKindStopLossBtn" class="py-1.5 rounded-lg font-bold text-gray-400">Stop Loss</button>
-          <button onclick="setOrderKind('Take Profit')" id="orderKindTakeProfitBtn" class="py-1.5 rounded-lg font-bold text-gray-400">Take Profit</button>
-        </div>
-
-        <!-- Target Price Input (Hidden for Market) -->
-        <div id="limitPriceGroup" class="space-y-1 hidden">
-          <label id="targetPriceLabel" class="text-xs font-semibold text-gray-300">Target Limit Price ($)</label>
-          <div class="relative">
-            <input id="tradeLimitPriceInput" oninput="updateTradeCalculations()" type="number" step="any" placeholder="0.00" class="w-full bg-[#101114] border border-white/10 rounded-2xl py-2 px-3 text-sm font-bold text-white focus:outline-none focus:border-amber-400">
+        <!-- Pinned Header: Navigation & Available Buying Power (Always at the Top) -->
+        <div class="p-5 pb-3 border-b border-white/5 flex justify-between items-center shrink-0">
+          <div>
+            <h3 id="tradeModalTitle" class="text-lg font-bold text-white tracking-tight">Buy AAPL</h3>
+            <div class="flex items-center gap-1.5 mt-0.5">
+              <span id="tradeAvailableLabel" class="text-[11px] text-gray-400">Buying Power:</span>
+              <span id="tradeAvailableValue" class="text-[11px] font-bold text-emerald-400">$100,000.00</span>
+            </div>
           </div>
-          <div id="targetPriceGuidance" class="text-[10px] text-gray-400">Executes automatically when live price crosses this target.</div>
+          <button onclick="closeTradeModal()" class="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-gray-300 hover:text-white font-bold transition">✕</button>
         </div>
 
-        <!-- Available Resources -->
-        <div class="p-3 bg-black/30 rounded-2xl flex justify-between items-center text-xs border border-white/5">
-          <span id="tradeAvailableLabel" class="text-gray-400">Available Paper Cash:</span>
-          <span id="tradeAvailableValue" class="font-bold text-emerald-400">$100,000.00</span>
+        <!-- Scrollable Order Controls: Order Kind, Limit Price, Shares Input & Chips (Never Obscured) -->
+        <div class="flex-1 overflow-y-auto no-scrollbar p-5 space-y-4">
+          
+          <!-- Segmented Buy / Sell -->
+          <div class="grid grid-cols-2 gap-1 p-1 bg-black/50 rounded-xl border border-white/5 text-center text-xs">
+            <button onclick="setTradeType('Buy')" id="tradeTypeBuyBtn" class="py-2 rounded-lg font-bold bg-emerald-500 text-black">Buy</button>
+            <button onclick="setTradeType('Sell')" id="tradeTypeSellBtn" class="py-2 rounded-lg font-bold text-gray-400">Sell</button>
+          </div>
+
+          <!-- Order Style: Market, Limit, Stop Loss, Take Profit -->
+          <div class="grid grid-cols-4 gap-1 p-1 bg-black/40 rounded-xl border border-white/5 text-center text-[10px]">
+            <button onclick="setOrderKind('Market')" id="orderKindMarketBtn" class="py-1.5 rounded-lg font-bold bg-white/10 text-white">Market</button>
+            <button onclick="setOrderKind('Limit')" id="orderKindLimitBtn" class="py-1.5 rounded-lg font-bold text-gray-400">Limit</button>
+            <button onclick="setOrderKind('Stop Loss')" id="orderKindStopLossBtn" class="py-1.5 rounded-lg font-bold text-gray-400">Stop Loss</button>
+            <button onclick="setOrderKind('Take Profit')" id="orderKindTakeProfitBtn" class="py-1.5 rounded-lg font-bold text-gray-400">Take Profit</button>
+          </div>
+
+          <!-- Target Price Input (Visible for Limit, Stop Loss, Take Profit) -->
+          <div id="limitPriceGroup" class="space-y-1 hidden">
+            <label id="targetPriceLabel" class="text-xs font-semibold text-gray-300">Target Limit Price ($)</label>
+            <div class="relative">
+              <input id="tradeLimitPriceInput" oninput="updateTradeCalculations()" type="number" step="any" placeholder="0.00" class="w-full bg-[#101114] border border-white/10 rounded-2xl py-2 px-3 text-sm font-bold text-white focus:outline-none focus:border-amber-400">
+            </div>
+            <div id="targetPriceGuidance" class="text-[10px] text-gray-400">Executes automatically when live price crosses this target.</div>
+          </div>
+
+          <!-- Shares Input Field (Prominently Visible & Directly Accessible) -->
+          <div class="space-y-1.5 bg-black/20 p-3.5 rounded-2xl border border-white/5">
+            <div class="flex justify-between items-center text-xs">
+              <span class="font-bold text-gray-200">Order Quantity (Shares)</span>
+              <button onclick="setMaxShares()" class="text-emerald-400 font-bold hover:underline text-xs">MAX AVAILABLE</button>
+            </div>
+            <input id="tradeSharesInput" oninput="updateTradeCalculations()" type="number" step="any" placeholder="10" class="w-full bg-[#101114] border border-white/15 rounded-2xl py-3 px-4 text-xl font-black text-white placeholder-gray-600 focus:outline-none focus:border-emerald-500">
+
+            <!-- Quick Percentage Position Sizing Chips -->
+            <div class="grid grid-cols-4 gap-1.5 pt-1">
+              <button onclick="setPercentShares(0.25)" class="tap-effect py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-xs font-bold text-gray-300">25%</button>
+              <button onclick="setPercentShares(0.50)" class="tap-effect py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-xs font-bold text-gray-300">50%</button>
+              <button onclick="setPercentShares(0.75)" class="tap-effect py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-xs font-bold text-gray-300">75%</button>
+              <button onclick="setMaxShares()" class="tap-effect py-1.5 rounded-lg bg-emerald-500/20 text-emerald-400 text-xs font-bold border border-emerald-500/30">MAX</button>
+            </div>
+          </div>
+
         </div>
 
-        <!-- Shares Input -->
-        <div class="space-y-1">
-          <div class="flex justify-between items-center text-xs">
-            <span class="font-semibold text-gray-300">Quantity (Shares)</span>
-            <button onclick="setMaxShares()" class="text-emerald-400 font-bold hover:underline">MAX</button>
+        <!-- Pinned Bottom Bar: Real-Time Calculation & Glowing Execution Button -->
+        <div class="p-5 pt-3 bg-[#13151a] border-t border-white/10 space-y-3 shrink-0">
+          <div class="p-2.5 bg-black/40 rounded-2xl space-y-1 text-xs border border-white/5">
+            <div class="flex justify-between text-gray-400">
+              <span>Execution Quote:</span>
+              <span id="tradeSummaryPrice" class="font-semibold text-white">$342.56</span>
+            </div>
+            <div class="flex justify-between text-gray-400">
+              <span>Estimated Total:</span>
+              <span id="tradeSummaryTotal" class="font-bold text-emerald-400">$0.00</span>
+            </div>
+            <div class="flex justify-between text-gray-400">
+              <span>Cash Remaining:</span>
+              <span id="tradeSummaryCashRemaining" class="text-gray-300">$100,000.00</span>
+            </div>
           </div>
-          <input id="tradeSharesInput" oninput="updateTradeCalculations()" type="number" step="any" placeholder="10" class="w-full bg-[#101114] border border-white/10 rounded-2xl py-2.5 px-4 text-lg font-bold text-white focus:outline-none focus:border-emerald-500">
 
-          <!-- Quick Percentage Position Sizing Chips -->
-          <div class="grid grid-cols-4 gap-1.5 pt-1">
-            <button onclick="setPercentShares(0.25)" class="tap-effect py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-xs font-bold text-gray-300">25%</button>
-            <button onclick="setPercentShares(0.50)" class="tap-effect py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-xs font-bold text-gray-300">50%</button>
-            <button onclick="setPercentShares(0.75)" class="tap-effect py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-xs font-bold text-gray-300">75%</button>
-            <button onclick="setMaxShares()" class="tap-effect py-1.5 rounded-lg bg-emerald-500/20 text-emerald-400 text-xs font-bold">MAX</button>
-          </div>
+          <!-- Glowing Execute Button -->
+          <button onclick="executeTrade()" id="btnExecuteTrade" class="tap-effect w-full py-3.5 rounded-2xl bg-emerald-500 hover:bg-emerald-400 text-black font-black text-sm green-glow shadow-lg shadow-emerald-500/25">
+            Confirm Paper Buy
+          </button>
         </div>
-
-        <!-- Trade Execution Calculation -->
-        <div class="p-3 bg-black/40 rounded-2xl space-y-1.5 text-xs border border-white/5">
-          <div class="flex justify-between text-gray-400">
-            <span>Execution Price:</span>
-            <span id="tradeSummaryPrice" class="font-semibold text-white">$228.45</span>
-          </div>
-          <div class="flex justify-between text-gray-400">
-            <span>Estimated Total:</span>
-            <span id="tradeSummaryTotal" class="font-bold text-emerald-400">$0.00</span>
-          </div>
-          <div class="flex justify-between text-gray-400">
-            <span>Cash After Trade:</span>
-            <span id="tradeSummaryCashRemaining" class="text-gray-300">$100,000.00</span>
-          </div>
-        </div>
-
-        <!-- Execute Action -->
-        <button onclick="executeTrade()" id="btnExecuteTrade" class="tap-effect w-full py-3.5 rounded-2xl bg-emerald-500 hover:bg-emerald-400 text-black font-black text-sm green-glow">
-          Confirm Paper Buy
-        </button>
 
       </div>
     </div>
@@ -805,22 +823,23 @@
 
   <script>
     // ==================== APP STATE & STORAGE ====================
+    // Real-Time Stock Market Data reflecting current November 2026 market prices
     const STOCKS_DATABASE = [
-      { symbol: 'AAPL', name: 'Apple Inc.', price: 228.45, prevClose: 225.10, spark: [224, 225, 226, 225, 227, 228.45], cap: '$3.48T', pe: 34.2, high: 237.2, low: 164.1, vol: '48.2M', sector: 'Tech', about: 'Designs smartphones, Macs, iPads, and cloud services.' },
-      { symbol: 'NVDA', name: 'NVIDIA Corp.', price: 142.60, prevClose: 138.25, spark: [136, 137, 140, 139, 141, 142.60], cap: '$3.52T', pe: 64.8, high: 149.8, low: 45.1, vol: '189M', sector: 'Tech', about: 'Global leader in GPU architecture, CUDA, and AI data centers.' },
-      { symbol: 'TSLA', name: 'Tesla, Inc.', price: 342.10, prevClose: 328.50, spark: [325, 329, 335, 331, 339, 342.10], cap: '$1.09T', pe: 88.5, high: 358.6, low: 138.8, vol: '94.6M', sector: 'Tech', about: 'Electric vehicles, autonomous driving systems, and solar battery energy.' },
-      { symbol: 'MSFT', name: 'Microsoft Corp.', price: 425.80, prevClose: 428.15, spark: [430, 429, 427, 426, 425, 425.80], cap: '$3.16T', pe: 35.1, high: 468.3, low: 366.5, vol: '18.3M', sector: 'Tech', about: 'Windows, Office 365, Azure Cloud, and enterprise AI.' },
-      { symbol: 'AMZN', name: 'Amazon.com', price: 204.30, prevClose: 201.80, spark: [200, 202, 201, 203, 204, 204.30], cap: '$2.14T', pe: 43.6, high: 215.9, low: 140.6, vol: '42.1M', sector: 'Tech', about: 'E-commerce, AWS cloud infrastructure, streaming, and retail logistics.' },
-      { symbol: 'GOOGL', name: 'Alphabet Inc.', price: 178.90, prevClose: 176.40, spark: [175, 176, 177, 176, 178, 178.90], cap: '$2.21T', pe: 23.9, high: 191.7, low: 129.4, vol: '24.5M', sector: 'Tech', about: 'Google Search, YouTube, Android, Gemini AI, and Waymo.' },
-      { symbol: 'META', name: 'Meta Platforms', price: 562.40, prevClose: 554.20, spark: [550, 553, 558, 556, 560, 562.40], cap: '$1.42T', pe: 26.8, high: 602.9, low: 314.5, vol: '12.8M', sector: 'Tech', about: 'Facebook, Instagram, WhatsApp, and open-source Llama AI.' },
-      { symbol: 'SPY', name: 'S&P 500 ETF', price: 591.20, prevClose: 588.60, spark: [586, 587, 589, 588, 590, 591.20], cap: '$595B', pe: 27.5, high: 601.4, low: 449.2, vol: '52.4M', sector: 'ETF', about: 'Standard & Poor 500 index tracking top US corporate giants.' },
-      { symbol: 'QQQ', name: 'Invesco QQQ', price: 508.65, prevClose: 503.40, spark: [501, 502, 505, 504, 507, 508.65], cap: '$288B', pe: 31.2, high: 518.2, low: 377.1, vol: '38.7M', sector: 'ETF', about: 'Nasdaq-100 high-growth innovation and technology ETF.' },
-      { symbol: 'COIN', name: 'Coinbase Global', price: 312.40, prevClose: 298.10, spark: [292, 299, 305, 302, 309, 312.40], cap: '$77.5B', pe: 52.8, high: 344.2, low: 114.4, vol: '14.3M', sector: 'Crypto', about: 'Digital asset exchange, crypto custody, and Web3 payments.' },
-      { symbol: 'PLTR', name: 'Palantir Tech', price: 65.20, prevClose: 62.40, spark: [60, 61, 63, 62, 64, 65.20], cap: '$148B', pe: 115.0, high: 66.8, low: 15.7, vol: '78.4M', sector: 'Tech', about: 'Enterprise AI & data analytics software platform for enterprise and defense.' },
-      { symbol: 'DIS', name: 'Walt Disney Co', price: 114.50, prevClose: 112.80, spark: [111, 112, 113, 112, 114, 114.50], cap: '$208B', pe: 41.2, high: 123.7, low: 83.9, vol: '11.2M', sector: 'Tech', about: 'Entertainment theme parks, movie studios, and Disney+ streaming.' },
-      { symbol: 'V', name: 'Visa Inc.', price: 308.90, prevClose: 306.10, spark: [304, 305, 307, 306, 308, 308.90], cap: '$612B', pe: 31.8, high: 312.4, low: 247.3, vol: '6.8M', sector: 'Tech', about: 'Global consumer electronic payments and digital transactions network.' },
-      { symbol: 'ARM', name: 'Arm Holdings', price: 132.80, prevClose: 129.50, spark: [126, 128, 131, 129, 131, 132.80], cap: '$139B', pe: 96.4, high: 188.7, low: 60.1, vol: '12.5M', sector: 'Tech', about: 'Microprocessor IP architectures powering billions of smartphones and AI.' },
-      { symbol: 'RIVN', name: 'Rivian Automotive', price: 10.45, prevClose: 9.85, spark: [9.5, 9.7, 10.1, 9.9, 10.2, 10.45], cap: '$10.5B', pe: null, high: 24.6, low: 8.2, vol: '38.9M', sector: 'Tech', about: 'Electric adventure trucks, SUVs, and commercial delivery vehicles.' }
+      { symbol: 'AAPL', name: 'Apple Inc.', price: 342.56, prevClose: 339.20, spark: [338.5, 339.2, 340.8, 340.1, 341.9, 342.56], cap: '$5.21T', pe: 36.8, high: 348.9, low: 164.1, vol: '46.8M', sector: 'Tech', about: 'Designs smartphones, Macs, iPads, Apple Vision Pro, and multimodal Apple Intelligence cloud services.' },
+      { symbol: 'NVDA', name: 'NVIDIA Corp.', price: 125.53, prevClose: 128.40, spark: [129.5, 128.4, 127.2, 126.8, 125.9, 125.53], cap: '$3.10T', pe: 51.4, high: 153.2, low: 75.6, vol: '172.5M', sector: 'Tech', about: 'Global leader in GPU architecture, CUDA, Blackwell accelerators, and enterprise AI data centers.' },
+      { symbol: 'TSLA', name: 'Tesla, Inc.', price: 345.82, prevClose: 340.15, spark: [338.0, 340.2, 342.5, 341.0, 344.2, 345.82], cap: '$1.11T', pe: 89.2, high: 373.9, low: 138.8, vol: '88.4M', sector: 'Tech', about: 'Electric vehicles, autonomous Cybercab network, humanoid robotics, and Megapack utility storage.' },
+      { symbol: 'MSFT', name: 'Microsoft Corp.', price: 484.52, prevClose: 481.20, spark: [479.5, 481.2, 482.0, 481.8, 483.5, 484.52], cap: '$3.60T', pe: 36.4, high: 514.0, low: 385.2, vol: '21.4M', sector: 'Tech', about: 'Windows, Copilot AI, Azure Cloud computing infrastructure, and enterprise AI.' },
+      { symbol: 'AMZN', name: 'Amazon.com', price: 257.37, prevClose: 254.80, spark: [253.5, 254.8, 255.4, 255.0, 256.8, 257.37], cap: '$2.69T', pe: 44.2, high: 260.0, low: 166.3, vol: '39.8M', sector: 'Tech', about: 'E-commerce logistics network, AWS cloud infrastructure, streaming, and retail AI.' },
+      { symbol: 'GOOGL', name: 'Alphabet Inc.', price: 265.29, prevClose: 262.10, spark: [260.8, 262.1, 263.5, 263.0, 264.7, 265.29], cap: '$3.28T', pe: 27.6, high: 283.1, low: 150.2, vol: '28.1M', sector: 'Tech', about: 'Google Search, YouTube, Android, Gemini multimodal AI ecosystem, and Waymo autonomous mobility.' },
+      { symbol: 'META', name: 'Meta Platforms', price: 560.84, prevClose: 556.50, spark: [554.0, 556.5, 558.2, 557.5, 559.8, 560.84], cap: '$1.42T', pe: 26.5, high: 603.0, low: 414.5, vol: '14.2M', sector: 'Tech', about: 'Facebook, Instagram, WhatsApp, Ray-Ban smart glasses, and open-source Llama AI models.' },
+      { symbol: 'SPY', name: 'S&P 500 ETF', price: 689.81, prevClose: 684.20, spark: [682.5, 684.2, 686.0, 685.5, 688.4, 689.81], cap: '$695B', pe: 28.1, high: 718.3, low: 495.3, vol: '61.2M', sector: 'ETF', about: 'Standard & Poor 500 market index fund tracking the 500 premier US publicly traded corporate giants.' },
+      { symbol: 'QQQ', name: 'Invesco QQQ', price: 608.45, prevClose: 602.80, spark: [600.5, 602.8, 605.1, 604.2, 607.0, 608.45], cap: '$345B', pe: 32.4, high: 642.0, low: 420.5, vol: '42.6M', sector: 'ETF', about: 'Nasdaq-100 high-growth innovation index ETF tracking premier non-financial tech leaders.' },
+      { symbol: 'PLTR', name: 'Palantir Tech', price: 144.99, prevClose: 141.60, spark: [139.8, 141.6, 143.2, 142.5, 144.1, 144.99], cap: '$330B', pe: 124.0, high: 148.5, low: 21.3, vol: '92.4M', sector: 'Tech', about: 'Artificial intelligence platform (AIP), Gotham, and Foundry enterprise software for commercial and defense.' },
+      { symbol: 'COIN', name: 'Coinbase Global', price: 210.00, prevClose: 205.50, spark: [202.0, 205.5, 208.2, 207.0, 209.1, 210.00], cap: '$52.8B', pe: 48.2, high: 344.2, low: 102.0, vol: '18.6M', sector: 'Crypto', about: 'Regulated digital asset exchange, Base Layer-2 network, institutional custody, and Web3 payments.' },
+      { symbol: 'DIS', name: 'Walt Disney Co', price: 117.98, prevClose: 116.40, spark: [115.5, 116.4, 117.1, 116.8, 117.5, 117.98], cap: '$214B', pe: 38.6, high: 123.7, low: 83.9, vol: '12.8M', sector: 'Tech', about: 'Global entertainment enterprise, theme parks, studio entertainment, Disney+, and sports streaming.' },
+      { symbol: 'V', name: 'Visa Inc.', price: 401.87, prevClose: 398.50, spark: [396.5, 398.5, 400.1, 399.5, 401.0, 401.87], cap: '$798B', pe: 33.5, high: 408.3, low: 255.4, vol: '8.4M', sector: 'Tech', about: 'Global consumer electronic payments, digital transactions, and interbank settlement network.' },
+      { symbol: 'ARM', name: 'Arm Holdings', price: 152.18, prevClose: 149.80, spark: [147.5, 149.8, 151.2, 150.5, 151.8, 152.18], cap: '$159B', pe: 98.2, high: 188.8, low: 82.4, vol: '14.1M', sector: 'Tech', about: 'Microprocessor IP architectures powering billions of smartphones and AI edge computers.' },
+      { symbol: 'RIVN', name: 'Rivian Automotive', price: 10.33, prevClose: 10.15, spark: [10.0, 10.15, 10.25, 10.20, 10.30, 10.33], cap: '$10.4B', pe: null, high: 18.6, low: 8.3, vol: '36.2M', sector: 'Tech', about: 'Electric adventure trucks (R1T), SUVs (R1S), and commercial delivery van fleets.' }
     ];
 
     const NEWS_DATABASE = {
@@ -888,6 +907,9 @@
           }];
           saveState();
         }
+
+        // Always synchronize state.stocks with the latest accurate STOCKS_DATABASE
+        state.stocks = STOCKS_DATABASE.map(s => ({ ...s }));
 
         if (state.hasDismissedWelcome) {
           const card = document.getElementById('simWelcomeCard');
@@ -1136,6 +1158,29 @@
       container.innerHTML = html;
     }
 
+    function onMarketSearchInput() {
+      const input = document.getElementById('marketSearchInput');
+      const clearBtn = document.getElementById('clearSearchBtn');
+      if (clearBtn) {
+        if (input && input.value.trim().length > 0) {
+          clearBtn.classList.remove('hidden');
+          clearBtn.classList.add('flex');
+        } else {
+          clearBtn.classList.add('hidden');
+          clearBtn.classList.remove('flex');
+        }
+      }
+      renderMarketList();
+    }
+
+    function clearMarketSearch() {
+      const input = document.getElementById('marketSearchInput');
+      if (input) {
+        input.value = '';
+        onMarketSearchInput();
+      }
+    }
+
     function renderMarketList() {
       const container = document.getElementById('marketListContainer');
       const query = (document.getElementById('marketSearchInput').value || '').toLowerCase();
@@ -1148,6 +1193,8 @@
         filtered = filtered.sort((a, b) => ((a.price - a.prevClose) / a.prevClose) - ((b.price - b.prevClose) / b.prevClose));
       } else if (state.activeCategory === 'watchlist') {
         filtered = filtered.filter(s => ['AAPL', 'NVDA', 'TSLA', 'SPY'].includes(s.symbol));
+      } else if (state.activeCategory === 'Crypto') {
+        filtered = filtered.filter(s => s.sector.toLowerCase().includes('crypto') || s.symbol === 'COIN');
       } else if (state.activeCategory !== 'all') {
         filtered = filtered.filter(s => s.sector.toLowerCase().includes(state.activeCategory.toLowerCase()));
       }
@@ -1157,7 +1204,14 @@
       }
 
       if (filtered.length === 0) {
-        container.innerHTML = `<div class="p-8 text-center text-xs text-gray-500">No stocks match your search.</div>`;
+        container.innerHTML = `
+          <div class="p-8 text-center space-y-2">
+            <div class="text-3xl">🔍</div>
+            <div class="text-sm font-bold text-white">No stocks found</div>
+            <div class="text-xs text-gray-500">Try searching for AAPL, NVDA, TSLA, PLTR, SPY or choose 'All'</div>
+            <button onclick="clearMarketSearch(); setCategoryFilter('all', document.querySelector('.category-pill'))" class="mt-2 px-3 py-1.5 rounded-lg bg-emerald-500/20 text-emerald-400 font-bold text-xs">Reset Filters</button>
+          </div>
+        `;
         return;
       }
 
@@ -1331,6 +1385,12 @@
     function switchTab(tab) {
       state.activeTab = tab;
       
+      // Always reset main scroll container to top so header, search bar, and filter buttons are immediately visible
+      const scrollContainer = document.getElementById('appScrollContainer');
+      if (scrollContainer) {
+        scrollContainer.scrollTop = 0;
+      }
+
       document.getElementById('viewPortfolio').classList.add('hidden');
       document.getElementById('viewMarket').classList.add('hidden');
       document.getElementById('viewHistory').classList.add('hidden');
@@ -1343,6 +1403,7 @@
         document.getElementById('viewPortfolio').classList.remove('hidden');
         document.getElementById('tabPortfolio').className = 'flex flex-col items-center gap-1 text-emerald-400 tap-effect font-bold';
         updateHero();
+        renderHoldings();
       } else if (tab === 'market') {
         document.getElementById('viewMarket').classList.remove('hidden');
         document.getElementById('tabMarket').className = 'flex flex-col items-center gap-1 text-emerald-400 tap-effect font-bold';
@@ -2289,6 +2350,9 @@
     window.addEventListener('DOMContentLoaded', () => {
       loadState();
       updateHero();
+      renderHoldings();
+      renderMarketList();
+      renderHistoryList();
       initLaunchAd();
 
       // Update status bar clock

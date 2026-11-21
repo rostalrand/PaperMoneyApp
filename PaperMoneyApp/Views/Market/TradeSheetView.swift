@@ -131,6 +131,8 @@ public struct TradeSheetView: View {
                 bottomExecutionButton
             }
             .background(AppTheme.Colors.canvas.ignoresSafeArea())
+            .presentationDetents([.large])
+            .presentationDragIndicator(.visible)
             .alert("Order Error", isPresented: $showErrorAlert) {
                 Button("OK", role: .cancel) {}
             } message: {

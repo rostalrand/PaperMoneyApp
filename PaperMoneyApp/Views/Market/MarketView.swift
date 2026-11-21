@@ -7,6 +7,7 @@ public enum MarketCategory: String, CaseIterable, Identifiable {
     case losers = "Losers"
     case tech = "Tech"
     case etfs = "ETFs"
+    case crypto = "Crypto"
 
     public var id: String { rawValue }
 
@@ -18,6 +19,7 @@ public enum MarketCategory: String, CaseIterable, Identifiable {
         case .losers: return "arrow.down.right"
         case .tech: return "desktopcomputer"
         case .etfs: return "chart.pie.fill"
+        case .crypto: return "bitcoinsign.circle.fill"
         }
     }
 }
@@ -48,9 +50,11 @@ public struct MarketView: View {
         case .losers:
             list = list.sorted { $0.changePercent < $1.changePercent }
         case .tech:
-            list = list.filter { $0.sector.contains("Tech") || $0.sector.contains("Internet") }
+            list = list.filter { $0.sector.contains("Tech") || $0.sector.contains("Internet") || $0.sector.contains("Semiconductors") }
         case .etfs:
             list = list.filter { $0.sector.contains("ETF") }
+        case .crypto:
+            list = list.filter { $0.sector.contains("Crypto") || $0.symbol == "COIN" }
         }
 
         // Search text query
@@ -68,7 +72,10 @@ public struct MarketView: View {
     public var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
-                // Category Filter Pills (Robinhood Style)
+                // Top Search Bar (Always visible immediately at the top - no hidden navigation drawers)
+                searchBarSection
+
+                // Category Screener Pills (Always directly underneath the search bar)
                 filterPillsBar
 
                 // Stocks List
@@ -111,6 +118,20 @@ public struct MarketView: View {
                             Text("Try searching for symbols like AAPL, NVDA, TSLA, SPY")
                                 .font(.system(.subheadline, design: .rounded))
                                 .foregroundColor(AppTheme.Colors.secondaryText)
+                            if !searchText.isEmpty {
+                                Button {
+                                    searchText = ""
+                                } label: {
+                                    Text("Clear Search")
+                                        .font(.system(.footnote, design: .rounded, weight: .bold))
+                                        .padding(.horizontal, 16)
+                                        .padding(.vertical, 8)
+                                        .background(AppTheme.Colors.gainBadge)
+                                        .foregroundColor(AppTheme.Colors.gain)
+                                        .cornerRadius(10)
+                                }
+                                .padding(.top, 4)
+                            }
                         }
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
                     }
@@ -146,13 +167,9 @@ public struct MarketView: View {
                     .scrollDismissesKeyboard(.interactively)
                 }
             }
+            .background(AppTheme.Colors.obsidianCanvas.ignoresSafeArea())
             .navigationTitle("Stock Market")
-            .searchable(text: $searchText, prompt: "Search ticker or ETF (e.g. PLTR, GME)")
-            .onSubmit(of: .search) {
-                Task {
-                    _ = await viewModel.searchUniversalStocks(query: searchText)
-                }
-            }
+            .navigationBarTitleDisplayMode(.inline)
             .onChange(of: searchText) { newValue in
                 if newValue.count >= 2 {
                     Task {
@@ -168,10 +185,54 @@ public struct MarketView: View {
             }
             .sheet(item: $quickTradeStock) { stock in
                 TradeSheetView(stock: stock, viewModel: viewModel, initialTradeType: .buy)
+                    .presentationDetents([.large])
+                    .presentationDragIndicator(.visible)
             }
         }
     }
 
+    // MARK: - Search Bar Section (Always visible immediately)
+    private var searchBarSection: some View {
+        HStack(spacing: 8) {
+            Image(systemName: "magnifyingglass")
+                .foregroundColor(AppTheme.Colors.secondaryText)
+                .font(.system(size: 14, weight: .semibold))
+
+            TextField("Search symbol or company (e.g. AAPL, PLTR)...", text: $searchText)
+                .font(.system(size: 13, weight: .medium, design: .rounded))
+                .foregroundColor(.white)
+                .autocorrectionDisabled()
+                .textInputAutocapitalization(.characters)
+                .onSubmit {
+                    Task {
+                        _ = await viewModel.searchUniversalStocks(query: searchText)
+                    }
+                }
+
+            if !searchText.isEmpty {
+                Button {
+                    searchText = ""
+                } label: {
+                    Image(systemName: "xmark.circle.fill")
+                        .foregroundColor(AppTheme.Colors.secondaryText)
+                        .font(.system(size: 14))
+                }
+            }
+        }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 9)
+        .background(AppTheme.Colors.cardSurface)
+        .cornerRadius(12)
+        .overlay(
+            RoundedRectangle(cornerRadius: 12)
+                .stroke(AppTheme.Colors.cardBorder, lineWidth: 1)
+        )
+        .padding(.horizontal, 16)
+        .padding(.top, 8)
+        .padding(.bottom, 4)
+    }
+
+    // MARK: - Screener Filter Bar (Positioned directly underneath the search bar)
     private var filterPillsBar: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 8) {
@@ -195,10 +256,14 @@ public struct MarketView: View {
                         .background(
                             selectedCategory == category
                                 ? AppTheme.Colors.gain
-                                : Color(UIColor.secondarySystemGroupedBackground)
+                                : AppTheme.Colors.cardSurface
                         )
                         .foregroundColor(selectedCategory == category ? .black : .white)
                         .cornerRadius(20)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 20)
+                                .stroke(selectedCategory == category ? Color.clear : AppTheme.Colors.cardBorder, lineWidth: 1)
+                        )
                     }
                     .buttonStyle(.plain)
                 }

@@ -101,7 +101,7 @@ public struct StockDetailView: View {
         }
         .sheet(isPresented: $showTradeSheet) {
             TradeSheetView(stock: liveStock, viewModel: viewModel, initialTradeType: tradeType)
-                .presentationDetents([.medium, .large])
+                .presentationDetents([.large])
                 .presentationDragIndicator(.visible)
         }
         .sheet(isPresented: $showPriceAlertSheet) {
