@@ -2,13 +2,16 @@ import SwiftUI
 
 public struct MarketView: View {
     @ObservedObject var viewModel: PortfolioViewModel
+    @Binding var selectedTab: Int
     @State private var searchText: String = ""
     @State private var selectedFilter: String = "All"
+    @State private var quickTradeStock: Stock? = nil
 
     private let filterOptions = ["All", "Watchlist ⭐", "Gainers 🟢", "Losers 🔴", "Tech", "ETFs"]
 
-    public init(viewModel: PortfolioViewModel) {
+    public init(viewModel: PortfolioViewModel, selectedTab: Binding<Int> = .constant(1)) {
         self.viewModel = viewModel
+        self._selectedTab = selectedTab
     }
 
     private var filteredStocks: [Stock] {
@@ -47,23 +50,73 @@ public struct MarketView: View {
 
                 // Stocks List
                 if filteredStocks.isEmpty {
-                    VStack(spacing: 12) {
-                        Image(systemName: "magnifyingglass")
-                            .font(.system(size: 40))
-                            .foregroundColor(.secondary)
-                            .padding(.top, 40)
-                        Text("No matching stocks")
-                            .font(.headline)
-                        Text("Try searching for symbols like AAPL, NVDA, TSLA, SPY")
-                            .font(.subheadline)
-                            .foregroundColor(.secondary)
+                    if selectedFilter == "Watchlist ⭐" {
+                        VStack(spacing: 12) {
+                            Image(systemName: "star.slash")
+                                .font(.system(size: 40))
+                                .foregroundColor(.secondary)
+                                .padding(.top, 40)
+                            Text("Your Watchlist is Empty")
+                                .font(.headline)
+                            Text("Star stocks in the market list or on stock detail pages to monitor your favorite tickers here.")
+                                .font(.subheadline)
+                                .foregroundColor(.secondary)
+                                .multilineTextAlignment(.center)
+                                .padding(.horizontal, 32)
+                            Button {
+                                selectedFilter = "All"
+                            } label: {
+                                Text("View All Stocks")
+                                    .font(.footnote)
+                                    .fontWeight(.semibold)
+                                    .padding(.horizontal, 16)
+                                    .padding(.vertical, 8)
+                                    .background(Color.green.opacity(0.15))
+                                    .foregroundColor(.green)
+                                    .cornerRadius(10)
+                            }
+                            .padding(.top, 4)
+                        }
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    } else {
+                        VStack(spacing: 12) {
+                            Image(systemName: "magnifyingglass")
+                                .font(.system(size: 40))
+                                .foregroundColor(.secondary)
+                                .padding(.top, 40)
+                            Text("No matching stocks")
+                                .font(.headline)
+                            Text("Try searching for symbols like AAPL, NVDA, TSLA, SPY")
+                                .font(.subheadline)
+                                .foregroundColor(.secondary)
+                        }
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
                     }
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
                 } else {
                     List {
                         ForEach(filteredStocks) { stock in
                             NavigationLink(value: stock) {
                                 StockRowView(stock: stock)
+                            }
+                            .swipeActions(edge: .leading) {
+                                Button {
+                                    viewModel.toggleWatchlist(symbol: stock.symbol)
+                                    HapticsService.shared.impact(style: .light)
+                                } label: {
+                                    Label(
+                                        viewModel.isWatchlisted(symbol: stock.symbol) ? "Unstar" : "Watch",
+                                        systemImage: viewModel.isWatchlisted(symbol: stock.symbol) ? "star.slash.fill" : "star.fill"
+                                    )
+                                }
+                                .tint(.yellow)
+                            }
+                            .swipeActions(edge: .trailing) {
+                                Button {
+                                    quickTradeStock = stock
+                                } label: {
+                                    Label("Trade", systemImage: "arrow.left.arrow.right")
+                                }
+                                .tint(.green)
                             }
                         }
                     }
@@ -90,6 +143,11 @@ public struct MarketView: View {
             }
             .navigationDestination(for: Stock.self) { stock in
                 StockDetailView(stock: stock, viewModel: viewModel)
+            }
+            .sheet(item: $quickTradeStock) { stock in
+                TradeSheetView(stock: stock, viewModel: viewModel, initialTradeType: .buy)
+                    .presentationDetents([.medium, .large])
+                    .presentationDragIndicator(.visible)
             }
         }
     }

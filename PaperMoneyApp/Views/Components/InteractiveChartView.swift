@@ -23,6 +23,7 @@ public struct InteractiveChartView: View {
     @State private var dragLocation: CGPoint? = nil
     @State private var selectedPoint: ChartDataPoint? = nil
     @State private var selectedCandle: CandlestickPoint? = nil
+    @State private var lastScrubIndex: Int? = nil
 
     public init(
         points: [ChartDataPoint],
@@ -121,6 +122,7 @@ public struct InteractiveChartView: View {
                             dragLocation = nil
                             selectedPoint = nil
                             selectedCandle = nil
+                            lastScrubIndex = nil
                         }
                 )
             }
@@ -212,12 +214,20 @@ public struct InteractiveChartView: View {
             let index = Int(round(fraction * CGFloat(candles.count - 1)))
             let safeIndex = max(0, min(candles.count - 1, index))
             selectedCandle = candles[safeIndex]
+            if lastScrubIndex != safeIndex {
+                lastScrubIndex = safeIndex
+                HapticsService.shared.selection()
+            }
         } else if points.count > 1 {
             let clampedX = max(0, min(width, xPos))
             let fraction = clampedX / width
             let index = Int(round(fraction * CGFloat(points.count - 1)))
             let safeIndex = max(0, min(points.count - 1, index))
             selectedPoint = points[safeIndex]
+            if lastScrubIndex != safeIndex {
+                lastScrubIndex = safeIndex
+                HapticsService.shared.selection()
+            }
         }
     }
 

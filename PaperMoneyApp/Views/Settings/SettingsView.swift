@@ -1,9 +1,9 @@
 import SwiftUI
 
 public struct SettingsView: View {
-    @Environment(\.dismiss) private var dismiss
     @ObservedObject var viewModel: PortfolioViewModel
     @ObservedObject var storageService: StorageService = .shared
+    @Binding var selectedTab: Int
 
     @State private var selectedResetAmount: Double = 100_000.0
     @State private var showResetConfirmAlert: Bool = false
@@ -13,8 +13,9 @@ public struct SettingsView: View {
 
     private let presetResetAmounts: [Double] = [10_000, 25_000, 50_000, 100_000, 500_000, 1_000_000]
 
-    public init(viewModel: PortfolioViewModel) {
+    public init(viewModel: PortfolioViewModel, selectedTab: Binding<Int> = .constant(3)) {
         self.viewModel = viewModel
+        self._selectedTab = selectedTab
     }
 
     public var body: some View {
@@ -196,20 +197,13 @@ public struct SettingsView: View {
                 }
             }
             .navigationTitle("Settings")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button("Done") {
-                        dismiss()
-                    }
-                }
-            }
+            .navigationBarTitleDisplayMode(.large)
             .alert("Reset Account?", isPresented: $showResetConfirmAlert) {
                 Button("Cancel", role: .cancel) {}
                 Button("Confirm Reset", role: .destructive) {
                     viewModel.resetAccount(startingDeposit: selectedResetAmount)
                     HapticsService.shared.notification(type: .success)
-                    dismiss()
+                    selectedTab = 0
                 }
             } message: {
                 Text("This will wipe all active positions, pending orders, and history, starting you fresh with $\(formatCurrency(selectedResetAmount)) in paper funds.")

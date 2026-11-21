@@ -476,6 +476,35 @@ final class PortfolioTests: XCTestCase {
         XCTAssertNil(pos, "Position should be completely closed even with slight floating point dust")
     }
 
+    func testViewInitializersWithTabBindings() {
+        let mainTab = MainTabView()
+        XCTAssertNotNil(mainTab)
+
+        var tabIndex = 0
+        let binding = Binding<Int>(get: { tabIndex }, set: { tabIndex = $0 })
+
+        let pView = PortfolioView(viewModel: viewModel, selectedTab: binding)
+        XCTAssertNotNil(pView)
+
+        let mView = MarketView(viewModel: viewModel, selectedTab: binding)
+        XCTAssertNotNil(mView)
+
+        let hView = HistoryView(viewModel: viewModel, selectedTab: binding)
+        XCTAssertNotNil(hView)
+
+        let sView = SettingsView(viewModel: viewModel, selectedTab: binding)
+        XCTAssertNotNil(sView)
+    }
+
+    func testWatchlistStocksRetrieval() {
+        viewModel.toggleWatchlist(symbol: "AAPL")
+        XCTAssertTrue(viewModel.isWatchlisted(symbol: "AAPL"))
+        XCTAssertTrue(viewModel.watchlistStocks.contains(where: { $0.symbol == "AAPL" }))
+
+        viewModel.toggleWatchlist(symbol: "AAPL")
+        XCTAssertFalse(viewModel.isWatchlisted(symbol: "AAPL"))
+    }
+
     private func caseIsSuccess<T, E>(_ result: Result<T, E>) -> Bool {
         switch result {
         case .success: return true

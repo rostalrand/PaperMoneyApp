@@ -10,13 +10,15 @@ public enum HistoryDomain: String, CaseIterable, Identifiable {
 
 public struct HistoryView: View {
     @ObservedObject var viewModel: PortfolioViewModel
+    @Binding var selectedTab: Int
     @State private var selectedDomain: HistoryDomain = .activity
     @State private var activityFilter: String = "All"
 
     private let activityFilterOptions = ["All", "Buys", "Sells", "Deposits"]
 
-    public init(viewModel: PortfolioViewModel) {
+    public init(viewModel: PortfolioViewModel, selectedTab: Binding<Int> = .constant(2)) {
         self.viewModel = viewModel
+        self._selectedTab = selectedTab
     }
 
     private var filteredTransactions: [Transaction] {
@@ -68,21 +70,43 @@ public struct HistoryView: View {
                                 .foregroundColor(.secondary)
                                 .multilineTextAlignment(.center)
                                 .padding(.horizontal, 32)
+
+                            Button {
+                                selectedTab = 1
+                            } label: {
+                                Text("Explore Market & Set Orders")
+                                    .font(.footnote)
+                                    .fontWeight(.semibold)
+                                    .padding(.horizontal, 16)
+                                    .padding(.vertical, 8)
+                                    .background(Color.green.opacity(0.15))
+                                    .foregroundColor(.green)
+                                    .cornerRadius(10)
+                            }
+                            .padding(.top, 4)
                         }
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
                     } else {
                         List {
                             ForEach(viewModel.pendingOrders) { order in
-                                orderRow(order)
-                                    .swipeActions(edge: .trailing) {
-                                        if order.status == .pending {
-                                            Button(role: .destructive) {
-                                                viewModel.cancelLimitOrder(id: order.id)
-                                            } label: {
-                                                Label("Cancel", systemImage: "xmark.circle")
-                                            }
+                                Group {
+                                    if let stock = viewModel.getStock(for: order.symbol) {
+                                        NavigationLink(value: stock) {
+                                            orderRow(order)
+                                        }
+                                    } else {
+                                        orderRow(order)
+                                    }
+                                }
+                                .swipeActions(edge: .trailing) {
+                                    if order.status == .pending {
+                                        Button(role: .destructive) {
+                                            viewModel.cancelLimitOrder(id: order.id)
+                                        } label: {
+                                            Label("Cancel", systemImage: "xmark.circle")
                                         }
                                     }
+                                }
                             }
                         }
                         .listStyle(.insetGrouped)
@@ -102,19 +126,41 @@ public struct HistoryView: View {
                                 .foregroundColor(.secondary)
                                 .multilineTextAlignment(.center)
                                 .padding(.horizontal, 32)
+
+                            Button {
+                                selectedTab = 1
+                            } label: {
+                                Text("Browse Stocks to Set Alerts")
+                                    .font(.footnote)
+                                    .fontWeight(.semibold)
+                                    .padding(.horizontal, 16)
+                                    .padding(.vertical, 8)
+                                    .background(Color.blue.opacity(0.15))
+                                    .foregroundColor(.blue)
+                                    .cornerRadius(10)
+                            }
+                            .padding(.top, 4)
                         }
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
                     } else {
                         List {
                             ForEach(viewModel.priceAlerts) { alert in
-                                alertRow(alert)
-                                    .swipeActions(edge: .trailing) {
-                                        Button(role: .destructive) {
-                                            viewModel.removePriceAlert(id: alert.id)
-                                        } label: {
-                                            Label("Delete", systemImage: "trash")
+                                Group {
+                                    if let stock = viewModel.getStock(for: alert.symbol) {
+                                        NavigationLink(value: stock) {
+                                            alertRow(alert)
                                         }
+                                    } else {
+                                        alertRow(alert)
                                     }
+                                }
+                                .swipeActions(edge: .trailing) {
+                                    Button(role: .destructive) {
+                                        viewModel.removePriceAlert(id: alert.id)
+                                    } label: {
+                                        Label("Delete", systemImage: "trash")
+                                    }
+                                }
                             }
                         }
                         .listStyle(.insetGrouped)
@@ -133,12 +179,32 @@ public struct HistoryView: View {
                             .foregroundColor(.secondary)
                             .multilineTextAlignment(.center)
                             .padding(.horizontal, 32)
+
+                        Button {
+                            selectedTab = 1
+                        } label: {
+                            Text("Browse Stock Market")
+                                .font(.footnote)
+                                .fontWeight(.semibold)
+                                .padding(.horizontal, 16)
+                                .padding(.vertical, 8)
+                                .background(Color.green.opacity(0.15))
+                                .foregroundColor(.green)
+                                .cornerRadius(10)
+                        }
+                        .padding(.top, 4)
                     }
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                 } else {
                     List {
                         ForEach(filteredTransactions) { tx in
-                            transactionRow(tx)
+                            if let symbol = tx.symbol, let stock = viewModel.getStock(for: symbol) {
+                                NavigationLink(value: stock) {
+                                    transactionRow(tx)
+                                }
+                            } else {
+                                transactionRow(tx)
+                            }
                         }
                     }
                     .listStyle(.insetGrouped)
@@ -146,6 +212,9 @@ public struct HistoryView: View {
                 }
             }
             .navigationTitle("Activity History")
+            .navigationDestination(for: Stock.self) { stock in
+                StockDetailView(stock: stock, viewModel: viewModel)
+            }
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     ShareLink(

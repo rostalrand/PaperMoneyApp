@@ -2,11 +2,13 @@ import SwiftUI
 
 public struct PortfolioView: View {
     @ObservedObject var viewModel: PortfolioViewModel
+    @Binding var selectedTab: Int
     @State private var showDepositSheet: Bool = false
     @AppStorage("has_dismissed_welcome_guide") private var hasDismissedWelcomeGuide: Bool = false
 
-    public init(viewModel: PortfolioViewModel) {
+    public init(viewModel: PortfolioViewModel, selectedTab: Binding<Int> = .constant(0)) {
         self.viewModel = viewModel
+        self._selectedTab = selectedTab
     }
 
     public var body: some View {
@@ -101,13 +103,13 @@ public struct PortfolioView: View {
                     Text("·")
                         .foregroundColor(.secondary)
 
-                    if let first = viewModel.stocks.first {
-                        NavigationLink(value: first) {
-                            Text("Start Trading")
-                                .font(.caption2)
-                                .fontWeight(.bold)
-                                .foregroundColor(.blue)
-                        }
+                    Button {
+                        selectedTab = 1
+                    } label: {
+                        Text("Start Trading")
+                            .font(.caption2)
+                            .fontWeight(.bold)
+                            .foregroundColor(.blue)
                     }
                 }
                 .padding(.top, 2)
@@ -304,30 +306,49 @@ public struct PortfolioView: View {
             }
             .frame(height: 10)
 
-            // Allocation Legend
+            // Allocation Legend (Interactive)
             LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 8) {
                 ForEach(viewModel.assetAllocation) { slice in
-                    HStack(spacing: 6) {
-                        Circle()
-                            .fill(Color(hex: slice.colorHex))
-                            .frame(width: 8, height: 8)
-                        Text(slice.symbol)
-                            .font(.caption)
-                            .fontWeight(.bold)
-                        Spacer()
-                        Text("\(String(format: "%.1f", slice.percentage))%")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
+                    if slice.symbol == "CASH" {
+                        Button {
+                            showDepositSheet = true
+                        } label: {
+                            allocationLegendItem(slice: slice)
+                        }
+                        .buttonStyle(.plain)
+                    } else if let stock = viewModel.getStock(for: slice.symbol) {
+                        NavigationLink(value: stock) {
+                            allocationLegendItem(slice: slice)
+                        }
+                        .buttonStyle(.plain)
+                    } else {
+                        allocationLegendItem(slice: slice)
                     }
-                    .padding(8)
-                    .background(Color(UIColor.tertiarySystemGroupedBackground))
-                    .cornerRadius(8)
                 }
             }
         }
         .padding(16)
         .background(Color(UIColor.secondarySystemGroupedBackground))
         .cornerRadius(16)
+    }
+
+    private func allocationLegendItem(slice: PortfolioViewModel.AssetSlice) -> some View {
+        HStack(spacing: 6) {
+            Circle()
+                .fill(Color(hex: slice.colorHex))
+                .frame(width: 8, height: 8)
+            Text(slice.symbol)
+                .font(.caption)
+                .fontWeight(.bold)
+                .foregroundColor(.primary)
+            Spacer()
+            Text("\(String(format: "%.1f", slice.percentage))%")
+                .font(.caption)
+                .foregroundColor(.secondary)
+        }
+        .padding(8)
+        .background(Color(UIColor.tertiarySystemGroupedBackground))
+        .cornerRadius(8)
     }
 
     // MARK: - Positions / Holdings
@@ -358,8 +379,10 @@ public struct PortfolioView: View {
                         .multilineTextAlignment(.center)
                         .padding(.horizontal, 24)
 
-                    if let first = viewModel.stocks.first {
-                        NavigationLink(value: first) {
+                    HStack(spacing: 12) {
+                        Button {
+                            selectedTab = 1
+                        } label: {
                             Text("Browse Stock Market")
                                 .font(.footnote)
                                 .fontWeight(.semibold)
@@ -369,8 +392,21 @@ public struct PortfolioView: View {
                                 .foregroundColor(.green)
                                 .cornerRadius(10)
                         }
-                        .padding(.top, 4)
+
+                        Button {
+                            showDepositSheet = true
+                        } label: {
+                            Text("Deposit Cash")
+                                .font(.footnote)
+                                .fontWeight(.semibold)
+                                .padding(.horizontal, 16)
+                                .padding(.vertical, 8)
+                                .background(Color(UIColor.tertiarySystemGroupedBackground))
+                                .foregroundColor(.primary)
+                                .cornerRadius(10)
+                        }
                     }
+                    .padding(.top, 4)
                 }
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 36)
