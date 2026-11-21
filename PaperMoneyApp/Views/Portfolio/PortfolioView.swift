@@ -146,23 +146,18 @@ public struct PortfolioView: View {
                 }
                 .buttonStyle(.plain)
 
-                Button {
-                    showSettingsSheet = true
-                } label: {
-                    HStack(spacing: 4) {
-                        Image(systemName: "icloud.fill")
-                            .font(.caption2)
-                        Text("iCloud")
-                            .font(.caption2)
-                            .fontWeight(.semibold)
-                    }
-                    .foregroundColor(.blue.opacity(0.85))
-                    .padding(.horizontal, 6)
-                    .padding(.vertical, 2)
-                    .background(Color.blue.opacity(0.12))
-                    .cornerRadius(6)
+                HStack(spacing: 4) {
+                    Image(systemName: "icloud.fill")
+                        .font(.caption2)
+                    Text(StorageService.shared.isICloudAvailable ? "iCloud" : "Local")
+                        .font(.caption2)
+                        .fontWeight(.semibold)
                 }
-                .buttonStyle(.plain)
+                .foregroundColor(.blue.opacity(0.85))
+                .padding(.horizontal, 6)
+                .padding(.vertical, 2)
+                .background(Color.blue.opacity(0.12))
+                .cornerRadius(6)
             }
 
             Text(viewModel.isPrivacyMode ? "$ ••••••••" : "$\(formatCurrency(summary.totalValue))")
