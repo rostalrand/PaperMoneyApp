@@ -2,18 +2,26 @@ import SwiftUI
 
 public struct AppTheme {
     public struct Colors {
+        // Canvas & Surfaces
+        public static let obsidianCanvas = Color(hex: "#080A0F")
         public static let canvas = Color(hex: "#080A0F")
         public static let cardSurface = Color(hex: "#11141D")
         public static let elevatedSurface = Color(hex: "#181C26")
-        public static let cardBorder = Color.white.opacity(0.05)
+        public static let cardHighlight = Color(hex: "#181C26")
+        public static let cardBorder = Color.white.opacity(0.06)
         
+        // Brand & Accents
         public static let gain = Color(hex: "#00C805")
         public static let loss = Color(hex: "#FF3B30")
         public static let gainBadge = Color(hex: "#00C805").opacity(0.15)
         public static let lossBadge = Color(hex: "#FF3B30").opacity(0.15)
         
+        // Text & Hierarchies
+        public static let headline = Color.white
+        public static let subheadline = Color(hex: "#8E92A0")
         public static let secondaryText = Color(hex: "#8E92A0")
         public static let tertiaryText = Color(hex: "#5A5E6B")
+        public static let muted = Color(hex: "#5A5E6B")
     }
     
     public struct Fonts {
