@@ -46,9 +46,9 @@ public struct LegalSheetView: View {
                     HStack(spacing: 12) {
                         Image(systemName: type.icon)
                             .font(.system(size: 28))
-                            .foregroundColor(.green)
+                            .foregroundColor(AppTheme.Colors.gain)
                             .frame(width: 48, height: 48)
-                            .background(Color.green.opacity(0.12))
+                            .background(AppTheme.Colors.gainBadge)
                             .clipShape(Circle())
 
                         VStack(alignment: .leading, spacing: 2) {

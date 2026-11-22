@@ -132,11 +132,11 @@ public struct HistoryView: View {
                             } label: {
                                 Text("Browse Stocks to Set Alerts")
                                     .font(.footnote)
-                                    .fontWeight(.semibold)
+                                    .fontWeight(.bold)
                                     .padding(.horizontal, 16)
                                     .padding(.vertical, 8)
-                                    .background(Color.blue.opacity(0.15))
-                                    .foregroundColor(.blue)
+                                    .background(AppTheme.Colors.gainBadge)
+                                    .foregroundColor(AppTheme.Colors.gain)
                                     .cornerRadius(10)
                             }
                             .padding(.top, 4)
@@ -502,26 +502,26 @@ public struct HistoryView: View {
 
     private func kindColor(for kind: OrderKind) -> Color {
         switch kind {
-        case .limit: return .blue
-        case .stopLoss: return .red
-        case .takeProfit: return .green
+        case .limit: return Color(hex: "#0A84FF")
+        case .stopLoss: return AppTheme.Colors.loss
+        case .takeProfit: return AppTheme.Colors.gain
         }
     }
 
     private func statusColor(for status: OrderStatus) -> Color {
         switch status {
-        case .pending: return .orange
-        case .filled: return .green
-        case .cancelled: return .gray
+        case .pending: return Color(hex: "#FF9F0A")
+        case .filled: return AppTheme.Colors.gain
+        case .cancelled: return AppTheme.Colors.muted
         }
     }
 
     private func color(for type: TransactionType) -> Color {
         switch type {
-        case .deposit: return .green
-        case .withdraw: return .orange
-        case .buy: return .blue
-        case .sell: return .purple
+        case .deposit: return AppTheme.Colors.gain
+        case .withdraw: return Color(hex: "#FF9F0A")
+        case .buy: return Color(hex: "#0A84FF")
+        case .sell: return Color(hex: "#BF5AF2")
         }
     }
 

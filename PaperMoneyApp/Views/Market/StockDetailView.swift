@@ -222,7 +222,7 @@ public struct StockDetailView: View {
                             Spacer()
                         }
                     }
-                    .tint(.green)
+                    .tint(AppTheme.Colors.gain)
                 } footer: {
                     Text("You will receive an in-app banner and tactile alert when live ticks cross your target price.")
                         .font(.caption2)
@@ -243,7 +243,7 @@ public struct StockDetailView: View {
                         UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
                     }
                     .font(.body.weight(.semibold))
-                    .foregroundColor(.green)
+                    .foregroundColor(AppTheme.Colors.gain)
                 }
             }
         }

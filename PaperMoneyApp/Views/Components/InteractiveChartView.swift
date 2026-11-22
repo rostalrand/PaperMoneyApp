@@ -41,31 +41,37 @@ public struct InteractiveChartView: View {
     }
 
     public var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            // Top Header: Scrub detail
-            if displayMode == .candles, let candle = selectedCandle {
-                HStack(spacing: 8) {
-                    Text("O: $\(formatPrice(candle.open))")
-                    Text("H: $\(formatPrice(candle.high))")
-                    Text("L: $\(formatPrice(candle.low))")
-                    Text("C: $\(formatPrice(candle.close))")
-                    Spacer()
-                    Text(formatDate(candle.timestamp))
+        VStack(alignment: .leading, spacing: 6) {
+            // Top Header: Scrub detail with fixed reserved height to eliminate chart vertical jump
+            HStack {
+                if displayMode == .candles, let candle = selectedCandle {
+                    HStack(spacing: 8) {
+                        Text("O: $\(formatPrice(candle.open))")
+                        Text("H: $\(formatPrice(candle.high))")
+                        Text("L: $\(formatPrice(candle.low))")
+                        Text("C: $\(formatPrice(candle.close))")
+                        Spacer()
+                        Text(formatDate(candle.timestamp))
+                    }
+                    .font(.system(.caption2, design: .monospaced, weight: .bold))
+                    .foregroundColor(candle.isBullish ? AppTheme.Colors.gain : AppTheme.Colors.loss)
+                    .padding(.horizontal, 4)
+                } else if externalSelectedPoint == nil, let selected = selectedPoint {
+                    HStack {
+                        Text("$\(String(format: "%.2f", selected.price))")
+                            .font(.system(.subheadline, design: .rounded, weight: .bold))
+                            .foregroundColor(AppTheme.Colors.headline)
+                        Spacer()
+                        Text(formatDate(selected.timestamp))
+                            .font(.caption2)
+                            .foregroundColor(AppTheme.Colors.secondaryText)
+                    }
+                    .padding(.horizontal, 4)
+                } else {
+                    Spacer().frame(height: 18)
                 }
-                .font(.system(.caption2, design: .monospaced, weight: .bold))
-                .foregroundColor(candle.isBullish ? .green : .red)
-                .padding(.horizontal, 4)
-            } else if let selected = selectedPoint {
-                HStack {
-                    Text("$\(String(format: "%.2f", selected.price))")
-                        .font(.system(.title3, design: .rounded, weight: .bold))
-                    Spacer()
-                    Text(formatDate(selected.timestamp))
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                }
-                .padding(.horizontal, 4)
             }
+            .frame(height: 18)
 
             GeometryReader { proxy in
                 let width = proxy.size.width
@@ -148,7 +154,7 @@ public struct InteractiveChartView: View {
                 let openY = getYPosition(for: candle.open, height: size.height)
                 let closeY = getYPosition(for: candle.close, height: size.height)
 
-                let color = candle.isBullish ? Color.green : Color.red
+                let color = candle.isBullish ? AppTheme.Colors.gain : AppTheme.Colors.loss
 
                 // Draw Wick
                 var wick = Path()

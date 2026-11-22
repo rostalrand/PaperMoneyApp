@@ -522,7 +522,7 @@ public struct TradeSheetView: View {
             } else {
                 guard effectivePrice > 0 else { return }
                 let shares = floor((totalAvailable / effectivePrice) * 1000) / 1000
-                inputText = String(format: "%.3f", shares)
+                inputText = formatShares(shares)
             }
         } else {
             let sharesTarget = sharesOwned * fraction
@@ -542,7 +542,7 @@ public struct TradeSheetView: View {
             } else {
                 guard effectivePrice > 0 else { return }
                 let maxShares = floor((viewModel.cashBalance / effectivePrice) * 1000) / 1000
-                inputText = String(format: "%.3f", maxShares)
+                inputText = formatShares(maxShares)
             }
         } else {
             if isDollarMode {

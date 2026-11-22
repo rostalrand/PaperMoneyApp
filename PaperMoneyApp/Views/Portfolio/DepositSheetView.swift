@@ -117,7 +117,7 @@ public struct DepositSheetView: View {
                         UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
                     }
                     .font(.body.weight(.semibold))
-                    .foregroundColor(.green)
+                    .foregroundColor(AppTheme.Colors.gain)
                 }
             }
         }

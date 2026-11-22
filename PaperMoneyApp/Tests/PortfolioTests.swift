@@ -576,6 +576,19 @@ final class PortfolioTests: XCTestCase {
         HapticsService.shared.selection()
     }
 
+    func testLegalSheetViewInstantiation() {
+        for sheetType in [LegalSheetType.disclaimer, .privacyPolicy, .termsOfService] {
+            let view = LegalSheetView(type: sheetType)
+            XCTAssertNotNil(view)
+        }
+    }
+
+    func testUniversalStockSearchOnline() async {
+        let results = await viewModel.searchUniversalStocks(query: "AAPL")
+        XCTAssertFalse(results.isEmpty)
+        XCTAssertTrue(results.contains { $0.symbol == "AAPL" })
+    }
+
     private func caseIsSuccess<T, E>(_ result: Result<T, E>) -> Bool {
         switch result {
         case .success: return true
